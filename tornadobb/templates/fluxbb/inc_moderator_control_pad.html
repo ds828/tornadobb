@@ -1,0 +1,54 @@
+{% if permission %}
+	{% if "sticky" in permission %}
+		| <a href="cmd?c=sticky" onclick='return confirm("{{ _('Do you want to make it sticky') }}?")'>
+			{% if topic.get("sticky",False) %} {{ _("unsticky") }} {% else %} {{ _("sticky") }} {% end %}</a>
+	{% end %}
+	{% if "distillate" in permission %}
+		| <a href="cmd?c=distillate" onclick='return confirm("{{ _('Do you want to make it distillate') }}?")'>
+			{% if topic.get("distillate_level",0) >= tornadobb_settings.get("tornadobb.distillat_threshold",60) or topic.get("distillate",False)%} {{ _("undistillate") }} {% else %} {{ _("distillate") }} {% end %}</a>
+	{% end %}
+	{% if "close_topic" in permission %}
+		| <a href="cmd?c=close_topic" onclick='return confirm("{{ _('Do you want to close this topic') }}?")'>
+			{% if topic.get("closed",False) %} {{ _("reopen") }} {% else %} {{ _("close") }} {% end %}</a>
+	{% end %}
+	{% if "hide_topic" in permission %}
+		| <a href="cmd?c=hide_topic" onclick='return confirm("{{ _('Do you want to hide this topic') }}?")'>
+			{% if topic.get("hidden",False) %} {{ _("unhide") }} {% else %} {{ _("hide") }} {% end %}</a>
+	{% end %}
+	{% if "delete_topic" in permission %}
+		| <a href="cmd?c=delete_topic" onclick='return confirm("{{ _('Do you want to delete it') }}?")'>{{ _("delete") }}</a>
+	{% end %}
+	{% if "move_topic" in permission %}
+		| <select onchange=" if (confirm('{{ _('Do you want to move it') }}?')) window.location=('cmd?c=move_topic&p='+this.options[this.selectedIndex].value);" >
+				<option>{{ _("move to") }}</option>
+				{% for category in tornadobb_settings["tornadobb.category_forum"] %}
+					<optgroup label="{{ category['name'] }}">
+					{% for forum in category.get("forum",[])%}
+						<option value="{{ category['_id'] }}/{{ forum['_id'] }}">{{ forum["name"] }}</option>
+					{% end %}
+					</optgroup>
+				{% end %}
+			</select>
+	{% end %}
+	{% if "highlight" in permission %}
+		| <select onchange="if (confirm('{{ _('Do you want to make it highlight') }}?')) window.location=('cmd?c=highlight&p='+this.options[this.selectedIndex].value);" >
+				<option>{{ _("highlight") }}</option>
+				<optgroup label="{{ _('using') }}">
+				{% for highlight in tornadobb_settings["tornadobb.highlight_settings"] %}
+					{% if highlight in topic.get("high_light",[]) %}
+						<option value="{{ highlight }}">{{ highlight }}</option>
+					{% end %}
+				{% end %}
+				</optgroup>
+				<optgroup label="{{ _('avaliable') }}">
+				{% for highlight in tornadobb_settings["tornadobb.highlight_settings"] %}
+					{% if highlight not in topic.get("high_light",[]) %}
+						<option value="{{ highlight }}">{{ highlight }}</option>
+					{% end %}
+				{% end %}
+				</optgroup>
+			</select>
+	{% end %}
+{% end %}
+
+

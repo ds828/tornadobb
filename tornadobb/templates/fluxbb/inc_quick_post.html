@@ -1,0 +1,23 @@
+<div id="quickpost" class="blockform">
+	<h2><span>{{ _("Quick post") }}</span></h2>
+	<div class="box">
+		<form id="reply_form" method="post" action="preview">
+		{% raw xsrf_form_html() %}
+		<input type="hidden" name="subject" value="{{ topic["subject"] }}"/>
+			<div class="inform">
+				<fieldset>
+					<legend>{{ _("Write your message and submit") }}</legend>
+					<div class="infldset txtarea">
+						<label><textarea id="message" name="message" rows="7" cols="75" tabindex="1"></textarea></label>
+						<ul class="bblinks">
+							<li><span><a href="help.php#bbcode" onclick="window.open(this.href); return false;">BBCode:</a> on</span></li>
+							<li><span><a href="help.php#img" onclick="window.open(this.href); return false;">[img] {{_("tag")}}:</a> on</span></li>
+							<li><span><a href="help.php#smilies" onclick="window.open(this.href); return false;">{{_("Smilies")}}:</a> on</span></li>
+						</ul>
+					</div>
+				</fieldset>
+			</div>
+			<p class="buttons"><input type="submit" tabindex="2" value="{{ _('Submit') }}" accesskey="s" id="submit"/> <input type="button" id="preview" value="{{ _('Preview') }}" tabindex="3" accesskey="p" /> <a href="#reply_preview" class="nyroModal" >preview</a></p>
+		</form>
+	</div>
+</div>

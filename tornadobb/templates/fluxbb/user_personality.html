@@ -1,0 +1,66 @@
+{% extends "user_base.html" %}
+{% block title %}{% block title %}{{_("Personality")}} - {{_("Profile")}} - {{_(tornadobb_settings['tornadobb.forum_title'])}}{% end%}{% end%}
+{% block menu_personality %}isactive{% end %}
+{% block right_content %}
+{% from postmarkup import render_bbcode %}
+{% autoescape None %}
+{% set signature = data.get("signature","") %}
+<h2><span>{{ current_user["name"] }} - {{_("Personality")}}</span></h2>
+	<div class="box">
+		<form id="profile4" method="post" action="">
+			{% raw xsrf_form_html() %}
+			<div class="inform">
+				<fieldset id="profileavatar">
+					<legend>{{_("Set your avatar display options")}}</legend>
+					<div class="infldset">
+						<p class="clearb actions"><span><a href="{{ root_url }}/profile/avatar">{{_("Upload avatar")}}</a></span></p>
+					</div>
+				</fieldset>
+			</div>
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Compose your signature")}}</legend>
+					<div class="infldset">
+						<div class="txtarea">
+							<label>{{_("Max length")}}: {{ tornadobb_settings.get("tornadobb.max_signature_char_num",400) }} {{_("characters")}} / {{_("Max lines")}}: 4<br />
+							<textarea id="signature" rows="4" cols="65" name="signature">{{ signature }}</textarea>
+							<br /></label>
+						</div>
+						<ul class="bblinks">
+							<li><span><a href="help.php#bbcode" onclick="window.open(this.href); return false;">BBCode:</a> on</span></li>
+							<li><span><a href="help.php#img" onclick="window.open(this.href); return false;">[img] {{_("tag")}}:</a> off</span></li>
+							<li><span><a href="help.php#smilies" onclick="window.open(this.href); return false;">{{_("Smilies")}}:</a> on</span></li>
+						</ul>
+						<p>
+						{% if signature %}
+						{{ render_bbcode(signature,"UTF-8") }}
+						{% else %}
+						{{_("No signature currently stored in profile")}}.
+						{% end %}
+						</p>
+					</div>
+				</fieldset>
+			</div>
+			<p class="buttons"><input type="submit" id="submit" value="{{_('Submit')}}" /></p>
+		</form>
+	</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script language="javascript">
+	$(document).ready(function(){
+		 $("input#submit").click(function(){
+			content = $.trim($("textarea#signature").val());
+			if (content.length == 0){alert("{{ _("Please input something and submit") }}");return false;}
+		
+			if (content.split(/[\n\r]/).length > 4){alert("{{ _("Max lines") }}: 4");return false;}
+			max_num = {{ tornadobb_settings.get("tornadobb.max_signature_char_num",400) }}
+			if (content.length > max_num){ 
+				alert("{{ _('Too many input, no more than') }} "+max_num);
+				return false;
+			}
+			return true;
+		});
+	});
+</script>
+{% end %}

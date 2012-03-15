@@ -1,0 +1,28 @@
+<div id="sitebar">
+	<div id="sitebar-content">
+		<div id="sitelogo">
+			<a href="/" title="TornadoBB Home"><img src="" alt="TornadoBB Home" /></a>
+		</div>
+		<div id="sitewelcome">
+			<div id="sitewelcome-inner">
+			{% if current_user and current_user.get("is_auth",False) %}
+				<p id="loggedin">{{ _("You are logged in as") }} <strong>{{ current_user["name"] }}</strong> : <a href="">{{_("profile")}}</a> | <a href="">{{_("logout")}}</a></p>
+			{% else %}
+				<p id="loggedin">{{_("You are not logged in") }}. {{_("Please")}} <a href="">{{_("login")}}</a> {{_("or")}} <a href="">{{_("register")}}</a>.</p>
+			{% end %}
+			</div>
+		</div>
+		<div id="sitemenu">
+			<ul id="sitenav">
+				<li><a href=""><span>Home</span></a></li>
+				<li><a href=""><span>About</span></a></li>
+				<li><a href=""><span>Downloads</span></a></li>
+				<li><a href=""><span>Resources</span></a></li>
+				<li class="active"><a href=""><span>Forums</span></a></li>
+				<li><a href=""><span>Community</span></a></li>
+				<li><a href=""><span>Documentation</span></a></li>
+				<li><a href=""><span>Development</span></a></li>
+			</ul>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,62 @@
+{% import datetime %}
+{% set root_url = handler.settings.get('tornadobb.root_url','/tornadobb') %}
+{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
+{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
+{% if current_user and current_user.get("is_auth",False) %}
+	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
+	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
+	{% if user_timezone_name != timezone_name %}
+		{% from pytz import timezone %}
+		{% set timezone_obj = timezone(user_timezone_name) %}
+	{% end %}
+{% end %}
+{% for i,category in enumerate(categories) %}
+<div id="idx1" class="blocktable">
+	<h2><span>{{ _(category["name"]) }}</span></h2>
+	<div class="box">
+		<div class="inbox">
+			<table cellspacing="0">
+			<thead>
+				<tr>
+					<th class="tcl" scope="col">{{_("Forum")}}</th>
+					<th class="tc2" scope="col">{{_("Topics")}}</th>
+					<th class="tc3" scope="col">{{_("Posts")}}</th>
+					<th class="tcr" scope="col">{{_("Last post")}}</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% set forums = category.get("forum",[]) %}
+			{% if forums %}
+				{% for p,forum in enumerate(sorted(forums, key=lambda forum: forum["position"]))%}
+					{% if not forum.get("closed",False)%}
+					<tr class="{% if p%2==0 %}rowodd{% else %}roweven{% end %}">
+						<td class="tcl">
+							<div class="icon"><div class="nosize">{{ p }}</div></div>
+							<div class="tclcon">
+								<div>
+									<h3><a href="{{ root_url }}/forum/{{ category['_id'] }}/{{ forum['_id'] }}/">{{ _(forum.get("name","")) }}</a></h3>
+									<div class="forumdesc">{{ forum.get("des","") }}</div>
+									<p class="modlist">(<em>{{_("Moderated")}} by</em> {% for user in forum.get("moderator",[]) %} <a href="">{{ user["name"] }}</a> {% end %})</p>
+								</div>
+							</div>
+						</td>
+						<td class="tc2">{{ forum.get("topics_num",0) }} </td>
+						<td class="tc3">{{ forum.get("replies_num",0) }} </td>
+						<td class="tcr">
+						{% set last_post_time = forum.get("last_post_time",None) %}
+						{% if last_post_time %}
+						<a href="{{ root_url}}/topic/{{ category['_id'] }}/{{ forum['_id'] }}/{{ forum['last_post_topic_id'] }}/">
+							{{ datetime.datetime.fromtimestamp(last_post_time, timezone_obj).strftime(datetime_format) }}
+						</a> <span class="byuser">by {{ forum.get("last_poster_name","") }}</span>
+						{% end %}
+						</td>
+					</tr>
+					{% end %}
+				{% end %}
+			{% end %}
+			</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+{% end %}

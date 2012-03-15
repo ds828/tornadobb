@@ -1,0 +1,100 @@
+{% autoescape None %}
+{% import datetime %}
+{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
+{% if current_user and current_user.get("is_auth",False) %}
+	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
+	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
+	{% if user_timezone_name != timezone_name %}
+		{% from pytz import timezone %}
+		{% set timezone_obj = timezone(user_timezone_name) %}
+	{% end %}
+{% end %}
+{% from mypostmarkup import render_bbcode %}
+{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
+{% set root_url = handler.settings.get('tornadobb.root_url','/tornadobb') %}
+{% for i,post in enumerate(topic["posts"]) %} 	
+<div class="blockpost rowodd firstpost blockpost1">
+	<h2><span><span class="conr">#{{ base_idx + i }}</span> <a href="">{{ datetime.datetime.fromtimestamp(post["post_time"], timezone_obj).strftime(datetime_format)}}</a></span></h2>
+	<div class="box">
+		<div class="inbox">
+			<div class="postbody">
+				<div class="postleft">
+					<dl>
+						<dt><strong>{{ post["poster_name"] }}</strong></dt>
+						<dd class="usertitle"><strong>{{ _(post.get("poster_role","Member")) }}</strong></dd>
+						{% set avatar = post.get('poster_avatar',None) %}
+						{% if not avatar %}
+							{% set avatar = "default/default.jpg" %}
+						{% else %}
+							{% set avatar = post['poster_id'] + avatar %}
+						{% end %}
+						<dd class="postavatar"><a href=""><img src="{{ handler.settings.get('tornadobb.root_url','/tornadobb') }}/static/avatar/{{avatar}}" alt="{{ post['poster_name'] }}" width="80" height="80" /></a></dd>
+						<dd><span>{{_("Registered")}}: {{ datetime.datetime.fromtimestamp(post["poster_registered_time"], timezone_obj).strftime(datetime_format) }}</span></dd>
+						<dd><span>{{_("Posts")}}: {{ post.get("poster_posts_num",0) }}</span></dd>
+						{% if post.get("poster_display_email")%}
+						<dd class="usercontacts"><span class="email"><a href="mailto:{{ post['poster_email'] }}">Email</a></span></dd>
+						{% end %}
+					</dl>
+				</div>
+				<div class="postright">
+					<h3>{{ topic["subject"] }}</h3>
+					<div class="postmsg">
+					{% if hide_content %}
+						<p>{{ _("to see the content, user must reply first") }}.</p>
+					{% else %}
+						<p>
+						{% if post.get("deleted",False) %}
+							{{ _("The message is deleted by") }} {{post.get("editer_name","")}}
+						{% else %}
+							{{ render_bbcode(post["content"],"UTF-8") }}
+						{% end %}
+						</p>
+						{% if post.get("editer_name",None) %}
+							<p class="postedit"><em>{{ _("Last edited by") }} {{post["editer_name"]}} ({{ datetime.datetime.fromtimestamp(post["edit_time"], timezone_obj).strftime(datetime_format) }})</em></p>
+						{% end %}
+						{% if hide_attach %}
+							<p>{{ _("to see the attachments, user must reply first") }}.</p>
+						{% else %}
+							{% if not post.get("deleted",False)%}
+							<p>
+							<ul>
+								{% for attache in post.get("attach",[]) %}
+								<li><img src="{{ root_url }}/static/images/download.png"/><a href="{{ attache['url'] }}">{{ attach['name'] }}</a></li>
+								{% end %}
+							</ul>
+							</p>
+							{% end %}
+						{% end %}
+					{% end %}						
+					</div>
+					{% set signature = post.get("poster_signature",None) %}
+					{% if signature %}
+						<div class="postsignature postmsg"><hr />{{ render_bbcode(signature,"UTF-8") }}</div>
+					{% end %}
+				</div>
+			</div>
+		</div>
+		{% if current_user and current_user.get("is_auth",False) %}
+		<div class="inbox">
+			<div class="postfoot clearb">
+				<div class="postfootleft"><p><span>{% if post.get("poster_online",False) %}{{ _("Online") }}{% else %}{{ _("Offline") }}{% end %}</span></p></div>
+				<div class="postfootright">
+					<ul>
+						<!--li class="postreport"><span><a href="">Report</a></span></li-->
+						{% if not hide_content and current_user.get("postable",True) %}
+						<li class="postquote"><span><span style="display:none" id="{{ post['_id']}}" name="{{ post['poster_name'] }}" >{{ post["content"] }}</span><a href="#message" class="quote">{{ _("Quote") }}</a></span></li>
+						{% end %}
+						{% if ((current_user["_id"] == post["poster_id"]) or ( permission and "edit_post" in permission )) and current_user.get("postable",True) %}
+						<li class="postedit"><span><a href="#edit_reply" onclick="edit_post('{{ post['_id'] }}')">{{_("Edit")}}</a></span></li>
+						{% end %}
+						{% if permission and "delete_post" in permission %}
+						<li class="postedit"><span><a href="#" onclick="if (confirm('Delete')) window.location='delete?post_id={{ post['_id'] }}';">{{_("Delete")}}</a></span></li>
+						{% end %}
+					</ul>
+				</div>
+			</div>
+		</div>
+		{% end %}
+	</div>
+</div>
+{% end %}

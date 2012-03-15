@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}{% end%}
+{% block extra_header %}	
+<link rel="stylesheet" type="text/css" media="screen" href="{{ root_url }}/static/scripts/markitup/skins/markitup/style.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="{{ root_url }}/static/scripts/markitup/sets/bbcode/style.css" />
+{% end %}
+{% block content %}
+{% set subject_min = tornadobb_settings.get("tornadobb.subject_min_chars_num",1) %}
+{% set subject_max = tornadobb_settings.get("tornadobb.subject_max_chars_num",100) %}
+{% set post_min = tornadobb_settings.get("tornadobb.post_min_chars_num",20) %}
+{% set post_max = tornadobb_settings.get("tornadobb.post_max_chars_num",5000) %}
+<div class="forum">
+	<div class="main site-main">
+		<div class="main-inner">
+			<div id="punpost" class="pun">
+				<div class="punwrap">
+				{% include "inc_header.html" %}
+					<div id="brdmain">
+						<div class="linkst">
+							<div class="inbox">
+								{% module Forum_Crumbs() %}
+							</div>
+						</div>
+						<div id="postform" class="blockform">
+							<h2><span>{{ _("Post new") }}</span></h2>
+							<div class="box">
+								<form id="post" method="post" action="">
+									<div class="inform">
+										<fieldset>
+											<legend>{{_("Write your message and submit")}}</legend>
+											<div class="infldset txtarea">
+												{% raw xsrf_form_html() %}
+												<label class="required"><strong>{{_("Subject")}} <span>({{_("Required")}})</span></strong>
+												<input type="text" name="subject"  id="subject" tabindex="100" size="83" maxlength="{{ subject_max }}"/><br /><br /></label>
+												<label class="required"><strong>{{_("Message")}} <span>({{_("Required")}})</span></strong><br />
+												 <div id="emoticons">
+												 {% for k,v in tornadobb_settings["tornadobb.emoticon_settings"].items()%}
+													<a href="#message" title="[emo]{{ k }}[/emo]"><img src="{{ v }}" /></a>
+												 {% end %}
+												</div>
+												<textarea id="message" rows="20" cols="80" name="message" tabindex="101" style="width: 93.5%"></textarea><br /></label>
+											</div>
+										</fieldset>
+									</div>
+									<div class="inform">
+										<fieldset>
+											<legend>{{ _("Video")}}</legend>
+											<div class="infldset">
+												<div class="txtarea">
+													<ol id="video_list"></ol>
+													<label><a href="#" id="add_video" tabindex="102">{{ _('add one video') }}</a><br /></label>
+												</div>
+											</div>
+										</fieldset>
+									</div>
+									<div class="inform">
+										<fieldset>
+											<legend>{{ _("Attachment")}}</legend>
+											<div class="infldset">
+												<div class="txtarea">
+													<ol id="attach_list"></ol>
+													<label><a href="#" id="add_attach" tabindex="103">{{ _('add one attachment') }}</a><br /></label>
+												</div>
+											</div>
+										</fieldset>
+									</div>
+									<div class="inform">
+										<fieldset>
+											<legend>{{_("Options")}}</legend>
+											<div class="infldset">
+												<div class="txtarea">
+													<label><input type="checkbox" name="need_replay" value="True" id="need_replay1" tabindex="104" />{{ _("reply to see the post") }}<br /></label>
+													<input type="checkbox" name="need_replay2" value="True" id="need_replay2" tabindex="105" disabled="disabled"/>{{ _("reply to see the attachments") }}<br /></label>
+												</div>
+											</div>
+										</fieldset>
+									</div>
+									<p class="buttons"><input type="submit" value="{{_('Submit')}}" tabindex="106" accesskey="s" /> <a href="javascript:history.go(-1)">{{_("Go back")}}</a></p>
+								</form>
+							</div>
+						</div>
+						<div id="brdfooter" class="block">
+						{% include "inc_board_foot.html" %}
+						</div>
+					</div>
+				</div>
+				<div class="end-box"><div><!-- Bottom corners --></div></div>
+			</div>
+		</div>
+	</div>
+</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript" src="{{ root_url }}/static/scripts/markitup/jquery.markitup.js"></script>
+<script type="text/javascript" src="{{ root_url }}/static/scripts/markitup/sets/bbcode/set.js"></script>
+<script language="javascript">
+$(document).ready(function(){
+	mySettings["previewParserPath"]="{{ root_url }}/mp";
+    $('#message').markItUp(mySettings);
+
+    $('#emoticons a').click(function() {
+        emoticon = $(this).attr("title");
+        $.markItUp( { replaceWith:emoticon } );
+    });
+    
+    $("#post").validate({
+		rules: {
+
+			subject: {
+				required: true,
+				minlength: {{ subject_min }},
+				maxlength: {{ subject_max }}
+			},
+			message: {
+				required: true,
+				minlength: {{ post_min }},
+				maxlength: {{ post_max }}
+			}
+		},
+		messages: {
+		
+			subject: {
+				required: "{{ _('Please enter a subject') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(subject_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(subject_max) }}"
+			},
+			message: {
+				required: "{{ _('Please write something') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(post_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(post_max) }}"
+			}
+		}
+	});
+    	
+	$("#add_video").click(function(){
+		dia = prompt("{{ _('video') }}:","http://");
+		if (dia == "" || dia == null || dia =="http://"){}
+		else{
+			video_str = "[video]" + dia + "[/video]";
+			
+			message = $("#message").html();
+			$("#message").html(message + video_str);
+			//$("#video_list").append("<li><input type='text' value='" + dia +"' name='video' readonly ><a href='' onclick='$(this).parent().remove();return false;'>{{ _('delete') }}</a></li>");
+		}
+		return false;
+		}
+	);
+	
+	$("#add_attach").click(function(){
+		url_dia = prompt("{{ _('URL for Attachment') }}:","http://");
+		if (url_dia == "" || url_dia == null || url_dia =="http://"){}
+		else{
+			url = url_dia;
+			name_dia = prompt("{{ _('Title for Attachment') }}:","");
+			if (name_dia == "" || name_dia == null){}
+			else{
+					name = name_dia;
+					console.info(url)
+					console.info(name)
+					$("#attach_list").append("<li><span><a href='"+ url +"' target='_blank'>"+ name +"</a><input type='hidden' value='" + name +"' name='attach_name' readonly><input type='hidden' value='" + url +"' name='attach_url'></span>  <a href='#' onclick='return delete_attache(this);'>{{ _('delete') }}</a></li>");
+					$("#need_replay2").removeAttr("disabled"); 
+				}
+			}
+		return false;
+		}
+	);
+	
+});
+function delete_attache(target){
+		$(target).parent().remove();
+		if ($("#attach_list").html()==""){
+			$("#need_replay2").attr("disabled","disabled").removeAttr("checked");
+		}
+		return false;
+	}
+</script>
+{% end %}

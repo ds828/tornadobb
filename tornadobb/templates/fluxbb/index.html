@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ tornadobb_settings.get('tornadobb.forum_title','TornadoBB Forum') }}{% end%}
+{% block content %}
+<div class="forum">
+	<div class="main site-main">
+		<div class="main-inner">
+			<div id="punindex" class="pun">
+				<div class="punwrap">
+				{% include "inc_header.html" %}
+					<div id="brdmain">
+						{% module Categories_and_Forums() %}
+						<div class="linksb">
+							<div class="inbox crumbsplus">
+								<p class="subscribelink clearb"></p>
+							</div>
+						</div>
+						{% module Board_Info() %}
+					</div>
+					<div id="brdfooter" class="block">
+						{% include "inc_board_foot.html" %}
+					</div>
+				</div>
+				<div class="end-box"><div><!-- Bottom corners --></div></div>
+			</div>
+		</div>
+	</div>
+</div>
+{% end %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{% end%}
+{% block content %}
+<div class="forum">
+	<div class="main site-main">
+		<div class="main-inner">
+			<div id="punprofile" class="pun">
+				<div class="punwrap">
+					{% include "inc_header.html" %}
+					<div id="brdmain">
+						<div id="profile" class="block2col">
+							<div class="blockmenu">
+								<h2><span>{{_("Profile menu")}}</span></h2>
+								<div class="box">
+									<div class="inbox">
+										<ul>
+											<li class="{% block menu_essentials %}{% end %}"><a href="{{ root_url }}/profile">{{_("Essentials")}}</a></li>
+											<li class="{% block menu_personality %}{% end %}"><a href="{{ root_url }}/profile/personality">{{_("Personality")}}</a></li>
+											<li class="{% block menu_display %}{% end %}"><a href="{{ root_url }}/profile/display">{{_("Display")}}</a></li>
+											<li class="{% block menu_privacy %}{% end %}"><a href="{{ root_url }}/profile/privacy">{{_("Privacy")}}</a></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="blockform">
+							{% set errors = data.get("errors",None)%}
+							{% if errors %}
+							<div style="color:#ff0000;margin:18px;padding: 6px 6px;border: 1px solid #FF0000;background: #FFFFE6;">
+								<p>{{_("The following error(s) occurred")}}:</p>
+								<ul>
+									{% for error in errors %}<li>{{ _(error) }}</li>{% end %}
+								</ul>
+							</div>
+							{% end %}
+							{% block right_content %}{% end %}
+							</div>
+							<div class="clearer"></div>
+						</div>
+					</div>
+					<div id="brdfooter" class="block">
+						{% include "inc_board_foot.html" %}
+					</div>
+				</div>
+				<div class="end-box"><div><!-- Bottom corners --></div></div>
+			</div>
+		</div>
+	</div>
+</div>
+{% end %}

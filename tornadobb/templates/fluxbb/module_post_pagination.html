@@ -1,0 +1,41 @@
+{% set current_page_num = pagination_obj.get("current_page_num") %}
+{% set pages_num = pagination_obj.get('pages_num',None) %}
+{% set total_items_num = pagination_obj.get('total_items_num',None) %}
+
+<p class="pagelink conl"><span class="pages-label">{{_("Pages")}}: </span>
+    {% if pagination_obj.get("has_previous",False) %}	
+     <a href="?p={{ current_page_num-1 }}&a={{ pages_num }}&i={{ total_items_num }}">{{_("Previous")}}</a>
+    {% end %}
+    <!-- show first page-->
+	{% if current_page_num == 1%}
+	<strong class="item1">1</strong>
+	{% else %}
+    <a href="?p=1">1</a>
+    {% end %}
+    
+    {% if show_perv_space %}
+	<span class="spacer">…</span>
+	{% end %}
+
+	{% for page_num in xrange(begin,end) %}
+		{% if page_num == current_page_num %}<strong class="item">{{ page_num }}</strong> 
+		{% else %}<a href="?p={{ page_num }}&a={{ pages_num }}&i={{ total_items_num }}">{{ page_num }}</a>
+		{% end %}
+	{% end %}
+
+	{% if show_next_space %}
+	<span class="spacer">…</span>
+	{% end %}
+	<!-- show last page-->
+	{% if pages_num > 1 %}
+		{% if current_page_num == pages_num %}
+		<strong class="item1">{{ pages_num}}</strong> 
+		{% else %}
+		<a href="?p={{pages_num }}&a={{ pages_num }}&i={{ total_items_num }}">{{ pages_num }}</a>
+		{% end %}
+		{% if pagination_obj.get("has_next",False) %}
+		<a href="?p={{ current_page_num+1 }}&a={{ pages_num }}&i={{ total_items_num }}">{{_("Next")}}</a>
+		{% end %}
+	{% end %}
+</p>
+

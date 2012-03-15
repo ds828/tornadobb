@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+{% set tornadobb_settings = handler.settings %}
+{% set root_url = tornadobb_settings.get('tornadobb.root_url','/tornadobb') %}
+{% set permission = data.get("permission",[]) %}
+{% set style = tornadobb_settings.get("tornadobb.style","Air") %}
+{% if current_user and current_user.get("style")%}
+{% set style = current_user.get("style") %}
+{% end %}
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{% block title %}{% end %}</title>
+<link rel="stylesheet" type="text/css" href="{{ root_url }}/static/style/fluxbb/{{style}}.css" />
+<!--[if lte IE 6]><script type="text/javascript" src="{{ root_url }}/static/fluxbb/style/imports/minmax.js"></script><![endif]-->
+<link rel="alternate" type="application/atom+xml" href="" title="Atom active topics feed" />
+<!-- start sitebar head -->
+<link rel="icon" type="image/png" href="{{ root_url }}/static/favicon.ico" />
+<!--[if IE]><link rel="Shortcut Icon" href="{{ root_url }}/static/favicon.ico"> <![endif]-->
+<link rel="Bookmark" href="{{ root_url }}/static/favicon.ico">
+<link rel="stylesheet" type="text/css" href="{{ root_url }}/static/style/flux.css" />
+<!--[if IE]><link rel="stylesheet" type="text/css" href="{{ root_url }}/static/style/flux_ie.css" /><![endif]-->
+{% block extra_header %}{% end %}
+</head>
+<body id="site-forum">
+<div id="wrapper">
+	<!-- start sitebar bar -->
+	{% include "inc_site_bar.html" %}
+	<!-- end sitebar bar -->
+	<div class="titlebar site">
+		<div class="titlebar-inner">
+			<h1>{{ _(tornadobb_settings.get('tornadobb.forum_title','TornadoBB Forum')) }}</h1>
+			<div class="titlebar-desc">
+				<div id="brddesc"><p><span>{{ _(tornadobb_settings.get('tornadobb.forum_sub_title','')) }}</span></p></div>
+			</div>
+		</div>
+	</div>
+	{% block content %}{% end %}
+	<div class="push"><!-- push --></div>
+</div>
+<!-- start sitebar foot -->
+{% include "inc_site_bar_foot.html" %}
+<!-- end sitebar foot -->
+{% block scripts %}{% end %}
+</body>
+</html>
+

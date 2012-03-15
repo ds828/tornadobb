@@ -1,0 +1,3 @@
+{% if current_user and current_user.get("is_auth",False) and current_user.get("postable",True)%}
+<a href="{{ url }}">{{ _("Post New Topic")}}</a>
+{% end %}

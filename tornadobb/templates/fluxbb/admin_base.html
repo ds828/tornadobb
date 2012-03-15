@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{% end%}
+{% block extra_header %}
+<link rel="stylesheet" type="text/css" href="{{ root_url }}/static/style/fluxbb/{{style}}/base_admin.css" />
+{% end %}
+{% block content %}
+{% set tornadobb_settings = handler.settings %}
+{% set admin_url = tornadobb_settings.get('tornadobb.admin_url','/tornadobb/admin') %}
+<div class="forum">
+	<div class="main site-main">
+		<div class="main-inner">
+			<div id="punadmin" class="pun">
+				<div class="punwrap">
+					{% include "inc_header.html" %}
+					<div id="brdmain">
+						<div id="adminconsole" class="block2col">
+							<div id="adminmenu" class="blockmenu">
+								<h2><span>{{_("Admin menu")}}</span></h2>
+								<div class="box">
+									<div class="inbox">
+										<ul>
+											<li class="{% block menu_dashboard %}{% end %}"><a href="{{ admin_url }}">{{_("Dashboard")}}</a></li>
+											<li class="{% block menu_category %}{% end %}"><a href="{{ admin_url }}/category">{{_("Category")}}</a></li>
+											<li class="{% block menu_forum %}{% end %}"><a href="{{ admin_url }}/forum">{{_("Forum")}}</a></li>
+											<li class="{% block menu_moderator %}{% end %}"><a href="{{ admin_url }}/moderator">{{_("Moderator")}}</a></li>
+											<li class="{% block menu_member %}{% end %}"><a href="{{ admin_url }}/member">{{_("Member")}}</a></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="blockform">
+							{% set errors = data.get("errors",None)%}
+							{% if errors %}
+							<div style="color:#ff0000;margin:18px;padding: 6px 6px;border: 1px solid #FF0000;background: #FFFFE6;">
+								<p>{{_("The following error(s) occurred")}}:</p>
+								<ul>
+									{% for error in errors %}<li>{{ _(error) }}</li>{% end %}
+								</ul>
+							</div>
+							{% end %}
+							{% block right_content %}{% end %}
+							</div>
+							<div class="clearer"></div>
+						</div>
+					</div>
+					<div id="brdfooter" class="block">
+						{% include "inc_board_foot.html" %}
+					</div>
+				</div>
+				<div class="end-box"><div><!-- Bottom corners --></div></div>
+			</div>
+		</div>
+	</div>
+</div>
+{% end %}

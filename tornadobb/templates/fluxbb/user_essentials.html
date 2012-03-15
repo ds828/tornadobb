@@ -1,0 +1,114 @@
+{% extends "user_base.html" %}
+{% block title %}{{_("Essentials")}} - {{_("Profile")}} - {{_(tornadobb_settings['tornadobb.forum_title'])}}{% end%}
+{% block menu_essentials %}isactive{% end %}
+{% block right_content %}
+{% import datetime %}
+{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
+{% if current_user and current_user.get("is_auth",False) %}
+	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
+	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
+	{% if user_timezone_name != timezone_name %}
+		{% from pytz import timezone %}
+		{% set timezone_obj = timezone(user_timezone_name) %}
+	{% end %}
+{% end %}
+{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
+{% set user = data["user"] %}
+<h2><span>{{ user["name"] }} - {{_("Essentials")}}</span></h2>
+	<div class="box">
+		<form id="profile1" method="post" action="" >
+		{% raw xsrf_form_html() %}
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Update your password")}}</legend>
+					<div class="infldset">
+						
+						<p>{{_("Username")}}: {{ user["name"] }}</p>
+						<p class="actions"><span><a href="{{ root_url }}/profile/pwd">{{_("Change password")}}</a></span></p>
+					</div>
+				</fieldset>
+			</div>
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Update your email address")}}</legend>
+					<div class="infldset">
+						<p>Email: {{ user["email"] }} - <a href="{{ root_url }}/profile/email">{{_("Change email address")}}</a></p>
+					</div>
+				</fieldset>
+			</div>
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Set your localisation options")}}</legend>
+					<div class="infldset">
+						<p>{{_("Your current time zone")}}: <strong>{{ user.get("tz",tornadobb_settings["tornadobb.timezone_name"]) }}</strong></p>
+						<p>{{_("For the forum to display times correctly you must select your local time zone")}}.</p>
+						<label>{{_("Time zone")}}
+						<br /><select name="area" id="area">
+							<option value="Asia" selected>{{ _("Asia") }}</option>
+							<option value="America">{{ _("America") }}</option>
+							<option value="Africa">{{ _("Africa") }}</option>
+							<option value="Antarctica">{{ _("Antarctica") }}</option>
+							<option value="Arctic">{{ _("Arctic") }}</option>
+							<option value="Atlantic">{{ _("Atlantic") }}</option>
+							<option value="Australia">{{ _("Australia") }}</option>
+							<option value="Canada">{{ _("Canada") }}</option>
+							<option value="Europe">{{ _("Europe") }}</option>
+							<option value="GMT">{{ _("GMT") }}</option>
+							<option value="India">{{ _("India") }}</option>
+							<option value="Pacific">{{ _("Pacific") }}</option>
+							<option value="US">{{ _("US") }}</option>
+							<option value="UTC">{{ _("UTC") }}</option>
+						</select>
+						<br /></label>
+						<br /><select id="tz" name="tz"></select>
+						<br />
+					</div>
+				</fieldset>
+			</div>
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("User activity")}}</legend>
+					<div class="infldset">
+						<p>{{_("Registered")}}: {{ datetime.datetime.fromtimestamp(user["registered_time"], timezone_obj).strftime(datetime_format) }}</p>
+						<p>{{_("Last visit")}}: {{ datetime.datetime.fromtimestamp(user["last_access"], timezone_obj).strftime(datetime_format) }}</p>
+						<p class="actions">{{_("Posts")}}: {{ user.get("topics_num",0) + user.get("replies_num",0) }} - <a href="{{ root_url }}/profile/topics">{{_("Show all topics")}}</a> - <a href="{{ root_url }}/profile/posts">{{_("Show all posts")}}</a></p>
+					</div>
+				</fieldset>
+			</div>
+			<p class="buttons"><input type="submit" value="{{_('Submit')}}" /></p>
+		</form>
+	</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript">
+$(document).ready(function() {
+	
+		options={
+				url:"{{ root_url}}/tz",
+				type:"GET",
+				data:"area=" + $("#area").val(),
+				success: function(response){
+				$("#tz").html("");
+					for (i=0;i<response["tz"].length;i++)
+						$("#tz").append("<option value='"+ response["tz"][i] +"'>" + response["tz"][i] + "</option>");
+					}
+				};
+		$.ajax(options);
+		
+		$("#area").change(function(){
+				options={
+							url:"{{ root_url}}/tz",
+							type:"GET",
+							data:"area=" + $(this).val(),
+							success: function(response){
+									$("#tz").html("");
+									for (i=0;i<response["tz"].length;i++)
+										$("#tz").append("<option value='"+ response["tz"][i] +"'>" + response["tz"][i] + "</option>");
+								}
+					};
+				$.ajax(options);
+			});
+	});
+</script>
+{% end %}

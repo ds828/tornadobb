@@ -1,0 +1,15 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>{{ _("Active email form")}} {{ handler.settings["tornadobb.forum_title"] }}</title>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+</head>
+
+<body>
+	<p>{{_("Hello")}} {{ username }}:</p>
+	<p>{{_("Please click")}} <a href="http://{{ handler.request.host }}{{ handler.settings['tornadobb.root_url']}}/active?u={{ username }}&p={{ password }}">{{_("active your account")}}</a>.</p>
+	<p>{{ handler.settings["tornadobb.forum_title"] }}</p>
+</body>
+
+</html>

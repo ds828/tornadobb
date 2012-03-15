@@ -1,0 +1,66 @@
+{% extends "profile_base.html" %}
+{% block title %}{% end%}
+{% block  profile_content %}
+<h2><span>{{_("Upload avatar")}}</span></h2>
+<div class="box">
+	<form id="upload_avatar">
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Enter an avatar file to upload")}}</legend>
+				<div class="infldset">
+				{% if "avatar" in current_user %}
+				{% set avatar = current_user["_id"] + current_user.get("avatar") %}
+				{% else %}
+				{% set avatar = "default/default.jpg" %}
+				{% end %}
+					<img src="{{ root_url }}/static/avatar/{{ avatar }}" width="80" height="80" />
+					<label class="required"><strong>{{_("File")}} <span>({{_("Required")}})</span></strong><br /><input type="file" size="40" id="file_upload" name="Filedata"/><br /></label>
+					<p>{{_("An avatar is a small image that will be displayed under your username in your posts. It must not be any bigger than 80 x 80 pixels and 20,480 bytes (20 KiB)")}}.</p>
+				</div>
+			</fieldset>
+		</div>
+		<p class="buttons"><input type="button" id="upload_button" value="{{ _('Upload New Avatar') }}" /> <a href="javascript:history.go(-1)">{{_("Go back")}}</a></p>
+	</form>
+</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script> 
+<script type="text/javascript" src="{{ root_url }}/static/scripts/uploadify/swfobject.js"></script>
+<script type="text/javascript" src="{{ root_url }}/static/scripts/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		
+		settings = {
+					'uploader'  : '{{ root_url }}/static/scripts/uploadify/uploadify.swf',
+					'script'    : '{{ root_url }}/profile/avatar',
+					'cancelImg' : '{{ root_url }}/static/scripts/uploadify/cancel.png',
+					'scriptData': {'_id':'{{ handler.get_secure_cookie("_id") }}','xsrf':'{{ handler.get_cookie("_xsrf") }}'},
+					'fileExt'   : '*.jpg;*.gif;*.png',
+					'fileDesc'  : 'Image Files (.JPG, .GIF, .PNG)',
+					'sizeLimit' : 20480,
+					'onComplete': function(event, ID, fileObj, response, data) {		
+									console.info(response);
+									if (response == 'RELOGIN'){
+										if (confirm("{{ _('Please relogin for reloading new avatar') }}")==true)
+											location.href='{{ root_url}}/login';
+										return false;
+										}
+									if (response == 'OK'){
+											console.info('reload');
+											//window.location.reload(); 
+										}
+										return false;
+									if (response == 'FAIL'){
+										alert("{{ _('Fail to upload avatar image') }}");
+										return false;
+										}
+								}
+					};
+		$('#file_upload').uploadify(settings);
+
+		$("#upload_button").click(function(){
+				$('input#file_upload').uploadifyUpload();
+			});
+	});
+</script>
+{% end %}

@@ -1,0 +1,126 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ _("Edit Moderators") }} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
+{% block menu_moderator %}isactive{% end %}
+{% block right_content %}
+{% set user_min = tornadobb_settings.get("tornadobb.username_min_chars_num",2) %}
+{% set user_max = tornadobb_settings.get("tornadobb.username_max_chars_num",25) %}
+<h2 class="block2"><span>{{_("Edit Moderators")}}</span></h2>
+<div class="box">
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Edit Moderators")}}</legend>
+				<div class="infldset">
+					<table cellspacing="0" >
+					<thead>
+						<tr>
+							<th class="tcl" scope="col">{{_("Category")}} - {{_("Forum")}}</th>
+							<th scope="col">{{_("Name")}}</th>
+							<th scope="col">{{_("Permission")}}</th>
+							<th scope="col">{{_("Action")}}</th>
+						</tr>
+					</thead>
+					<tbody>
+					{% for category in data["category_forum_set"] %}
+						{% for forum in category.get("forum",[]) %}
+							{% for moderator in forum.get("moderator",[]) %}
+							<form method="post" action="edit">
+							{% raw xsrf_form_html() %}
+							<input type="hidden" name="forum_id" value={{ forum['_id']}}>
+							<tr>
+								<td>
+									{{ category['name'] }} - {{ forum['name'] }}
+								</td>
+								<td>{{ moderator['name'] }}<input type="hidden" name="moderator_id" value="{{ moderator['_id'] }}"/></td>
+								<td>
+									{% set moderator_perm = moderator["permission"]%}
+									<ol>
+										{% for permission in tornadobb_settings["tornadobb.permission_settings"] %}
+											{% if permission in moderator_perm %}
+											<li><input type="checkbox" name="permission" value="{{ permission }}" checked>{{ _(permission) }}</li>
+											{% else %}
+											<li><input type="checkbox" name="permission" value="{{ permission }}">{{ _(permission) }}</li>
+											{% end %}
+										{% end %}
+									</ol>
+								</td>
+								<td><input type="submit" value="{{_('Update')}}" /> | <a href="delete?c_id={{ category['_id']}}&f_id={{ forum['_id']}}&u_id={{ moderator['_id']}}">delete</a></td>
+							</tr>
+							</form>
+							{% end %}
+						{% end %}
+					{% end %}	
+					</tbody>
+					</table>
+				</div>
+			</fieldset>
+		</div>
+</div>
+<h2 class="block2"><span>{{_("Add Moderator")}}</span></h2>
+<div class="box">
+	<form id="moderatoradd" method="post" action="">
+	{% raw xsrf_form_html() %}
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Add Moderator")}}</legend>
+				<div class="infldset">
+					<table cellspacing="0" >
+						<tr>
+							<th class="tcl" scope="col">{{_("Category")}} - {{_("Forum")}}</th>
+							<th scope="col">{{_("Name")}}</th>
+							<th scope="col">{{_("Permission")}}</th>
+						</tr>
+						<tr>
+							<td>
+								<select size="1" name="category_forum_id" id="category_forum_id">
+								{% for category in tornadobb_settings["tornadobb.category_forum"] %}
+									<optgroup label="{{ category['name'] }}">
+									{% for forum in category.get("forum",[])%}
+										<option value="{{ category['_id'] }}/{{ forum['_id'] }}">{{ forum["name"] }}</option>
+									{% end %}
+									</optgroup>
+								{% end %}
+								</select>
+							</td>
+							<td><input type="text" id="moderator_name" name="moderator_name" size="20" maxlength="{{ user_max }}" /></td>
+							<td>
+								<ol>
+								{% for permission in tornadobb_settings["tornadobb.permission_settings"] %}	
+									<li><input type="checkbox" name="permission" id="permission" value="{{ permission }}">{{ _(permission) }}</input></li>
+								{% end %}
+								</ol>
+							</td>
+						</tr>
+					</table>
+					<div class="fsetsubmit"><input type="submit" value="{{_('Submit')}}" /></div>
+				</div>
+			</fieldset>
+		</div>
+	</form>
+</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("#moderatoradd").validate({
+		rules: {
+			moderator_name: {
+				required: true,
+				minlength: {{ user_min }},
+				maxlength: {{ user_max }}
+			}
+		},
+		messages: {
+			moderator_name: {
+				required: "{{ _('Please enter a username') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(user_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(user_max) }}"
+			}
+		}
+	});
+	
+});
+</script>
+{% end %}

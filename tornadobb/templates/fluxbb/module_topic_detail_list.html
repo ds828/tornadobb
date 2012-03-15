@@ -1,0 +1,36 @@
+{% import datetime %}
+{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
+{% if current_user and current_user.get("is_auth",False) %}
+	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
+	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
+	{% if user_timezone_name != timezone_name %}
+		{% from pytz import timezone %}
+		{% set timezone_obj = timezone(user_timezone_name) %}
+	{% end %}
+{% end %}
+{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
+{% set items_per_page = handler.settings["tornadobb.posts_num_per_page"] %}
+{% for i,topic in enumerate(topics)%}
+{% set is_sticky = topic.get("sticky",False) %}
+<tr class="{% if i%2==0 %}rowodd{% else %}roweven{% end %} {% if is_sticky %}isticky{% end %}">
+	<td class="tcl">
+		<div class="icon {% if topic.get('dist_level',0) >= handler.settings.get('tornadobb.distillat_threshold',60) or topic.get('dist',False) %}icon-new{% end %}"><div class="nosize">{{ i }}</div></div>
+		<div class="tclcon">
+			<div>
+				{% if is_sticky %}<span class="stickytext">Sticky:</span>{% end %}
+				{% if topic.get("closed",False) %}<span class="closedtext">({{ _("Closed") }})</span>{% end %}	
+				<a href="{{handler.request.path.replace('forum','topic')}}{{ topic['_id'] }}/" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
+				<span class="byuser">by {{ topic["creater_name"] }}</span>
+			</div>
+		</div>
+	</td>
+	<td class="tc2">{{ topic.get("replies_num",0) }}</td>
+	<td class="tc3">{{ topic.get("views_num",0) }}</td>
+	{% if topic.get('replies_num',0)%items_per_page == 0 %}
+		{% set pages_num = topic.get('replies_num',0)/items_per_page %}
+	{% else %}
+		{% set pages_num = topic.get('replies_num',0)/items_per_page + 1 %}
+	{% end %}
+	<td class="tcr"><a href="{{ handler.request.path.replace('forum','topic')}}{{ topic['_id'] }}/?p={{ pages_num }}">{{ datetime.datetime.fromtimestamp(topic["create_time"] ,timezone_obj ).strftime(datetime_format) }}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
+</tr>
+{% end %}

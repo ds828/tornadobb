@@ -1,0 +1,23 @@
+/* Fixes for IE6 and IE7
+--------------------------------------------*/
+
+.site p.olddown, .site p.newdown {
+	height: 1%;
+}
+
+.site #page-head {
+	zoom: 1;
+	width: 100%;
+}
+
+* html .site .pagenav li a {
+	height: 2.5em;
+}
+
+#sitebar div, #sitenav, p.olddown, p.newdown {
+	zoom: 1;
+}
+
+#index1 .content-a, #index3 .content-a {
+	width: 518px;
+}

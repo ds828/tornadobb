@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{% end%}
+{% block content %}
+<div class="site">
+	<div class="main index-main">
+		<div class="main-inner">
+			{% set errors = data.get("errors",None)%}
+			{% if errors %}
+			<div class="site-error">
+				<p class="site-error-contents site-error-multiple">{{_("The following error(s) occurred")}}:</p>
+				<ul class="site-error-list">
+					{% for error in errors %}<li>{{ linkify(_(error)) }}</li>{% end %}
+				</ul>
+			</div>
+			{% end %}
+			<div class="section-inner-page">
+				<div class="content">
+					<div class="mod intro">
+						<div class="mod-bd">
+							<p><a href="register">{{_("Register now")}}</a>{% if data.get("response","ok") == "not_verify"%} | <a href="sendmail">{{_("Resend actived email")}}</a>{% end %}</p>
+							<form class="login-form" method="post" action="" id="login-form">
+								{% raw xsrf_form_html() %}
+								<p>
+									<label><strong>{{ _("Username") }}</strong><br />
+									<input type="text" id="username" name="username" tabindex="1" /></label>
+								</p>
+								<p>
+									<label><strong>{{ _("Password") }}</strong><br />
+									<input type="password" id="password" name="password" tabindex="2" /></label>
+								</p>
+								<p><label><input type="checkbox" name="save_pass" value="True" tabindex="3" />{{ _("Remember me") }} </label></p>
+								<p><input type="submit" value="{{_('Login')}}" tabindex="4" /></p>
+							</form>
+							<!-- TODO: Add register motivation box -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#login-form").validate({
+		rules: {
+
+			username: {
+				required: true,
+				minlength: 2,
+				maxlength: 25
+			},
+			password: {
+				required: true,
+				minlength: 6,
+				maxlength: 25
+			}
+		},
+		messages: {
+		
+			username: {
+				required: "{{ _('Please enter a username') }}",
+				minlength: "{{ _('Your username must consist of at least 2 characters') }}",
+				maxlength: "{{ _('Your username must consist of at most 25 characters') }}"
+			},
+			password: {
+				required: "{{ _('Please provide a password') }}",
+				minlength: "{{ _('Your password must be at least 6 characters long') }}",
+				maxlength: "{{ _('Your password must be at most 25 characters long') }}"
+			}
+		}
+	});
+});
+</script>
+{% end %}

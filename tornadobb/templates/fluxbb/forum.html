@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{% module Title(data['category_id'], data['forum_id']) %}{% end%}
+{% block extra_header %}
+<link rel="stylesheet" type="text/css" href="{{ root_url }}/static/style/highlight.css" />
+{% end %}
+{% block content %}
+{% set topics = data["forum_obj"].get("topics",[])  %}
+<div class="forum">
+	<div class="main site-main">
+		<div class="main-inner">
+			<div id="punviewforum" class="pun">
+				<div class="punwrap">
+					{% include "inc_header.html" %}
+					<div id="brdmain">
+						<div class="linkst">
+							<div class="inbox crumbsplus">
+								{% module Forum_Crumbs() %}
+								<div class="pagepost">
+								{% module Pagination(data["pagination_obj"]) %}
+								<p style="margin-left:90%">
+								{% module NewPost() %}
+								</p>
+								</div>
+								<div class="clearer"></div>
+							</div>
+						</div>
+						<div id="vf" class="blocktable">
+							<h2><span>{{_("Forum Name")}}</span></h2>
+							<div class="box">
+								<div class="inbox">
+									<table cellspacing="0">
+									<thead>
+										<tr>
+											<th class="tcl" scope="col">{{ _("Topic") }}</th>
+											<th class="tc2" scope="col">{{ _("Replies") }}</th>
+											<th class="tc3" scope="col">{{ _("Views") }}</th>
+											<th class="tcr" scope="col">{{ _("Last post") }}</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% module Topic_Detail_List(topics) %}
+									</tbody>
+									</table>
+								</div>
+							</div>	
+						</div>
+						<div class="linksb">
+							<div class="inbox crumbsplus">
+								<div class="pagepost">
+								{% module Pagination(data["pagination_obj"]) %}
+								<p style="margin-left:90%">
+								{% module NewPost() %}
+								</p>
+								</div>
+								{% module Forum_Crumbs() %}
+								<p class="subscribelink clearb"><!--a href="#">{{_("Subscribe to this forum")}}</a> - <a href="#">Mark this forum as read</a--></p>
+								<div class="clearer"></div>
+							</div>
+						</div>
+					</div>
+					<div id="brdfooter" class="block">
+						{% include "inc_board_foot.html" %}
+					</div>
+				</div>
+				<div class="end-box"><div><!-- Bottom corners --></div></div>
+			</div>
+		</div>
+	</div>
+</div>
+{% end %}

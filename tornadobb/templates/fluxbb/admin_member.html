@@ -1,0 +1,128 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ _("Edit Members") }} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
+{% block menu_member %}isactive{% end %}
+{% block right_content %}
+{% import datetime %}
+{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
+{% set timezone_obj = tornadobb_settings["tornadobb.timezone_obj"] %}
+{% if current_user and current_user.get("is_auth",False) %}
+	{% set timezone_name = tornadobb_settings["tornadobb.timezone_name"] %}
+	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
+	{% if user_timezone_name != timezone_name%}
+		{% from pytz import timezone %}
+		{% set timezone_obj = timezone(user_timezone_name) %}
+	{% end %}
+{% end %}
+{% set user_min = tornadobb_settings.get("tornadobb.username_min_chars_num",2) %}
+{% set user_max = tornadobb_settings.get("tornadobb.username_max_chars_num",25) %}
+<h2 class="block2"><span>{{_("Search Member")}}</span></h2>
+<div class="box">
+	<form id="membersearch" method="post" action="">
+	{% raw xsrf_form_html() %}
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Search Member")}}</legend>
+				<div class="infldset">
+					<table cellspacing="0" >
+						<tr>
+							<td>{{_("Name")}}:</td>
+							<td><input type="text" id="member_name" name="member_name" size="20" maxlength="{{ user_max }}" /></td>
+							<td><input type="submit" value="{{ _('Search') }}"/></td>
+						</tr>
+					</table>
+				</div>
+			</fieldset>
+		</div>
+	</form>
+</div>
+
+
+<h2 class="block2"><span>{{_("Edit Members")}}</span></h2>
+<div class="box">
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Edit Members")}}</legend>
+				<div class="infldset">
+					<table cellspacing="0" >
+					<thead>
+						<tr>
+							<th scope="col">{{_("Name")}}</th>
+							<th scope="col">{{_("Information")}}</th>
+							<th scope="col">{{_("Action")}}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for member in data.get("member_set",[]) %}	
+						<tr>
+							<td>{{ member["name"] }}</td>
+							<td>
+								<ul>
+									<li>{{ _("Email") }}: 
+										<strong>
+										{{ member["email"] }}
+										</strong>
+									</li>
+									<li>{{ _("Registered") }}: 
+										<strong>
+										{% if member.get("registered_time",None) %}
+											{{ datetime.datetime.fromtimestamp(member["registered_time"], timezone_obj).strftime(datetime_format)}}
+										{% end %}
+										</strong>
+									</li>
+									<li>{{ _("Last access") }}: 
+										<strong>
+										{% if member.get("last_access",None) %}
+											sss{{ datetime.datetime.fromtimestamp(member["last_access"], timezone_obj).strftime(datetime_format)}}
+										{% end %}
+										</strong>
+									</li>
+									<li>{{ _("Topics") }}: <strong>{{ member.get("topics_num",0) }}</strong></li>
+									<li>{{ _("Posts") }}: <strong>{{ member.get("replies_num",0) }}</strong></li>
+								</ul>
+							</td>
+							<td>
+								{% if member.get("postable",True) %}
+									<a href="postable?m_id={{ member['_id'] }}&c=shut">{{ _("shut up") }}</a>  
+								{% else %}
+									<a href="postable?m_id={{ member['_id'] }}&c=open">{{ _("open mouse") }}</a>  
+								{% end %}
+								{% if member.get("closed",False) %}
+									<a href="close?m_id={{ member['_id'] }}&c=open">{{ _("open") }}</a>  
+								{% else %}
+									<a href="close?m_id={{ member['_id'] }}&c=close">{{ _("close") }}</a>  
+								{% end %}
+							</td>
+						</tr>
+						{% end %}
+					</tbody>
+				</table>
+			</div>
+		</fieldset>
+	</div>
+</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#membersearch").validate({
+		rules: {
+
+			member_name: {
+				required: true,
+				minlength: {{ user_min }},
+				maxlength: {{ user_max }}
+			}
+		},
+		messages: {
+			member_name: {
+				required: "{{ _('Please enter a username') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(user_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(user_max) }}"
+			}
+		}
+	});
+});
+</script>
+{% end %}

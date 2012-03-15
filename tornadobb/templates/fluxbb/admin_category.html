@@ -1,0 +1,134 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ _("Edit categories") }} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
+{% block menu_category %}isactive{% end %}
+{% block right_content %}
+{% set category_min = tornadobb_settings.get("tornadobb.category_min_chars_num",5) %}
+{% set category_max = tornadobb_settings.get("tornadobb.category_max_chars_num",25) %}
+<h2 class="block2"><span>{{_("Edit categories")}}</span></h2>
+<div class="box">
+	<form method="post" action="./edit" id="categoryedit">
+	{% raw xsrf_form_html() %}
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Edit categories")}}</legend>
+				<div class="infldset">
+					<table cellspacing="0" >
+					<thead>
+						<tr>
+							<th class="tcl" scope="col">{{_("Name")}}</th>
+							<th scope="col">{{_("Position")}}</th>
+							<th scope="col">{{_("Action")}}</th>
+						</tr>
+					</thead>
+					<tbody>
+					{% for category in data["category_set"]%}
+						<input type="hidden" name="category_id" value="{{ category['_id']}}">
+						<tr>
+							<td class="tcl"><input class="name" type="text" name="category_name" value="{{category['name']}}" size="35" maxlength="{{ category_max }}" /></td>
+							<td><input class="position" type="text" name="category_position" value="{{category['position']}}" size="3" maxlength="3" /></td>
+							<td>
+							{% if category.get("closed",False) %}
+							<a href="close?id={{ category['_id']}}&c=open">{{_("open")}}</a>
+							{% else %}
+							<a href="close?id={{ category['_id']}}&c=close">{{_("close")}}</a>
+							{% end %}
+							 | <a href="delete?id={{ category['_id']}}">{{_("delete")}}</a></td>
+						</tr>
+					{% end %}
+					</tbody>
+					</table>
+					<div class="fsetsubmit"><input type="submit" value="{{_('Update')}}" /></div>
+				</div>
+			</fieldset>
+		</div>
+	</form>
+</div>
+<h2 class="block2"><span>{{_("Add category")}}</span></h2>
+<div class="box">
+	<form id="categporyadd" method="post" action="">
+	{% raw xsrf_form_html() %}
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Add category")}}</legend>
+				<div class="infldset">
+					<table cellspacing="0" >
+						<tr>
+							<th>{{_("Name")}}</th>
+							<th>{{_("Position")}}</th>
+						</tr>
+						<tr>
+							<td><input type="text" id="category_name" name="category_name" size="35" maxlength="{{ category_max }}" /></td>
+							<td><input type="text" id="category_position" name="category_position" size="3" maxlength="3" /></td>
+						</tr>
+					</table>
+					<div class="fsetsubmit"><input type="submit" value="{{_('Submit')}}" /></div>
+				</div>
+			</fieldset>
+		</div>
+	</form>
+</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#categoryedit").submit(function(){
+		var reg_name = /^\S+.*/
+		var result = true;
+				
+		$("#categoryedit .name").each(function(){	
+			if (reg_name.test($(this).val())){}
+			else{
+				alert("{{ _('Please enter a category name') }}");
+				result = false;
+				$(this)[0].focus();
+				return
+				}
+		});
+
+		if (result == false)
+			return false;
+		var reg_position = /[0-9]+/;
+		$("#categoryedit .position").each(function(){
+
+			if (reg_position.test($(this).val())){}
+			else{
+				alert("{{ _('Position must be one integer') }}");
+				result = false;
+				$(this)[0].focus();
+				}
+		});
+		return result;
+	});
+	
+	$("#categporyadd").validate({
+		rules: {
+
+			category_name: {
+				required: true,
+				minlength: {{ category_min }},
+				maxlength: {{ category_max }}
+			},
+			category_position: {
+				required: true,
+				digits: true
+			}
+		},
+		messages: {
+		
+			category_name: {
+				required: "{{ _('Please enter a category name') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(category_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(category_max) }}"
+			},
+			category_position: {
+				required: "{{ _('Please enter a position number') }}",
+				digits: "{{ _('Position must be one integer') }}"
+			}
+		}
+	});
+});
+</script>
+{% end %}

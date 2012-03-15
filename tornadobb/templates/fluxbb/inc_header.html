@@ -1,0 +1,60 @@
+{% if current_user and current_user.get("is_auth",False) %}
+<div id="brdheader" class="block">
+	<div class="box">
+		<div id="brdmenu" class="inbox">
+			<ul>
+				<li id="navindex" class="{% block menu_index %}isactive{% end %}"><a href="{{ root_url }}">{{ _("Index") }}</a></li>
+				<li id="navrules" class="{% block menu_rules %}{% end %}"><a href="{{root_url}}/rules">{{ _("Rules") }}</a></li>
+				<li id="navsearch" class="{% block menu_search %}{% end %}"><a href="{{root_url}}/search">{{ _("Search") }}</a></li>
+				<li id="navprofile" class="{% block menu_profile %}{% end %}"><a href="{{root_url}}/profile">{{ _("Profile") }}</a></li>
+				<li id="navlogout" class="{% block menu_logout %}{% end %}"><a href="{{root_url}}/logout">{{ _("Logout") }}</a></li>
+			</ul>
+		</div>
+		<div id="brdwelcome" class="inbox">
+			<ul class="conl">
+				<li><span>{{ _("Logged in as") }} <strong>{{ current_user["name"] }}</strong></span></li>
+			</ul>
+			{% if not handler.request.path == root_url %}
+				{% set forum_or_topic = handler.request.path.partition(root_url)[2].split("/")[1] %}
+				{% if  forum_or_topic in ["forum","topic"] %}
+				<ul class="conr">
+					<li>
+						<span>{{ _("Topics") }}: <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/?o=create" title="Find topics with new posts since your last visit.">{{ _("New") }}</a> | <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/" title="{{ _('Find topics with recent posts') }}.">{{ _("Active") }}</a> | <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/?f=dist" title="{{ _('Find topics from Distillate Area') }}.">{{ _("Distillate") }}</a> {% if current_user and current_user.get("role",None) %} | <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/?f=hide" title="Find topics with new posts since your last visit.">{{ _("Hide") }}</a>{% end %}</span>
+					</li>
+				</ul>
+				{% end %}
+			{% end %}
+			<div class="clearer"></div>
+		</div>
+	</div>
+</div>
+{% else %}
+<div id="brdheader" class="block">
+	<div class="box">
+		<div id="brdmenu" class="inbox">
+			<ul>
+				<li id="navindex" class="{% block menu_index %}{% end %}"><a href="{{root_url}}">{{ _("Index") }}</a></li>
+				<li id="navrules" class="{% block menu_rules %}{% end %}"><a href="{{root_url}}/rules">{{ _("Rules") }}</a></li>
+				<li id="navsearch" class="{% block menu_search %}{% end %}"><a href="{{root_url}}/search">{{ _("Search") }}</a></li>
+				<li id="navregister" class="{% block menu_register %}{% end %}"><a href="{{root_url}}/register">{{ _("Register") }}</a></li>
+				<li id="navlogin" class="{% block menu_login %}{% end %}"><a href="{{root_url}}/login">{{ _("Login") }}</a></li>
+			</ul>
+		</div>
+		<div id="brdwelcome" class="inbox">
+			<!--<p class="conl">You are not logged in.</p>-->
+			<ul class="conl">	
+				<li>{{ _("You are not logged in") }}</li>
+			</ul>
+			{% if not handler.request.path == root_url %}
+				{% set forum_or_topic = handler.request.path.partition(root_url)[2].split("/")[1] %}
+				{% if  forum_or_topic in ["forum","topic"] %}
+				<ul class="conr">
+					<li><span>{{ _("Topics") }}: <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/?o=create" title="Find topics with new posts since your last visit.">{{ _("New") }}</a> | <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/" title="{{ _('Find topics with recent posts') }}.">{{ _("Active") }}</a></span></li>
+				</ul>
+				{% end %}
+			{% end %}
+			<div class="clearer"></div>
+		</div>
+	</div>
+</div>
+{% end %}

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}{% module Title(data['category_id'], data['forum_id'],data['topic_obj']['subject']) %}{% end %}
+{% block extra_header %}	
+<link rel="stylesheet" type="text/css" media="screen" href="{{ root_url }}/static/scripts/markitup/skins/markitup/style.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="{{ root_url }}/static/scripts/markitup/sets/bbcode/style.css" />
+{% end %}
+{% block content %}
+{% from mypostmarkup import render_bbcode %}
+{% autoescape None %}
+{% set topic = data["topic_obj"] %}
+<div class="forum">
+	<div class="main site-main">
+		<div class="main-inner">
+			<div id="punviewtopic" class="pun">
+				<div class="punwrap">
+				{% include "inc_header.html" %}
+					<div id="brdmain">
+						<div class="linkst">
+							<div class="inbox crumbsplus">
+								{% module Forum_Crumbs(topic["subject"]) %}
+								<div class="pagepost">
+								{% module Pagination(data["pagination_obj"],"post") %}
+								<p style="margin-left:45%">
+								{% include "inc_moderator_control_pad.html" %}
+								{% module NewPost() %}
+								</p>
+								</div>
+								<div class="clearer"></div>
+							</div>
+						</div>
+					{% set current_page_num = data["pagination_obj"]["current_page_num"] %}
+					{% set posts_num_per_page = tornadobb_settings["tornadobb.posts_num_per_page"] %}
+					{% module Post_Detail_List(topic,current_page_num,posts_num_per_page,permission,data["hide_content"],data["hide_attach"]) %}
+						<div class="postlinksb">
+							<div class="inbox crumbsplus">
+								<div class="pagepost">
+								{% module Pagination(data["pagination_obj"],"post") %}
+								<p style="margin-left:45%">
+								{% include "inc_moderator_control_pad.html" %}
+								{% module NewPost() %}
+								</p>
+								</div>
+								{% module Forum_Crumbs(topic["subject"]) %}
+								<div class="clearer"></div>
+							</div>
+						</div>
+					{% if current_user and current_user.get("is_auth",False) and current_user.get("postable",True) and not topic.get("closed",False) %}
+						<div id="quickpost" class="blockform">
+							<div class="box">
+								<form id="quick_reply_form" method="post" action="reply">
+								{% raw xsrf_form_html() %}
+									<div class="inform">
+										<fieldset>
+											<legend>{{ _("Quick post") }}</legend>
+											<div class="infldset txtarea">
+												<label><textarea id="message" name="message" rows="7" cols="75" tabindex="1"></textarea></label>
+											</div>
+										</fieldset>
+									</div>
+									<p class="buttons"><input type="submit" tabindex="2" value="{{ _('Submit') }}"/> <a href="#preview_reply" id="preview">preview</a></p>
+								</form>
+							</div>
+						</div>
+						<!-- reply preview -->
+						<div id="preview_reply" style="display: none" class="blockform">
+							<div class="box">
+								<form id="preview_reply_form" method="post" action="reply">
+								{% raw xsrf_form_html() %}
+									<div class="inform">
+										<fieldset>
+											<legend>{{ _("Post a reply") }}</legend>
+											<div class="infldset txtarea">
+												{% raw xsrf_form_html() %}
+												<label class="required"><strong>{{_("Message")}} <span>({{_("Required")}})</span></strong><br />
+												<div id="emoticons">
+													{% for k,v in tornadobb_settings["tornadobb.emoticon_settings"].items()%}
+													<a href="#message_preview" title="[emo]{{ k }}[/emo]"><img src="{{ v }}" /></a>
+												 {% end %}
+												</div>
+												<textarea id="message_preview" rows="20" cols="70" name="message" tabindex="4" style="width: 93.5%"></textarea><br /></label>
+											</div>
+										</fieldset>
+									</div>
+									<p class="buttons"><input type="submit" tabindex="5" value="{{ _('Submit') }}"/></p>
+								</form>
+							</div>
+						</div>
+						<!-- end of reply preview-->
+						<!-- edit reply -->
+						<div id="edit_reply" style="display: none" class="blockform">
+							<div class="box">
+								<form id="edit_reply_form" method="post" action="edit">
+								{% raw xsrf_form_html() %}
+									<div class="inform">
+										<fieldset>
+											<legend>{{ _("Edit a reply") }}</legend>
+											<div class="infldset txtarea">
+												{% raw xsrf_form_html() %}
+												<input type='hidden' id="post_id" value="" name="post_id">
+												<label class="required"><strong>{{_("Message")}} <span>({{_("Required")}})</span></strong><br />
+												<div id="emoticons">
+													{% for k,v in tornadobb_settings["tornadobb.emoticon_settings"].items()%}
+													<a href="#message_edit" title="[emo]{{ k }}[/emo]"><img src="{{ v }}" /></a>
+												 {% end %}
+												</div>
+												<textarea id="message_edit" rows="20" cols="70" name="message" tabindex="6" style="width: 93.5%"></textarea><br /></label>
+											</div>
+										</fieldset>
+									</div>
+									<p class="buttons"><input type="submit" tabindex="7" value="{{ _('Submit') }}"/></p>
+								</form>
+							</div>
+						</div>
+						<!-- end of edit reply-->
+					{% end %}
+					</div>
+					<div id="brdfooter" class="block">
+						{% include "inc_board_foot.html" %}
+					</div>
+				</div>
+				<div class="end-box"><div><!-- Bottom corners --></div></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- edit pervie -->
+{% end %}
+{% block scripts %}
+{% set post_min = tornadobb_settings.get("tornadobb.post_min_chars_num",20) %}
+{% set post_max = tornadobb_settings.get("tornadobb.post_max_chars_num",5000) %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript" src="{{ root_url }}/static/scripts/markitup/jquery.markitup.js"></script>
+<script type="text/javascript" src="{{ root_url }}/static/scripts/markitup/sets/bbcode/set.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+				
+		$(".quote").click(function(){
+			$("#quickpost").css("display","");
+			$("#edit_reply").css("display","none");
+			$("#preview_reply").css("display","none");
+			name = $(this).prev().attr("name");
+			content = $(this).prev().html();
+			$("#message")[0].focus();
+			quote_content = "[quote=" + name + "]" + content +"[/quote]\r\n";
+			$("#message").html(quote_content);
+		});
+		
+		$("#preview").click(function(){
+			$("#quickpost").css("display","none");
+			$("#edit_reply").css("display","none");
+			$("#preview_reply").css("display","");
+			$("#message_preview").html("");
+			$("#message_preview").html($("#message").val());
+			$("#message_preview")[0].focus();
+		});
+		
+		mySettings["previewParserPath"]="{{ root_url }}/mp";
+		$('#message_preview').markItUp(mySettings);
+		$('#message_edit').markItUp(mySettings);
+
+		$('#emoticons a').click(function() {
+			emoticon = $(this).attr("title");
+			$.markItUp( { replaceWith:emoticon } );
+		});
+
+		$("#quick_reply_form").validate({
+		rules: {
+			message: {
+				required: true,
+				minlength: {{ post_min }},
+				maxlength: {{ post_max }}
+			}
+		},
+		messages: {
+			message: {
+				required: "{{ _('Please write something') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(post_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(post_max) }}"
+			}
+		}
+		});
+		
+		$("#reply_form").validate({
+		rules: {
+			message: {
+				required: true,
+				minlength: {{ post_min }},
+				maxlength: {{ post_max }}
+			}
+		},
+		messages: {
+			message: {
+				required: "{{ _('Please write something') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(post_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(post_max) }}"
+			}
+		}
+		});
+	
+		$("#edit_reply_form").validate({
+		rules: {
+			message: {
+				required: true,
+				minlength: {{ post_min }},
+				maxlength: {{ post_max }}
+			}
+		},
+		messages: {
+			message: {
+				required: "{{ _('Please write something') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(post_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(post_max) }}"
+			}
+		}
+		});
+	});
+	
+	function edit_post(post_id){
+		console.info(post_id);
+		console.info($("#"+post_id).html());
+		
+		$("#quickpost").css("display","none");
+		$("#preview_reply").css("display","none");
+		$("#edit_reply").css("display","");
+		$("#message_edit")[0].focus();
+		$("#message_edit").html($("#"+post_id).html());
+		$("#post_id").val(post_id);
+	}
+	
+</script>
+{% end %}
+

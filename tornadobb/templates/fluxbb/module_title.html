@@ -1,0 +1,10 @@
+{% if data["topic_name"] %}
+	{{ data["topic_name"] }} -
+{% end %}
+{% if data["forum_name"] %}
+	{{ _(data["forum_name"]) }} -
+{% end %}
+{% if data["category_name"] %}
+	{{ _(data["category_name"]) }} -
+{% end %}
+{{ _(handler.settings.get('tornadobb.forum_title','TornadoBB Forum')) }}
