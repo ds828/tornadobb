@@ -1,2 +1,3 @@
 tornadobb/*.pyc
 tornadobb/db_backends/*.pyc
+tornadobb/settings.py
