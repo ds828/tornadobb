@@ -571,11 +571,10 @@ class UserAvatarHandler(BaseHandler):
 					self.write("OK")
 				else:
 					os.remove(self.settings["tornadobb.root_path"] + "/static/avatar/" + user_id + current_avatar_ext)
-					db_backend.do_change_avatar_name(user_id,ext)
-					self.write("RELOGIN")
-			else:
-				db_backend.do_change_avatar_name(user_id,ext)
-				self.write("RELOGIN")
+				
+			db_backend.do_change_avatar_name(user_id,ext)
+			self.write("RELOGIN")
+			
 		else:	
 			self.write("FAIL")
 		
