@@ -673,10 +673,11 @@ class UserDisplayHandler(BaseHandler):
 			self.write_error(404)
 			return
 
-class UserPrivacyHandler(self):
+class UserPrivacyHandler(BaseHandler):
 	@authenticated
 	def get(self):
 		
+		display_email = db_backend.do_show_display_email_option(self.current_user["_id"])
 		self.render("user_privacy.html",data=locals())
 		
 	@authenticated

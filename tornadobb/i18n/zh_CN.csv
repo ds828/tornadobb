@@ -169,8 +169,6 @@
 "Please enter a new password","请提供一个新密码"
 "Position must be one integer","位置必须是一个整数"
 "Please input something and submit","请输入再提交"
-
-
 "Preview","预览"
 "Profile","配置文件"
 "Password","密码"
@@ -182,6 +180,7 @@
 "Profile menu","配置文件目录"
 "Passwords must be at least {0} characters long. Passwords are case sensitive","密码必须最少{0}个字符，请注意大小写"
 "Personality","个性化"
+"Privacy","隐私"
 #Q
 "Quick post","快速发贴"
 "Quote","引用"
@@ -212,8 +211,8 @@
 "Set your avatar display options","设置头像选项"
 "sticky","置顶"
 "Send active email","发送激活邮件"
-
-
+"Set your privacy options","设置你的隐私选项"
+"Select whether you want your email address to be viewable to other users","选择是否显示你的邮件地址给其他用户"
 #T
 "This username has already been used","这个用户名已经被注册"
 "The following error(s) occurred","发生下面这些错误"
@@ -234,6 +233,7 @@
 "Update","更新"
 "Update your password","更新你的密码"
 "Update your email address","更新你的邮件地址"
+"Update privacy","更新隐私"
 "using","正在使用"
 "Username","用户名"
 "User information","用户信息"
