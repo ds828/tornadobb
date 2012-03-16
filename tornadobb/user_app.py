@@ -846,6 +846,23 @@ class TimezoneHandler(BaseHandler):
 			tz = filter(lambda x: x.startswith(area),common_timezones)
 			self.write({"tz":tz})
 			return
+class ForgetPasswordHandler(BaseHandler):
+	
+	def post(self):
+		username = self.get_argument("username",None)
+		email = self.get_argument("email",None)
+		if username and email:
+			user_id = db_backend.do_show_user_id_with_name(username)
+			if user_id
+				new_password = hash_password[:4]
+				db_backend.do_update_user_password(user_id,hash_password,new_password):
+			else:
+				errors = ["Wrong username or email"]
+				self.render("forget_pwd.html",data=locals())
+		else:
+			self.write_error(404)
+			return	
+
 
 def send_verify_email(request_handler,email,username,password):
 	subject = "Active account email from " + request_handler.settings["tornadobb.forum_title"]

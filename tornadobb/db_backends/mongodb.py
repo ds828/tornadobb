@@ -1265,3 +1265,15 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False
+
+	def do_show_user_id_with_username_email(self,username,email):
+		
+		try:
+			user = self._database["user"].find_one({"name":username},fields=["password","email"])
+			if user and email == user["email"]:
+				return user["_id"]
+			return None
+				
+		except OperationFailure as e:
+			logging.exception(e)
+			return None
