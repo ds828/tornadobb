@@ -24,6 +24,7 @@ from tornado.web import *
 import datetime, time
 from pytz import timezone
 from settings import db_backend
+from util import *
 import functools
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -229,9 +230,9 @@ class SendEmailHandler(BaseHandler):
 	def post(self):
 			
 		print '-----------------POST method in sendmail---------------------'
-		print self.request.arguments
 		receiver = self.get_argument("receiver")
 		subject = self.get_argument("subject")
-		message = self.get_argument("message")
-		send_mail(receiver,subject,message)
+		plain = self.get_argument("plain")
+		html = self.get_argument("html")
+		send_mail(receiver,subject,plain,html)
 		print '----------------- sendmail OK ---------------------'

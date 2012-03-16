@@ -859,11 +859,11 @@ class TimezoneHandler(BaseHandler):
 			self.write({"tz":tz})
 			return
 
-class ForgetPasswordHandler(BaseHandler):
+class UserForgetPasswordHandler(BaseHandler):
 
 	def get(self):
 		
-		self.render("forget_pwd.html",data=locals())
+		self.render("forget_password.html",data=locals())
 	
 	def post(self):
 		username = self.get_argument("username",None)
@@ -880,17 +880,17 @@ class ForgetPasswordHandler(BaseHandler):
 			else:
 				errors = ["Wrong username or email"]
 				
-			self.render("forget_pwd.html",data=locals())
+			self.render("forget_password.html",data=locals())
 			
 		else:
 			self.write_error(404)
 			return	
 
-def send_forget_password_email(requests_handler,email_address,username,password):
+def send_forget_password_email(request_handler,email_address,username,password):
 	
-	subject = "New password from " + request_handler.settings["tornadobb.forum_title"]
-	message = request_handler.render_string("forget_password_email.html",username=username,password=password)
-	body='_xsrf='+ request_handler.xsrf_token+'&receiver='+ email_address +'&subject='+ subject +'&message='+ message
+	subject = tornado.escape.to_unicode("New password from" + request_handler.settings["tornadobb.forum_title"])
+	message = tornado.escape.to_unicode(request_handler.render_string("forget_password_email.html",username=username,password=password))
+	body='_xsrf='+ request_handler.xsrf_token+'&receiver='+ email_address +'&subject='+ subject +'&plain='+ message + "&html=" + message
 	http_client = AsyncHTTPClient()
 	request = request_handler.request
 	http_client.fetch(request.protocol + "://" + request.host + request_handler.settings["tornadobb.root_url"] + "/sendmail", None ,method ="POST", body=body , headers = request.headers)
@@ -899,7 +899,7 @@ def send_forget_password_email(requests_handler,email_address,username,password)
 def send_verify_email(request_handler,email_address,username,password):
 	subject = "Active account email from " + request_handler.settings["tornadobb.forum_title"]
 	message = request_handler.render_string("active_email.html",username=username,password=password)
-	body='_xsrf='+ request_handler.xsrf_token+'&receiver='+ email_address +'&subject='+ subject +'&message='+ message
+	body='_xsrf='+ request_handler.xsrf_token+'&receiver='+ email_address +'&subject='+ subject +'&plain='+ message + "&html=" + message
 	http_client = AsyncHTTPClient()
 	request = request_handler.request
 	http_client.fetch(request.protocol + "://" + request.host + request_handler.settings["tornadobb.root_url"] + "/sendmail", None ,method ="POST", body=body , headers = request.headers)

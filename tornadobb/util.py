@@ -20,24 +20,35 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+
 import settings
 import logging
+import email
+import mimetypes
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+from email.MIMEImage import MIMEImage
+import smtplib
 
-def send_mail(receiver,subject,message):
+def send_mail(receiver,subject,plainText,htmlText):
 	
 	smtp_settings = settings.tornadobb_settings["tornadobb.smtp_settings"]
 	
-	# Create message container - the correct MIME type is multipart/alternative.
-	msg = MIMEMultipart('alternative')
-	msg['Subject'] = subject
-	msg['From'] = smtp_settings["username"]
-	msg['To'] = receiver
-	# Record the MIME type
-	part = MIMEText(message, 'html')
-	msg.attach(part)
+	msgRoot = MIMEMultipart('related')
+	msgRoot['Subject'] = subject
+	msgRoot['From'] = smtp_settings["email_address"]
+	msgRoot['To'] = receiver
+
+	# Encapsulate the plain and HTML versions of the message body in an
+	# ‘alternative’ part, so message agents can decide which they want to display.
+	msgAlternative = MIMEMultipart('alternative')
+	msgRoot.attach(msgAlternative)
+
+	msgText = MIMEText(plainText, 'plain', 'utf-8')
+	msgAlternative.attach(msgText)
+
+	msgText = MIMEText(htmlText, 'html', 'utf-8')
+	msgAlternative.attach(msgText)
 
 	# Send the message via local SMTP server.
 	if smtp_settings["use_authentication"]:
@@ -55,12 +66,12 @@ def send_mail(receiver,subject,message):
 	smtp.login(smtp_settings["username"],smtp_settings["password"])
 	# sendmail function takes 3 arguments: sender's address, recipient's address
 	# and message to send - here it is sent as one string.
-	smtp.sendmail(sender, receiver, msg.as_string())
+	smtp.sendmail(smtp_settings["email_address"], receiver, msgRoot.as_string())
 	smtp.quit()
 
 def main():
 	
-	send_mail("songdi19@gmail.com")
+	send_mail("songdi19@gmail.com","中文内容","中文内容")
 	
 	return 0
 
