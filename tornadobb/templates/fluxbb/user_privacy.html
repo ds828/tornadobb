@@ -1,0 +1,27 @@
+{% extends "user_base.html" %}
+{% block title %}{{_("Personality")}} - {{_("Update privacy")}} - {{_(tornadobb_settings['tornadobb.forum_title'])}}{% end%}
+{% block menu_privacy %}isactive{% end %}
+{% block right_content %}
+<h2><span>{{ current_user["name"] }} - {{_("Update privacy")}}</span></h2>
+	<div class="box">
+		<form id="privacy-form" method="post" action="">
+			{% raw xsrf_form_html() %}
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Set your privacy options")}}</legend>
+					<div class="infldset">
+						<p>{{_("Select whether you want your email address to be viewable to other users")}}.</p>
+						<label>
+						{% if data.get("display_email",False) %}
+							<input type="checkbox" name="display_email" value="True" checked />
+						{% else %}
+							<input type="checkbox" name="display_email" value="True" />
+						{% end %}
+						{{_("Display your email address")}}.<br /></label>
+					</div>
+				</fieldset>
+			</div>
+			<p class="buttons"><input type="submit" id="submit" value="{{_('Submit')}}" /></p>
+		</form>
+	</div>
+{% end %}
