@@ -1,5 +1,5 @@
 {% extends "user_base.html" %}
-{% block title %}{% block title %}{{_("Personality")}} - {{_("Profile")}} - {{_(tornadobb_settings['tornadobb.forum_title'])}}{% end%}{% end%}
+{% block title %}{{_("Personality")}} - {{_("Profile")}} - {{_(tornadobb_settings['tornadobb.forum_title'])}}{% end%}
 {% block menu_personality %}isactive{% end %}
 {% block right_content %}
 {% from postmarkup import render_bbcode %}
@@ -26,11 +26,6 @@
 							<textarea id="signature" rows="4" cols="65" name="signature">{{ signature }}</textarea>
 							<br /></label>
 						</div>
-						<ul class="bblinks">
-							<li><span><a href="help.php#bbcode" onclick="window.open(this.href); return false;">BBCode:</a> on</span></li>
-							<li><span><a href="help.php#img" onclick="window.open(this.href); return false;">[img] {{_("tag")}}:</a> off</span></li>
-							<li><span><a href="help.php#smilies" onclick="window.open(this.href); return false;">{{_("Smilies")}}:</a> on</span></li>
-						</ul>
 						<p>
 						{% if signature %}
 						{{ render_bbcode(signature,"UTF-8") }}

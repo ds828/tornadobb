@@ -29,7 +29,11 @@ import logging
 __all__ = [	"tornadobb_handlers",
 			"tornadobb_settings",
 			#"db_backend",
+<<<<<<< HEAD
 			]
+=======
+		]
+>>>>>>> privacy
 ###########################################
 #
 #	You can change below
@@ -49,7 +53,11 @@ TORNADOBB_ROOT_URL = r"/tornadobb"	#required
 TORNADOBB_ADMIN_URL = r"/admin"	#required
 TORNADOBB_FIRST_ADMIN_NAME="admin"	#required
 TORNADOBB_FIRST_ADMIN_PASSWORD="admin"	#required
+<<<<<<< HEAD
 TORNADOBB_FIRST_ADMIN_EMAIL="songdi19@gmail.com"	#required
+=======
+TORNADOBB_FIRST_ADMIN_EMAIL="admin@tornadobb.com"	#required
+>>>>>>> privacy
 TORNADOBB_SESSION_EXPIRE = 30 #mins
 TORNADOBB_TIME_ZONE="Australia/Sydney"
 #TORNADOBB_TIME_ZONE="Asia/Shanghai"
@@ -360,6 +368,7 @@ tornadobb_handlers = [
 		    (TORNADOBB_ROOT_URL + "/resend$", ResendVerifyMailHandler),
 		    (TORNADOBB_ROOT_URL + "/active$", UserActiveHandler),
 		    (TORNADOBB_ROOT_URL + "/forget$", UserForgetPasswordHandler),
+		    (TORNADOBB_ROOT_URL + "/active$", UserActiveHandler),
 		    url(TORNADOBB_ROOT_URL + "/profile?", UserProfileHandler,name="profile_page"),
 		    (TORNADOBB_ROOT_URL + "/profile/avatar$", UserAvatarHandler),
 		    (TORNADOBB_ROOT_URL + "/profile/personality$", UserSignatureHandler),
@@ -368,7 +377,7 @@ tornadobb_handlers = [
 			(TORNADOBB_ROOT_URL + "/profile/posts$", UserPostsHandler),
 			(TORNADOBB_ROOT_URL + "/profile/pwd$", UserPasswordHandler),
 			(TORNADOBB_ROOT_URL + "/profile/email$", UserEmailHandler),
-			(TORNADOBB_ROOT_URL + "/profile/[a-z0-9]+$", UserProfileHandler),
+			(TORNADOBB_ROOT_URL + "/profile/privacy$", UserPrivacyHandler),
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "$", AdminDashboardHandler),
 			url(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/category/?", AdminCategoryHandler,name="admin_category_page"),
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/category/edit$", AdminCategoryEditHandler),

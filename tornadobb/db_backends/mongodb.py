@@ -1291,3 +1291,33 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False
+	
+	def do_show_display_email_option(self,user_id):
+		try:
+			if type(user_id)is not ObjectId:
+				user_id = ObjectId(user_id)
+			
+			user = self._database["user"].find_one({"_id":user_id},fields=["display_email"])
+			if user and "display_email" in user:
+				return user["display_email"]
+			else:
+				return False
+		except InvalidId:
+			return False
+		except OperationFailure as e:
+			logging.exception(e)
+			return False
+		
+
+	def do_update_user_privacy(self,user_id,display_email):
+		try:
+			if type(user_id)is not ObjectId:
+				user_id = ObjectId(user_id)
+			
+			self._database["user"].update({"_id":user_id},{"$set":{"display_email":display_email}})
+			return True
+		except InvalidId:
+			return False
+		except OperationFailure as e:
+			logging.exception(e)
+			return False
