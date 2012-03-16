@@ -1,6 +1,9 @@
-{% extends "profile_base.html" %}
-{% block title %}{% block title %}{{_("Update your email address")}} - {{_("Profile")}} - {{_(tornadobb_settings['tornadobb.forum_title'])}}{% end%}{% end%}
-{% block  profile_content %}
+{% extends "single_block_base.html" %}
+{% block title %}{{_("Update your email address")}} - {{_("Profile")}} - {{_(tornadobb_settings['tornadobb.forum_title'])}}{% end%}
+{% block single_block %}
+{% set pwd_min = tornadobb_settings.get("tornadobb.password_min_chars_num",5) %}
+{% set pwd_max = tornadobb_settings.get("tornadobb.password_max_chars_num",25) %}
+<div class="blockform">
 <h2><span>{{_("Change email address")}}</span></h2>
 <div class="box">
 	<form id="change_email" method="post" action="">
@@ -11,7 +14,7 @@
 					{% raw xsrf_form_html() %}
 					<label class="required"><strong>{{_("New email")}} <span>({{_("Required")}})</span></strong><br /><input type="text" id="new_email1" name="new_email1" size="25" maxlength="80" /><br /></label>
 					<label class="required"><strong>{{_("Confirm new email")}} <span>({{_("Required")}})</span></strong><br /><input type="text" id="new_email2" name="new_email2" size="25" maxlength="80" /><br /></label>
-					<label class="required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="password" id="password" size="16" name="password"/><br /></label>
+					<label class="required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="password" id="password" size="16" name="password" maxlength="{{ pwd_max }}"/><br /></label>
 					<p>{{_("An email will be sent to your new address with an activation link. You must click the link in the email you receive to activate the new address")}}.</p>
 				</div>
 			</fieldset>
@@ -19,10 +22,9 @@
 		<p class="buttons"><input type="submit" value="{{_('Submit')}}" /> <a href="javascript:history.go(-1)">{{_("Go back")}}</a></p>
 	</form>
 </div>
+</div>
 {% end %}
 {% block scripts %}
-{% set pwd_min = tornadobb_settings.get("tornadobb.password_min_chars_num",5) %}
-{% set pwd_max = tornadobb_settings.get("tornadobb.password_max_chars_num",25) %}
 <script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
 <script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
 <script type="text/javascript">
@@ -41,7 +43,7 @@ $(document).ready(function() {
 			password: {
 				required: true,
 				minlength: {{ pwd_min }},
-				maxlength: {{ pwd_max }},
+				maxlength: {{ pwd_max }}
 			}
 		},
 		messages: {

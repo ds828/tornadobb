@@ -1,57 +1,31 @@
-{% extends "base.html" %}
+{% extends "single_block_base.html" %}
 {% block title %}{{ _("Login")}} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
-{% block content %}
+{% block single_block %}
 {% set user_min = tornadobb_settings.get("tornadobb.username_min_chars_num",2) %}
 {% set user_max = tornadobb_settings.get("tornadobb.username_max_chars_num",25) %}
 {% set pwd_min = tornadobb_settings.get("tornadobb.password_min_chars_num",5) %}
 {% set pwd_max = tornadobb_settings.get("tornadobb.password_max_chars_num",25) %}
-<div class="forum">
-	<div class="main site-main">
-		<div class="main-inner">
-			<div id="punlogin" class="pun">
-				<div class="punwrap">
-				{% include "inc_header.html" %}
-					<div id="brdmain">
-					{% set errors = data.get("errors",None)%}
-					{% if errors %}
-						<div style="color:#ff0000;margin:18px;padding: 6px 6px;border: 1px solid #FF0000;background: #FFFFE6;">
-							<p>{{_("The following error(s) occurred")}}:</p>
-							<ul>
-								{% for error in errors %}<li>{{ _(error) }}</li>{% end %}
-							</ul>
+<div class="blockform">
+	<h2><span>{{_("Login")}}</span></h2>
+	<div class="box">
+		<form id="login-form" method="post" action="">
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Enter your username and password below")}}</legend>
+					<div class="infldset">
+						{% raw xsrf_form_html() %}
+						<label class="conl required"><strong>{{_("Username")}} <span>({{_("Required")}})</span></strong><br /><input type="text" id="username" name="username" size="25" maxlength="{{ user_max }}" tabindex="1" /><br /></label>
+						<label class="conl required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="password" id="password" name="password" size="25" maxlength="{{ pwd_max }}" tabindex="2" /><br /></label>
+						<div class="rbox clearb">
+							<label><input type="checkbox" name="save_pass" value="1" tabindex="3" />{{_("Log me in automatically each time I visit")}}.<br /></label>
 						</div>
-					{% end %}
-						<div class="blockform">
-							<h2><span>{{_("Login")}}</span></h2>
-							<div class="box">
-								<form id="login-form" method="post" action="">
-									<div class="inform">
-										<fieldset>
-											<legend>{{_("Enter your username and password below")}}</legend>
-											<div class="infldset">
-												{% raw xsrf_form_html() %}
-												<label class="conl required"><strong>{{_("Username")}} <span>({{_("Required")}})</span></strong><br /><input type="text" id="username" name="username" size="25" maxlength="{{ user_max }}" tabindex="1" /><br /></label>
-												<label class="conl required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="password" id="password" name="password" size="25" maxlength="{{ pwd_max }}" tabindex="2" /><br /></label>
-												<div class="rbox clearb">
-													<label><input type="checkbox" name="save_pass" value="1" tabindex="3" />{{_("Log me in automatically each time I visit")}}.<br /></label>
-												</div>
-												<p class="clearb">{{_("If you have not registered or have forgotten your password click on the appropriate link below")}}.</p>
-												<p class="actions"><span><a href="register" tabindex="5">{{_("Not registered yet")}}?</a></span> <span><a href="forget" tabindex="6">{{_("Forgotten your password")}}?</a></span><span>{% if data.get("response","ok") == "not_verify"%}<a href="sendmail"  tabindex="7">{{_("Resend active email")}}</a>{% end %}</span></p>
-											</div>
-										</fieldset>
-									</div>
-									<p class="buttons"><input type="submit" value="{{_('Login')}}" tabindex="4" /></p>
-								</form>
-							</div>
-						</div>
+						<p class="clearb">{{_("If you have not registered or have forgotten your password click on the appropriate link below")}}.</p>
+						<p class="actions"><span><a href="register" tabindex="5">{{_("Not registered yet")}}?</a></span> <span><a href="forget" tabindex="6">{{_("Forgotten your password")}}?</a></span><span>{% if data.get("response","ok") == "not_verify"%}<a href="sendmail"  tabindex="7">{{_("Resend active email")}}</a>{% end %}</span></p>
 					</div>
-					<div id="brdfooter" class="block">
-						{% include "inc_board_foot.html" %}
-					</div>
-				</div>
-				<div class="end-box"><div><!-- Bottom corners --></div></div>
+				</fieldset>
 			</div>
-		</div>
+			<p class="buttons"><input type="submit" value="{{_('Login')}}" tabindex="4" /></p>
+		</form>
 	</div>
 </div>
 {% end %}

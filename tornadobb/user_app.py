@@ -813,22 +813,25 @@ class UserPostsHandler(BaseHandler):
 				
 class ResendVerifyMailHandler(BaseHandler):
 		
-	def post(self):
+	def get(self):
 		
 		self.render("resend_active_email.html",data=locals())
 		
 	def post(self):
 		
+		print self.request
+		
 		username = self.get_argument("username")
 		password = self.get_argument("password")
-		if username and password and email:
+		if username and password:
 			m = hashlib.md5()
 			m.update(password)
 			password = m.hexdigest().upper()
 			email = db_backend.do_show_user_email_with_username_password(username,password)
 			if email:
 				send_verify_email(self,email,username,password)
-				messages = ["An active account email has alerady sent to " + email]	
+				messages = ["An active account email has alerady sent to " + email]
+
 			else:
 				errors = ["Wrong username or email address"]
 			self.render("resend_active_email.html",data=locals())
@@ -843,11 +846,11 @@ class UserActiveHandler(BaseHandler):
 		username = self.get_argument("u",None)
 		password = self.get_argument("p",None)
 		if username and password and db_backend.do_active_user_account(username,password):
-			self.render("user_actived.html",data=locals())
+			messages = ["Your account is actived now,please login"]
+			self.render("login.html",data=locals())
 		else:
 			self.write_error(500)
 			return
-			
 
 class TimezoneHandler(BaseHandler):
 	
@@ -897,9 +900,9 @@ def send_forget_password_email(request_handler,email_address,username,password):
 
 
 def send_verify_email(request_handler,email_address,username,password):
-	subject = "Active account email from " + request_handler.settings["tornadobb.forum_title"]
-	message = request_handler.render_string("active_email.html",username=username,password=password)
-	body='_xsrf='+ request_handler.xsrf_token+'&receiver='+ email_address +'&subject='+ subject +'&plain='+ message + "&html=" + message
+	subject = tornado.escape.to_unicode("Active account email from " + request_handler.settings["tornadobb.forum_title"])
+	message = tornado.escape.url_escape(tornado.escape.to_unicode(request_handler.render_string("active_email.html",username=username,password=password)))
+	body='_xsrf='+ request_handler.xsrf_token+'&receiver='+ email_address +'&subject=' + subject +'&plain='+ message + "&html=" + message
 	http_client = AsyncHTTPClient()
 	request = request_handler.request
 	http_client.fetch(request.protocol + "://" + request.host + request_handler.settings["tornadobb.root_url"] + "/sendmail", None ,method ="POST", body=body , headers = request.headers)

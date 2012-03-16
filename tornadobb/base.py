@@ -230,9 +230,11 @@ class SendEmailHandler(BaseHandler):
 	def post(self):
 			
 		print '-----------------POST method in sendmail---------------------'
+		print self.request
 		receiver = self.get_argument("receiver")
 		subject = self.get_argument("subject")
 		plain = self.get_argument("plain")
-		html = self.get_argument("html")
+		html = self.request.arguments["html"][0]
+		print html
 		send_mail(receiver,subject,plain,html)
 		print '----------------- sendmail OK ---------------------'

@@ -1,0 +1,63 @@
+{% extends "single_block_base.html" %}
+{% block title %}{{ _("Send active email")}} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
+{% block single_block %}
+{% set user_min = tornadobb_settings.get("tornadobb.username_min_chars_num",2) %}
+{% set user_max = tornadobb_settings.get("tornadobb.username_max_chars_num",25) %}
+{% set pwd_min = tornadobb_settings.get("tornadobb.password_min_chars_num",5) %}
+{% set pwd_max = tornadobb_settings.get("tornadobb.password_max_chars_num",25) %}
+<div class="blockform">
+<h2><span>{{_("Send active email")}}</span></h2>
+<div class="box">
+	<form id="active-form" method="post" action="">
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Enter your username and password below")}}</legend>
+				<div class="infldset">
+					{% raw xsrf_form_html() %}
+					<label class="conl required"><strong>{{_("Username")}} <span>({{_("Required")}})</span></strong><br /><input type="text" id="username" name="username" size="25" maxlength="{{ user_max }}" tabindex="1" /><br /></label>
+					<label class="conl required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="password" id="password" name="password" size="25" maxlength="{{ pwd_max }}" tabindex="2" /><br /></label>
+				</div>
+			</fieldset>
+		</div>
+		<p class="buttons"><input type="submit" value="{{_('Submit')}}" tabindex="3" /></p>
+	</form>
+</div>
+</div>
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("#active-form").validate({
+		rules: {
+
+			username: {
+				required: true,
+				minlength: {{ user_min }},
+				maxlength: {{ user_max }}
+			},
+			password: {
+				required: true,
+				minlength: {{ pwd_min }},
+				maxlength: {{ pwd_max }}
+			}
+		},
+		messages: {
+		
+			username: {
+				required: "{{ _('Please enter a username') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(user_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(user_max) }}"
+			},
+			password: {
+				required: "{{ _('Please enter a password') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(pwd_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(pwd_max) }}"
+			}
+		}
+	});
+});
+</script>
+{% end %}

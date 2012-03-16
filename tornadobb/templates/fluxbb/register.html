@@ -1,85 +1,66 @@
-{% extends "base.html" %}
-{% block title %}{% end%}
-{% block content %}
+{% extends "single_block_base.html" %}
+{% block title %}{{ _("Register") }} - {{ tornadobb_settings.get('tornadobb.forum_title','TornadoBB Forum') }}{% end%}
+{% block single_block %}
 {% set user_min = tornadobb_settings.get("tornadobb.username_min_chars_num",2) %}
 {% set user_max = tornadobb_settings.get("tornadobb.username_max_chars_num",25) %}
 {% set pwd_min = tornadobb_settings.get("tornadobb.password_min_chars_num",5) %}
 {% set pwd_max = tornadobb_settings.get("tornadobb.password_max_chars_num",25) %}
-<div class="forum">
-	<div class="main site-main">
-		<div class="main-inner">
-			<div id="punregister" class="pun">
-				<div class="punwrap">
-					{% include "inc_header.html" %}
-					<div id="brdmain">
-						<div id="regform" class="blockform">
-							<h2><span>{{_("Register")}}</span></h2>
-							<div class="box">
-								<form id="register" method="post" action="">
-								{% raw xsrf_form_html() %}
-									<div class="inform">
-										<div class="forminfo">
-											<h3>{{_("Important information")}}</h3>
-											<p>Registration will grant you access to a number of features and capabilities otherwise unavailable. These functions include the ability to edit and delete posts, design your own signature that accompanies your posts and much more. If you have any questions regarding this forum you should ask an administrator.</p>
-											<p>Below is a form you must fill out in order to register. Once you are registered you should visit your profile and review the different settings you can change. The fields below only make up a small part of all the settings you can alter in your profile.</p>
-										</div>
-										<fieldset>
-											<legend>{{_("Please enter a username between {0} and {1} characters long").format(user_min,user_max)}}</legend>
-											<div class="infldset">
-												<label class="required"><strong>{{_("Username")}} <span>({{_("Required")}})</span></strong><br /><input type="text" name="username" id="username" size="25" maxlength="{{ user_max }}" /><br /></label>
-											</div>
-										</fieldset>
-										<fieldset>
-											<legend>{{_("Please enter a password at least {0} characters long").format(pwd_min)}}</legend>
-											<div class="infldset">
-												<label class="required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="text" name="password1" size="25" maxlength="{{ pwd_max }}" /><br /></label>
-												<label class="required"><strong>{{_("Confirm password")}} <span>({_("Required")}})</span></strong><br /><input type="text" name="password2" size="25" maxlength="{{ pwd_max }}" /><br /></label>
-											</div>
-										</fieldset>
-									</div>
-									<div class="inform">
-										<fieldset>
-											<legend>{{_("Enter and confirm a valid email address")}}</legend>
-											<div class="infldset">
-												<p>{{_("You must enter a valid email address as you have to active the account with the email we sent to that address")}}.</p>
-												<label class="required"><strong>{{_("Email")}} <span>({_("Required")}})</span></strong><br />
-												<input type="text" name="email1" id="email1" size="50" maxlength="80" /><br /></label>
-												<label class="required"><strong>{{_("Confirm email address")}} <span>({_("Required")}})</span></strong><br />
-												<input type="text" name="email2" id="email2" size="50" maxlength="80" /><br /></label>
-											</div>
-										</fieldset>
-									</div>
-									<div class="inform">
-										<fieldset>
-											<legend>{{_("Set your privacy options")}}</legend>
-											<div class="infldset">
-												<p>{{_("Select whether you want your email address to be viewable to other users or not and if you want other users to be able to send you email via the forum (form email) or not")}}.</p>
-												
-													<label><input type="checkbox" name="display_email" value="True" />{{_("Display your email address")}}.<br /></label>
-												
-											</div>
-										</fieldset>
-									</div>
-									<div class="inform">
-										<fieldset>
-											<legend>{{_("Agree the forum rule")}}</legend>
-											<div class="infldset">
-												<p><input type="checkbox" name="agree" value="True" id="agree" />{{_("I agree the forum rules")}}. <a href="rules">{{_("Know more")}}</a> </p>
-											</div>
-										</fieldset>
-									</div>
-									<p class="buttons"><input type="submit" value="{{_("Register")}}" /></p>
-								</form>
-							</div>
-						</div>
-					</div>
-					<div id="brdfooter" class="block">
-						{% include "inc_board_foot.html" %}
-					</div>
+<div id="regform" class="blockform">
+	<h2><span>{{_("Register")}}</span></h2>
+	<div class="box">
+		<form id="register" method="post" action="">
+		{% raw xsrf_form_html() %}
+			<div class="inform">
+				<div class="forminfo">
+					<h3>{{_("Important information")}}</h3>
+					<p>Registration will grant you access to a number of features and capabilities otherwise unavailable. These functions include the ability to edit and delete posts, design your own signature that accompanies your posts and much more. If you have any questions regarding this forum you should ask an administrator.</p>
+					<p>Below is a form you must fill out in order to register. Once you are registered you should visit your profile and review the different settings you can change. The fields below only make up a small part of all the settings you can alter in your profile.</p>
 				</div>
-				<div class="end-box"><div><!-- Bottom corners --></div></div>
+				<fieldset>
+					<legend>{{_("Please enter a username between {0} and {1} characters long").format(user_min,user_max)}}</legend>
+					<div class="infldset">
+						<label class="required"><strong>{{_("Username")}} <span>({{_("Required")}})</span></strong><br /><input type="text" name="username" id="username" size="25" maxlength="{{ user_max }}" /><br /></label>
+					</div>
+				</fieldset>
+				<fieldset>
+					<legend>{{_("Please enter a password at least {0} characters long").format(pwd_min)}}</legend>
+					<div class="infldset">
+						<label class="required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="text" name="password1" size="25" maxlength="{{ pwd_max }}" /><br /></label>
+						<label class="required"><strong>{{_("Confirm password")}} <span>({_("Required")}})</span></strong><br /><input type="text" name="password2" size="25" maxlength="{{ pwd_max }}" /><br /></label>
+					</div>
+				</fieldset>
 			</div>
-		</div>
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Enter and confirm a valid email address")}}</legend>
+					<div class="infldset">
+						<p>{{_("You must enter a valid email address as you have to active the account with the email we sent to that address")}}.</p>
+						<label class="required"><strong>{{_("Email")}} <span>({_("Required")}})</span></strong><br />
+						<input type="text" name="email1" id="email1" size="50" maxlength="80" /><br /></label>
+						<label class="required"><strong>{{_("Confirm email address")}} <span>({_("Required")}})</span></strong><br />
+						<input type="text" name="email2" id="email2" size="50" maxlength="80" /><br /></label>
+					</div>
+				</fieldset>
+			</div>
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Set your privacy options")}}</legend>
+					<div class="infldset">
+						<p>{{_("Select whether you want your email address to be viewable to other users or not and if you want other users to be able to send you email via the forum (form email) or not")}}.</p>
+							<label><input type="checkbox" name="display_email" value="True" />{{_("Display your email address")}}.<br /></label>
+					</div>
+				</fieldset>
+			</div>
+			<div class="inform">
+				<fieldset>
+					<legend>{{_("Agree the forum rule")}}</legend>
+					<div class="infldset">
+						<p><input type="checkbox" name="agree" value="True" id="agree" />{{_("I agree the forum rules")}}. <a href="rules">{{_("Know more")}}</a> </p>
+					</div>
+				</fieldset>
+			</div>
+			<p class="buttons"><input type="submit" value="{{_('Register')}}" /></p>
+		</form>
 	</div>
 </div>
 {% end %}

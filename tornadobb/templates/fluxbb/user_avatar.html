@@ -1,6 +1,7 @@
-{% extends "profile_base.html" %}
-{% block title %}{% end%}
-{% block  profile_content %}
+{% extends "single_block_base.html" %}
+{% block title %}{{_("Upload avatar")}} - {{ tornadobb_settings.get('tornadobb.forum_title','TornadoBB Forum') }}{% end%}
+{% block single_block %}
+<div class="blockform">
 <h2><span>{{_("Upload avatar")}}</span></h2>
 <div class="box">
 	<form id="upload_avatar">
@@ -21,6 +22,7 @@
 		</div>
 		<p class="buttons"><input type="button" id="upload_button" value="{{ _('Upload New Avatar') }}" /> <a href="javascript:history.go(-1)">{{_("Go back")}}</a></p>
 	</form>
+</div>
 </div>
 {% end %}
 {% block scripts %}
