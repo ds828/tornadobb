@@ -19,6 +19,7 @@
 "Active","最新回帖"
 "Active email form","激活邮件来自"
 "active your account","激活你的帐号"
+"An active account email has alerady sent to ","激活邮件已经发送到"
 "Action","操作"
 "Admin menu","管理员菜单"
 "Add category","添加类别"
@@ -31,8 +32,8 @@
 "Agree the forum rule","同意论坛规则"
 "An avatar is a small image that will be displayed under your username in your posts. It must not be any bigger than 80 x 80 pixels and 20,480 bytes (20 KiB)",""
 "An email will be sent to your new address with an activation link. You must click the link in the email you receive to activate the new address",""
-"A new active email has already been sent to your email address",""
-"Please active your account before login",""
+
+"Please active your account before login","请在登录前，激活你的帐号"
 #B
 "Board statistics","统计面板"
 #C
@@ -76,7 +77,8 @@
 "Edit Moderators","编辑版主"
 "Edit a reply","编辑回复内容"
 "Email","电子邮件"
-"Enter your username and password below","输入你的用户名和密码"
+"Enter your username and password below","输入用户名和密码"
+"Enter your username and email below","输入用户名和邮件地址"
 "Enter and confirm a valid email address","输入和确认一个有效的邮件地址"
 "Enter an avatar file to upload","上传一个头像文件"
 "Enter your new email address","输入新的邮件地址"
@@ -87,6 +89,7 @@
 "Forum Name","论坛名称"
 "Forum administration","论坛描述"
 "Forgotten your password","忘记密码"
+"Find password","找回密码"
 "for message in messages",""
 "File","文件"
 "Fail to upload avatar image","不能上传头像文件"
@@ -163,7 +166,7 @@
 "Please accept our policy","请接受我们的条例"
 "Please relogin for reloading new avatar","请重新登录来重新加载新头像"
 "Please enter the same password as above","请输入与上面相同的密码"
-"Please provide a new password","请提供一个新密码"
+"Please enter a new password","请提供一个新密码"
 "Position must be one integer","位置必须是一个整数"
 "Please input something and submit","请输入再提交"
 
@@ -208,8 +211,11 @@
 "Show all posts","显示全部回帖"
 "Set your avatar display options","设置头像选项"
 "sticky","置顶"
+"Send active email","发送激活邮件"
+
 
 #T
+"This username has already been used","这个用户名已经被注册"
 "The following error(s) occurred","发生下面这些错误"
 "The following message(s)","请注意下面这些消息"
 "Topics","主题"
@@ -246,4 +252,6 @@
 "You must enter a valid email address as you have to active the account with the email we sent to that address","你必须输入一个邮箱的邮件地址，因为你要用它来激活你的帐号"
 "You must enter your existing password","你必须输入现在的密码"
 "Your current time zone","你当前的时区"
+"Your new password has already been sent to ","新密码已经发送到"
+
 #Z

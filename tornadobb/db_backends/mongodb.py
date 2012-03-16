@@ -1230,12 +1230,12 @@ class mongodb(backend_base):
 			logging.exception(e)
 			return False
 
-	def do_show_user_password_with_username_email(self,username,email):
+	def do_show_user_email_with_username_password(self,username,password):
 		
 		try:
-			user = self._database["user"].find_one({"name":username},fields=["password","email"])
-			if user and email == user["email"]:
-				return user["password"]
+			user = self._database["user"].find_one({"name":username,"password":password},fields=["email"])
+			if user:
+				return user["email"]
 			return None
 				
 		except OperationFailure as e:
@@ -1269,7 +1269,7 @@ class mongodb(backend_base):
 	def do_show_user_id_with_username_email(self,username,email):
 		
 		try:
-			user = self._database["user"].find_one({"name":username},fields=["password","email"])
+			user = self._database["user"].find_one({"name":username},fields=["email"])
 			if user and email == user["email"]:
 				return user["_id"]
 			return None
@@ -1277,3 +1277,17 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return None
+
+	def do_reset_user_password(self,user_id,password):
+		
+		try:
+			if type(user_id)is not ObjectId:
+				user_id = ObjectId(user_id)
+			
+			self._database["user"].update({"_id":user_id},{"$set":{"password":password}})
+			return True
+		except InvalidId:
+			return False
+		except OperationFailure as e:
+			logging.exception(e)
+			return False

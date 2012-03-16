@@ -22,6 +22,7 @@
 
 import unittest
 import logging
+import random
 try:
 	from pytz import common_timezones
 	from pytz import timezone
@@ -37,11 +38,9 @@ class CommonTest(unittest.TestCase):
 	
 	def test_pytz(self):
 		
-		prefix = "Asia"
-		print filter(lambda x:prefix in x,common_timezones)
+		print map(lambda x:x.upper(), ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'])
 		
-		for tz in common_timezones:
-			print tz
+		print "".join(random.sample(['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'], 5))
 		
 
 def main():

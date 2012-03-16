@@ -26,6 +26,8 @@ from base import *
 import datetime, time
 import hashlib
 import os
+import random
+import string
 from mypostmarkup import render_bbcode
 from settings import db_backend
 from pytz import common_timezones
@@ -487,7 +489,7 @@ class UserRegisterHandler(BaseHandler):
 		print self.request.arguments	
 		#check username
 		if not db_backend.do_check_user_name(self.get_argument('username',None)):
-			errors = ["This user name already exist"]
+			errors = ["This username has already been used"]
 			self.render("register.html",data=locals())
 		else:
 			
@@ -509,11 +511,11 @@ class UserRegisterHandler(BaseHandler):
 					
 			if db_backend.do_user_register(user):
 				send_verify_email(self,email,username,password)
-				messages = ["A new active email has already been sent to your email address","Please active your account before login"]
+				messages = ["A active email has already been sent to " + email,"Please active your account before login"]
 				self.render("register.html",data=locals())
 			else:
-				errors= ["Register Fail"]
-				self.render("register.html",data=locals())
+				self.write_error(500)
+				return
 
 class UserProfileHandler(BaseHandler):
 	@authenticated
@@ -814,15 +816,26 @@ class ResendVerifyMailHandler(BaseHandler):
 		
 	def post(self):
 		
+		self.render("resend_active_email.html",data=locals())
+		
+	def post(self):
+		
 		username = self.get_argument("username")
-		email_address = self.get_argument("email")
-		password = db_backend.do_show_user_password_with_username_email(username,email)
-		if password:
-			send_verify_email(self,email_address,username,password)
-			self.redirect(self.reverse_url("login_page"))
+		password = self.get_argument("password")
+		if username and password and email:
+			m = hashlib.md5()
+			m.update(password)
+			password = m.hexdigest().upper()
+			email = db_backend.do_show_user_email_with_username_password(username,password)
+			if email:
+				send_verify_email(self,email,username,password)
+				messages = ["An active account email has alerady sent to " + email]	
+			else:
+				errors = ["Wrong username or email address"]
+			self.render("resend_active_email.html",data=locals())
 		else:
-			errors = ["Wrong username or email address"]
-			self.render(self.request.path,data=locals())
+			self.write_error(404)
+			return
 
 class UserActiveHandler(BaseHandler):
 	
@@ -846,28 +859,49 @@ class TimezoneHandler(BaseHandler):
 			tz = filter(lambda x: x.startswith(area),common_timezones)
 			self.write({"tz":tz})
 			return
+
 class ForgetPasswordHandler(BaseHandler):
+
+	def get(self):
+		
+		self.render("forget_pwd.html",data=locals())
 	
 	def post(self):
 		username = self.get_argument("username",None)
 		email = self.get_argument("email",None)
 		if username and email:
-			user_id = db_backend.do_show_user_id_with_name(username)
-			if user_id
-				new_password = hash_password[:4]
-				db_backend.do_update_user_password(user_id,hash_password,new_password):
+			user_id = db_backend.do_show_user_id_with_username_email(username,email)
+			new_password = "".join(random.sample(['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'], 5))
+			m = hashlib.md5()
+			m.update(new_password)
+			hash_new_password = m.hexdigest().upper()
+			if user_id and db_backend.do_reset_user_password(user_id,hash_new_password):
+				send_forget_password_email(self,email,username,new_password)
+				messages = ["Your new password has already been sent to " + email]	
 			else:
 				errors = ["Wrong username or email"]
-				self.render("forget_pwd.html",data=locals())
+				
+			self.render("forget_pwd.html",data=locals())
+			
 		else:
 			self.write_error(404)
 			return	
 
+def send_forget_password_email(requests_handler,email_address,username,password):
+	
+	subject = "New password from " + request_handler.settings["tornadobb.forum_title"]
+	message = request_handler.render_string("forget_password_email.html",username=username,password=password)
+	body='_xsrf='+ request_handler.xsrf_token+'&receiver='+ email_address +'&subject='+ subject +'&message='+ message
+	http_client = AsyncHTTPClient()
+	request = request_handler.request
+	http_client.fetch(request.protocol + "://" + request.host + request_handler.settings["tornadobb.root_url"] + "/sendmail", None ,method ="POST", body=body , headers = request.headers)
 
-def send_verify_email(request_handler,email,username,password):
+
+def send_verify_email(request_handler,email_address,username,password):
 	subject = "Active account email from " + request_handler.settings["tornadobb.forum_title"]
 	message = request_handler.render_string("active_email.html",username=username,password=password)
 	body='_xsrf='+ request_handler.xsrf_token+'&receiver='+ email_address +'&subject='+ subject +'&message='+ message
 	http_client = AsyncHTTPClient()
 	request = request_handler.request
 	http_client.fetch(request.protocol + "://" + request.host + request_handler.settings["tornadobb.root_url"] + "/sendmail", None ,method ="POST", body=body , headers = request.headers)
+
