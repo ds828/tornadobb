@@ -1291,3 +1291,16 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False
+
+	def do_update_user_privacy(self,user_id,display_email):
+		try:
+			if type(user_id)is not ObjectId:
+				user_id = ObjectId(user_id)
+			
+			self._database["user"].update({"_id":user_id},{"$set":{"display_email":display_email}})
+			return True
+		except InvalidId:
+			return False
+		except OperationFailure as e:
+			logging.exception(e)
+			return False

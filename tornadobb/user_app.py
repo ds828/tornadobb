@@ -672,6 +672,26 @@ class UserDisplayHandler(BaseHandler):
 		else:
 			self.write_error(404)
 			return
+
+class UserPrivacyHandler(self):
+	@authenticated
+	def get(self):
+		
+		self.render("user_privacy.html",data=locals())
+		
+	@authenticated
+	def post(self):
+		display_email = self.get_argument("display_email",None)
+		if display_email:
+			if not db_backend.do_update_user_privacy(self.current_user["_id"],True):
+				self.write_error(500)
+				return
+		elif not db_backend.do_update_user_privacy(self.current_user["_id"],False):
+			self.write_error(500)
+			return
+		
+		self.redirect(self.request.path)
+		return
 				
 class UserTopicsHandler(BaseHandler):
 	@authenticated
@@ -887,8 +907,8 @@ class UserForgetPasswordHandler(BaseHandler):
 			
 		else:
 			self.write_error(404)
-			return	
-
+			return
+			
 def send_forget_password_email(request_handler,email_address,username,password):
 	
 	subject = tornado.escape.to_unicode("New password from" + request_handler.settings["tornadobb.forum_title"])
