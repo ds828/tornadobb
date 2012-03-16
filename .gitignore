@@ -1,1 +1,2 @@
 tornadobb/*.pyc
+tornadobb/db_backends/*.pyc
