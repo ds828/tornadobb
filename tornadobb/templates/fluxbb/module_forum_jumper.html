@@ -1,6 +1,6 @@
 {% set root_url = handler.settings["tornadobb.root_url"]  %}
-<form id="qjump" method="get" action="">
-	<div><label><span>{{_("Jump to")}}<br /></span>
+
+<div><label><span>{{_("Jump to")}}<br /></span>
 		<select name="id" onchange="window.location=(this.options[this.selectedIndex].value)">
 		<option value="#">---{{ _("Forum") }}---</option>
 		{% for category in handler.settings["tornadobb.category_forum"] %}
@@ -12,6 +12,5 @@
 			{% end %}
 		{% end %}
 		</select>
-		<input type="submit" value=" Go " accesskey="g" />
-	</label></div>
-</form>
+</label></div>
+

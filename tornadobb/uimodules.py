@@ -140,9 +140,11 @@ class Pagination(tornado.web.UIModule):
 			print begin
 			print end
 			if target == "topic":
-				return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_perv_space=False,show_next_space=False)
+				return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
+			elif target == "post":
+				return self.render_string("module_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
 			else:
-				return self.render_string("module_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_perv_space=False,show_next_space=False)
+				return self.render_string("module_user_topic_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
 
 		begin = pagination_obj.get("current_page_num")
 		
@@ -161,9 +163,9 @@ class Pagination(tornado.web.UIModule):
 			end = pages_num
 			
 		if begin <= pagination_pages_num:
-			show_perv_space = False
+			show_prev_space = False
 		else:
-			show_perv_space = True
+			show_prev_space = True
 		
 		if begin >= pages_num - pagination_pages_num - 1:
 			show_next_space = False
@@ -171,15 +173,17 @@ class Pagination(tornado.web.UIModule):
 			show_next_space = True
 		
 		if target == "topic":
-			return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_perv_space=False,show_next_space=False)
+			return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=show_prev_space,show_next_space=show_next_space)
+		elif target == "post":
+			return self.render_string("module_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=show_prev_space,show_next_space=show_next_space)
 		else:
-			return self.render_string("module_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_perv_space=False,show_next_space=False)
+			return self.render_string("module_user_topic_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=show_prev_space,show_next_space=show_next_space)
 
 class Topic_Detail_List(tornado.web.UIModule):
 	 
-	 def render(self,topics):
+	 def render(self,category_id,forum_id,topics):
 		 
-		return self.render_string("module_topic_detail_list.html", topics = topics)
+		return self.render_string("module_topic_detail_list.html", category_id = category_id,forum_id = forum_id, topics = topics)
 	
 class Post_Detail_List(tornado.web.UIModule):
 	 

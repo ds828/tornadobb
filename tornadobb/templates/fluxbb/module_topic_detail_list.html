@@ -10,6 +10,7 @@
 {% end %}
 {% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
 {% set items_per_page = handler.settings["tornadobb.posts_num_per_page"] %}
+{% set root_url = handler.settings["tornadobb.root_url"]%}
 {% for i,topic in enumerate(topics)%}
 {% set is_sticky = topic.get("sticky",False) %}
 <tr class="{% if i%2==0 %}rowodd{% else %}roweven{% end %} {% if is_sticky %}isticky{% end %}">
@@ -19,7 +20,7 @@
 			<div>
 				{% if is_sticky %}<span class="stickytext">Sticky:</span>{% end %}
 				{% if topic.get("closed",False) %}<span class="closedtext">({{ _("Closed") }})</span>{% end %}	
-				<a href="{{handler.request.path.replace('forum','topic')}}{{ topic['_id'] }}/" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
+				<a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
 				<span class="byuser">by {{ topic["creater_name"] }}</span>
 			</div>
 		</div>
@@ -31,6 +32,6 @@
 	{% else %}
 		{% set pages_num = topic.get('replies_num',0)/items_per_page + 1 %}
 	{% end %}
-	<td class="tcr"><a href="{{ handler.request.path.replace('forum','topic')}}{{ topic['_id'] }}/?p={{ pages_num }}">{{ datetime.datetime.fromtimestamp(topic["create_time"] ,timezone_obj ).strftime(datetime_format) }}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
+	<td class="tcr"><a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?p={{ pages_num }}">{{ datetime.datetime.fromtimestamp(topic["create_time"] ,timezone_obj ).strftime(datetime_format) }}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
 </tr>
 {% end %}

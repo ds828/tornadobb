@@ -27,7 +27,6 @@ import datetime, time
 import hashlib
 import os
 import random
-import string
 from mypostmarkup import render_bbcode
 from settings import db_backend
 from pytz import common_timezones
@@ -160,7 +159,7 @@ class TopicHandler(BaseHandler):
 		# get current user whether alreay reply this topic boolean
 		hide_content = topic_obj.get("need_reply",False)
 		hide_attach = topic_obj.get("need_reply_for_attach",False)
-		current_user = self.current_user
+		#current_user = self.current_user
 		#TODO: HOW can current user get replies
 		if "_id" in self.current_user and self.current_user and db_backend.do_check_already_reply(forum_id,topic_id,self.current_user["_id"]):
 			hide_content = False
@@ -695,140 +694,60 @@ class UserPrivacyHandler(BaseHandler):
 class UserTopicsHandler(BaseHandler):
 	@authenticated
 	def get(self):
-		user = {
-				"_id":"1234",
-				"name":"disong",
-				#"avatar":"songdi.jpg",
-				}
-		pagination_obj = {
-					"has_previous": True,
-					"has_next": True,
-					"prev_page_num":2,
-					"current_page_num":3,
-					"next_page_num":4,
-					"pages_num":100
-		}
 		
-		topic_1 = {
-				"_id":1234,
-				"subject":"Hello tornado BBS",
-				"topic_type":"text",
-				"high_light":["red"],
-				"sticky":True,
-				"closed":False,
-				"hidden":False,
-				"distillate_level":10,
-				"manual_distillate":False,
-				"created_on":datetime.datetime.today().strftime(" %Y-%m-%d %H:%M "),
-				"created_by":"DiSONG",
-				"replies_num":100,
-				"views_num":200,
-				"last_posted_on":datetime.datetime.today().strftime(" %Y-%m-%d %H:%M "),
-				"last_posted_by":"DiSONG",
-				"total_num" : 100,
-				"posts":[]
-		}
+		if "id" in self.request.arguments:
+			category_forum_id = self.get_argument("id",None)
+			category_id_and_forum_id = category_forum_id.split("/")
+			category_id = category_id_and_forum_id[0]
+			forum_id = category_id_and_forum_id[1]
+			jump_to_page_no = 1
+			pages_num = None
+			total_items_num = None
+			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
+			topics = db_backend.do_show_user_topics(self.current_user["_id"],forum_id,jump_to_page_no,topics_num_per_page)
+			#print topics
+			pagination_obj = db_backend.do_create_user_topics_pagination(self.current_user["_id"],category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 		
-		topic_2 = {
-				"_id":2222,
-				"subject":"This is the first post on tornado BBS",
-				"topic_type":"text",
-				"high_light":["red"],
-				"sticky":True,
-				"closed":True,
-				"hidden":False,
-				"distillate_level":10,
-				"manual_distillate":True,
-				"created_on":datetime.datetime.today().strftime(" %Y-%m-%d %H:%M "),
-				"created_by":"DiSONG",
-				"replies_num":100,
-				"views_num":200,
-				"last_posted_on":datetime.datetime.today().strftime(" %Y-%m-%d %H:%M "),
-				"last_posted_by":"DiSONG",
-				"total_num" : 100,
-				"posts":[]
-		}
-		
-		forum_obj = {
-					 "category_name":"Pictures",
-					 "forum_name":"Asian Girls",
-					 "topic_filter" : "all", #"all" , "distillate"
-					 "total_num" : 100,
-					 "current_page_num" : 2,
-					 "topics" : [topic_1,topic_2], #topic object
-					 "sticky_topics" : [topic_1],# topic object
-					 
-					}
+		elif "c_id" in self.request.arguments:
+			category_id = self.get_argument("c_id")
+			forum_id = self.get_argument("f_id")
+			jump_to_page_no = int(self.get_argument("p",1))# jump to page
+			pages_num = self.get_argument("a",None) #total page count
+			total_items_num = self.get_argument("i",None) #total item count
+			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
+			topics = db_backend.do_show_user_topics(self.current_user["_id"],forum_id,jump_to_page_no,topics_num_per_page)
+			pagination_obj = db_backend.do_create_user_topics_pagination(self.current_user["_id"],category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+			
 		self.render("user_topics.html",data=locals())
 		
-class UserPostsHandler(BaseHandler):
+class UserRepliesHandler(BaseHandler):
 	@authenticated
 	def get(self):
-		user = {
-				"_id":"1234",
-				"name":"disong",
-				#"avatar":"songdi.jpg",
-				}
-		pagination_obj = {
-					"has_previous": True,
-					"has_next": True,
-					"prev_page_num":2,
-					"current_page_num":3,
-					"next_page_num":4,
-					"pages_num":100
-		}
 		
-		topic_1 = {
-				"_id":1234,
-				"subject":"Hello tornado BBS",
-				"topic_type":"text",
-				"high_light":["red"],
-				"sticky":True,
-				"closed":False,
-				"hidden":False,
-				"distillate_level":10,
-				"manual_distillate":False,
-				"created_on":datetime.datetime.today().strftime(" %Y-%m-%d %H:%M "),
-				"created_by":"DiSONG",
-				"replies_num":100,
-				"views_num":200,
-				"last_posted_on":datetime.datetime.today().strftime(" %Y-%m-%d %H:%M "),
-				"last_posted_by":"DiSONG",
-				"total_num" : 100,
-				"posts":[]
-		}
+		if "id" in self.request.arguments:
+			category_forum_id = self.get_argument("id",None)
+			category_id_and_forum_id = category_forum_id.split("/")
+			category_id = category_id_and_forum_id[0]
+			forum_id = category_id_and_forum_id[1]
+			jump_to_page_no = 1
+			pages_num = None
+			total_items_num = None
+			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
+			topics = db_backend.do_show_user_replies(self.current_user["_id"],forum_id,jump_to_page_no,topics_num_per_page)
+			#print topics
+			pagination_obj = db_backend.do_create_user_replies_pagination(self.current_user["_id"],category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 		
-		topic_2 = {
-				"_id":2222,
-				"subject":"This is the first post on tornado BBS",
-				"topic_type":"text",
-				"high_light":["red"],
-				"sticky":True,
-				"closed":True,
-				"hidden":False,
-				"distillate_level":10,
-				"manual_distillate":True,
-				"created_on":datetime.datetime.today().strftime(" %Y-%m-%d %H:%M "),
-				"created_by":"DiSONG",
-				"replies_num":100,
-				"views_num":200,
-				"last_posted_on":datetime.datetime.today().strftime(" %Y-%m-%d %H:%M "),
-				"last_posted_by":"DiSONG",
-				"total_num" : 100,
-				"posts":[]
-		}
-		
-		forum_obj = {
-					 "category_name":"Pictures",
-					 "forum_name":"Asian Girls",
-					 "topic_filter" : "all", #"all" , "distillate"
-					 "total_num" : 100,
-					 "current_page_num" : 2,
-					 "topics" : [topic_1,topic_2], #topic object
-					 "sticky_topics" : [topic_1],# topic object
-					 
-					}
-		self.render("user_posts.html",data=locals())
+		elif "c_id" in self.request.arguments:
+			category_id = self.get_argument("c_id")
+			forum_id = self.get_argument("f_id")
+			jump_to_page_no = int(self.get_argument("p",1))# jump to page
+			pages_num = self.get_argument("a",None) #total page count
+			total_items_num = self.get_argument("i",None) #total item count
+			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
+			topics = db_backend.do_show_user_replies(self.current_user["_id"],forum_id,jump_to_page_no,topics_num_per_page)
+			pagination_obj = db_backend.do_create_user_replies_pagination(self.current_user["_id"],category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+			
+		self.render("user_replies.html",data=locals())
 				
 class ResendVerifyMailHandler(BaseHandler):
 		
@@ -907,7 +826,7 @@ class UserForgetPasswordHandler(BaseHandler):
 		else:
 			self.write_error(404)
 			return
-			
+
 def send_forget_password_email(request_handler,email_address,username,password):
 	
 	subject = tornado.escape.to_unicode("New password from" + request_handler.settings["tornadobb.forum_title"])

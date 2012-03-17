@@ -1,0 +1,61 @@
+{% extends "single_block_base.html" %}
+{% block title %}{{_("My replies")}} - {{ tornadobb_settings.get('tornadobb.forum_title','TornadoBB Forum') }}{% end %}
+{% block single_block %}
+<div>
+	<label><span>{{_("Forum")}}<br /></span>
+		<select name="id" onchange="window.location=('?id=' + this.options[this.selectedIndex].value)">
+			<option value="#">---{{ _("Forum") }}---</option>
+			{% for category in handler.settings["tornadobb.category_forum"] %}
+				<optgroup label="{{ category['name'] }}">
+				{% for forum in category.get("forum",[])%}
+					{% if not forum.get("closed",False) %}
+						{% if "forum_id" in data and data["forum_id"] == forum['_id'] %}
+						{% set forum_name = forum["name"] %}
+						<option value="{{category['_id']}}/{{ forum['_id'] }}" selected>{{ forum_name }}</option>
+						{% else%}
+						<option value="{{category['_id']}}/{{ forum['_id'] }}">{{ forum["name"] }}</option>
+						{% end %}
+					{% end %}
+				{% end %}
+			{% end %}
+		</select>
+	</label>
+</div>
+<br />
+{% if data.get("topics",None) %}
+	<h2><span>{{_("My replies")}} »&#160;{{_(forum_name)}}</span></h2>
+	<div class="linkst">
+		<div class="inbox crumbsplus">
+			<div class="pagepost">
+			{% module Pagination(data["pagination_obj"],"user") %}
+			</div>
+		</div>
+	</div>
+	<div id="vf" class="blocktable">
+		<div class="box">
+			<div class="inbox">
+				<table cellspacing="0">
+				<thead>
+					<tr>
+						<th class="tcl" scope="col">{{ _("Topic") }}</th>
+						<th class="tc2" scope="col">{{ _("Replies") }}</th>
+						<th class="tc3" scope="col">{{ _("Views") }}</th>
+						<th class="tcr" scope="col">{{ _("Last post") }}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% module Topic_Detail_List(data["category_id"],data["forum_id"],data["topics"]) %}
+				</tbody>
+				</table>
+			</div>
+		</div>	
+	</div>	
+	<div class="postlinksb">
+		<div class="inbox crumbsplus">
+			<div class="pagepost">
+			{% module Pagination(data["pagination_obj"],"post") %}
+			</div>
+		</div>
+	</div>
+{% end %}
+{% end %}						

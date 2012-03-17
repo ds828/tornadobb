@@ -71,7 +71,7 @@
 					<div class="infldset">
 						<p>{{_("Registered")}}: {{ datetime.datetime.fromtimestamp(user["registered_time"], timezone_obj).strftime(datetime_format) }}</p>
 						<p>{{_("Last visit")}}: {{ datetime.datetime.fromtimestamp(user["last_access"], timezone_obj).strftime(datetime_format) }}</p>
-						<p class="actions">{{_("Posts")}}: {{ user.get("topics_num",0) + user.get("replies_num",0) }} - <a href="{{ root_url }}/profile/topics">{{_("Show all topics")}}</a> - <a href="{{ root_url }}/profile/posts">{{_("Show all posts")}}</a></p>
+						<p class="actions">{{_("Posts")}}: {{ user.get("topics_num",0) + user.get("replies_num",0) }} - <a href="{{ root_url }}/profile/topics">{{_("Show all topics")}}</a> - <a href="{{ root_url }}/profile/replies">{{_("Show all replies")}}</a></p>
 					</div>
 				</fieldset>
 			</div>

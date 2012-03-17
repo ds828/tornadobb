@@ -760,10 +760,13 @@ class mongodb(backend_base):
 				query = {"hidden":False}
 			
 			topics_num = self._database[forum_id].find(query,fields=["_id"]).count()
-			if topics_num % items_num_per_page == 0:
-				pages_num = topics_num/items_num_per_page
+			
+			quotient,remainder = divmod(topics_num,items_num_per_page)
+			if remainder == 0:
+				pages_num = quotient
 			else:
-				pages_num = topics_num/items_num_per_page + 1
+				pages_num = quotient + 1
+
 		else:
 			pages_num = int(pages_num)
 
@@ -780,7 +783,7 @@ class mongodb(backend_base):
 						}
 		return pagination_obj
 	
-	def do_create_post_pagination(self,forum_id,topic_id,current_page_no,items_num_per_page,pages_num,posts_num):
+	def do_create_post_pagination(self,forum_id,topic_id,current_page_no,items_num_per_page,pages_num,total_items_num):
 		
 		if not pages_num:
 			
@@ -792,11 +795,13 @@ class mongodb(backend_base):
 			
 			topic = self._database[forum_id].find_one({"_id":topic_id},fields=["posts"])
 			if topic:
-				posts_num = len(topic["posts"])
-				if posts_num % items_num_per_page == 0:
-					pages_num = posts_num/items_num_per_page
+				
+				total_items_num = len(topic.get("posts",[]))
+				quotient,remainder = divmod(total_items_num,items_num_per_page)
+				if remainder == 0:
+					pages_num = quotient
 				else:
-					pages_num = posts_num/items_num_per_page + 1
+					pages_num = quotient + 1
 			else:
 				return None
 		else:
@@ -807,9 +812,78 @@ class mongodb(backend_base):
 							"has_next": current_page_no < pages_num,
 							"pages_num": pages_num,
 							"current_page_num":current_page_no,
-							"total_items_num":posts_num,
+							"total_items_num":total_items_num,
 						}
 		return pagination_obj
+		
+	def do_create_user_topics_pagination(self,user_id,category_id,forum_id,current_page_no,items_num_per_page,pages_num,total_items_num):
+		
+		if not pages_num:
+			
+			try:
+				if type(user_id)is not ObjectId:
+					user_id = ObjectId(user_id)
+			except InvalidId,e:
+				return None
+			
+			user = self._database["user"].find_one({"_id":user_id},fields=["topic_" + forum_id])
+			if user:
+				total_items_num = len(user.get("topic_" + forum_id,[]))
+				quotient,remainder = divmod(total_items_num,items_num_per_page)
+				if remainder == 0:
+					pages_num = quotient
+				else:
+					pages_num = quotient + 1
+			else:
+				return None
+		else:
+			pages_num = int(pages_num)
+
+		pagination_obj = {
+							"category_id" : category_id, 
+							"forum_id" : forum_id,
+							"has_previous": current_page_no > 1,
+							"has_next": current_page_no < pages_num,
+							"pages_num": pages_num,
+							"current_page_num":current_page_no,
+							"total_items_num":total_items_num,
+						}
+		return pagination_obj
+		
+	def do_create_user_replies_pagination(self,user_id,category_id,forum_id,current_page_no,items_num_per_page,pages_num,total_items_num):
+		
+		if not pages_num:
+			
+			try:
+				if type(user_id)is not ObjectId:
+					user_id = ObjectId(user_id)
+			except InvalidId,e:
+				return None
+			
+			user = self._database["user"].find_one({"_id":user_id},fields=["reply_" + forum_id])
+			if user:
+				
+				total_items_num = len(user.get("reply_" + forum_id,[]))
+				quotient,remainder = divmod(total_items_num,items_num_per_page)
+				if remainder == 0:
+					pages_num = quotient
+				else:
+					pages_num = quotient + 1
+			else:
+				return None
+		else:
+			pages_num = int(pages_num)
+
+		pagination_obj = {
+							"category_id" : category_id, 
+							"forum_id" : forum_id,
+							"has_previous": current_page_no > 1,
+							"has_next": current_page_no < pages_num,
+							"pages_num": pages_num,
+							"current_page_num":current_page_no,
+							"total_items_num":total_items_num,
+						}
+		return pagination_obj		
 		
 	def do_show_topic_posts(self,forum_id,topic_id,current_page_no,items_num_per_page,expire_time):
 
@@ -821,7 +895,7 @@ class mongodb(backend_base):
 	
 		begin = (current_page_no - 1) * items_num_per_page
 		
-		topic = self._database[forum_id].find_one({"_id":topic_id},fields={"posts":{"$slice": [begin, items_num_per_page]}})
+		topic = self._database[forum_id].find_one({"_id":topic_id},fields={"subject":1,"posts":{"$slice": [begin, items_num_per_page]}})
 
 		posts = topic["posts"]		
 		user_list = list(set([post["poster_id"] for post in posts]))
@@ -1321,3 +1395,42 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False
+
+	def do_show_user_topics(self,user_id,forum_id,current_page_no,items_num_per_page):
+		
+		try:
+			if type(user_id)is not ObjectId:
+				user_id = ObjectId(user_id)
+			field = "topic_" + forum_id
+			begin = (current_page_no - 1) * items_num_per_page
+			user = self._database["user"].find_one({"_id":user_id},fields={"_id":1,field:{"$slice": [begin, items_num_per_page]}})
+			if user and field in user:
+				topics_id = user[field]
+				return list(self._database[forum_id].find({"_id":{"$in":topics_id}}))
+			else:
+				return None
+		except InvalidId:
+			return None
+		except OperationFailure as e:
+			logging.exception(e)
+			return None
+
+	def do_show_user_replies(self,user_id,forum_id,current_page_no,items_num_per_page):
+		
+		try:
+			if type(user_id)is not ObjectId:
+				user_id = ObjectId(user_id)
+			field = "reply_" + forum_id
+			begin = (current_page_no - 1) * items_num_per_page
+			user = self._database["user"].find_one({"_id":user_id},fields={"_id":1,field:{"$slice": [begin, items_num_per_page]}})
+
+			if user and field in user:
+				topics_id = user[field]
+				return list(self._database[forum_id].find({"_id":{"$in":topics_id}}))
+			else:
+				return None
+		except InvalidId:
+			return None
+		except OperationFailure as e:
+			logging.exception(e)
+			return None

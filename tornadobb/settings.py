@@ -367,7 +367,7 @@ tornadobb_handlers = [
 		    (TORNADOBB_ROOT_URL + "/profile/personality$", UserSignatureHandler),
 		    (TORNADOBB_ROOT_URL + "/profile/display$", UserDisplayHandler),
 			(TORNADOBB_ROOT_URL + "/profile/topics$", UserTopicsHandler),
-			(TORNADOBB_ROOT_URL + "/profile/posts$", UserPostsHandler),
+			(TORNADOBB_ROOT_URL + "/profile/replies$", UserRepliesHandler),
 			(TORNADOBB_ROOT_URL + "/profile/pwd$", UserPasswordHandler),
 			(TORNADOBB_ROOT_URL + "/profile/email$", UserEmailHandler),
 			(TORNADOBB_ROOT_URL + "/profile/privacy$", UserPrivacyHandler),

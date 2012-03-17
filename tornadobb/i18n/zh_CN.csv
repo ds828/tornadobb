@@ -130,6 +130,8 @@
 "Max length","最大长度"
 "Max lines","最大行数"
 "move_topic","移动主题"
+"My topics","我的主题"
+"My replies","我的回帖"
 #N
 "Name","名字"
 "New","新的主题"
@@ -209,7 +211,7 @@
 "Set your localisation options","设置你的时区"
 "Set your privacy options","设置你的隐私选项"
 "Show all topics","显示全部主题"
-"Show all posts","显示全部回帖"
+"Show all replies","显示全部回帖"
 "Set your avatar display options","设置头像选项"
 "sticky","置顶"
 "Send active email","发送激活邮件"

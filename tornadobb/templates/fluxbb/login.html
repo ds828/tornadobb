@@ -8,7 +8,7 @@
 <div class="blockform">
 	<h2><span>{{_("Login")}}</span></h2>
 	<div class="box">
-		<form id="login-form" method="post" action="">
+		<form id="login-form" method="post" action="login">
 			<div class="inform">
 				<fieldset>
 					<legend>{{_("Enter your username and password below")}}</legend>
@@ -20,7 +20,7 @@
 							<label><input type="checkbox" name="save_pass" value="1" tabindex="3" />{{_("Log me in automatically each time I visit")}}.<br /></label>
 						</div>
 						<p class="clearb">{{_("If you have not registered or have forgotten your password click on the appropriate link below")}}.</p>
-						<p class="actions"><span><a href="register" tabindex="5">{{_("Not registered yet")}}?</a></span> <span><a href="forget" tabindex="6">{{_("Forgotten your password")}}?</a></span><span>{% if data.get("response","ok") == "not_verify"%}<a href="sendmail"  tabindex="7">{{_("Resend active email")}}</a>{% end %}</span></p>
+						<p class="actions"><span><a href="register" tabindex="5">{{_("Not registered yet")}}?</a></span> <span><a href="forget" tabindex="6">{{_("Forgotten your password")}}?</a></span><span>{% if data.get("response","ok") == "not_verify"%}<a href="resend"  tabindex="7">{{_("Resend active email")}}</a>{% end %}</span></p>
 					</div>
 				</fieldset>
 			</div>
