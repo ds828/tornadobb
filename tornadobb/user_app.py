@@ -71,7 +71,7 @@ class ForumHandler(BaseHandler):
 		permission = kwargs.get("permission",[])
 		
 		filter_view = self.get_argument("f","all")#filter
-		if filter_view == "hide" and "hide_topic" not in permssion:
+		if filter_view == "hide" and "hide_topic" not in permission:
 			self.write_error(403)
 			return
 
@@ -150,10 +150,15 @@ class TopicHandler(BaseHandler):
 		posts_num_per_page = self.settings["tornadobb.posts_num_per_page"]
 		expire_time = time.time() - self.settings["tornadobb.session_expire"]
 		topic_obj  = db_backend.do_show_topic_posts(forum_id,topic_id,jump_to_page_no,posts_num_per_page,expire_time)
-			
+
 		if not topic_obj:
 			self.write_error(500)
 			return
+		
+		print '----------------------- %d' % jump_to_page_no
+		if jump_to_page_no == 1:
+			print 'views number + 1'
+			db_backend.do_add_topic_views_num(forum_id,topic_id)	
 		#print topic_obj
 		pagination_obj = db_backend.do_create_post_pagination(forum_id,topic_id,jump_to_page_no,posts_num_per_page,pages_num,total_items_num)
 		# get current user whether alreay reply this topic boolean
@@ -387,6 +392,24 @@ class QuoteHandler(BaseHandler):
 		else:
 			self.write_error(500)
 
+class SearchHandler(BaseHandler):
+	
+	def get(self):
+		return self.render("search.html",data={})
+	
+	def post(self):
+		
+		search_field = self.get_argument("search_field",None)
+		if search_field:
+			category_forum_id = self.get_argument("id",None)
+			category_id_and_forum_id = category_forum_id.split("/")
+			category_id = category_id_and_forum_id[0]
+			forum_id = category_id_and_forum_id[1]
+			topics = db_backend.do_search_topic_name(forum_id,search_field)
+			return self.render("search.html",data=locals())
+		else:
+			self.redirect(self.reverse_url("search_page"))
+	
 class MarkitupPreviewHandler(BaseHandler):
 	
 	@authenticated

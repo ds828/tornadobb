@@ -1406,7 +1406,7 @@ class mongodb(backend_base):
 			user = self._database["user"].find_one({"_id":user_id},fields={"_id":1,field:{"$slice": [begin, items_num_per_page]}})
 			if user and field in user:
 				topics_id = user[field]
-				return list(self._database[forum_id].find({"_id":{"$in":topics_id}}))
+				return list(self._database[forum_id].find({"_id":{"$in":topics_id}},fields={"posts":0}))
 			else:
 				return None
 		except InvalidId:
@@ -1426,7 +1426,7 @@ class mongodb(backend_base):
 
 			if user and field in user:
 				topics_id = user[field]
-				return list(self._database[forum_id].find({"_id":{"$in":topics_id}}))
+				return list(self._database[forum_id].find({"_id":{"$in":topics_id}},fields={"posts":0}))
 			else:
 				return None
 		except InvalidId:
@@ -1434,3 +1434,22 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return None
+
+	def do_search_topic_name(self,forum_id,search_field):
+		
+		return list(self._database[forum_id].find({"subject":{"$regex":r".*%s.*" % search_field}},fields={"posts":0}))
+		
+		
+	def do_add_topic_views_num(self,forum_id,topic_id):
+		
+		try:
+			if type(topic_id)is not ObjectId:
+				topic_id = ObjectId(topic_id)
+			
+			self._database[forum_id].update({"_id":topic_id},{"$inc":{"views_num":1}})
+			return True
+		except InvalidId:
+			return False
+		except OperationFailure as e:
+			logging.exception(e)
+			return False

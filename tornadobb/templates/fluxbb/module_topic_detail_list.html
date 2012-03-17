@@ -32,6 +32,6 @@
 	{% else %}
 		{% set pages_num = topic.get('replies_num',0)/items_per_page + 1 %}
 	{% end %}
-	<td class="tcr"><a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?p={{ pages_num }}">{{ datetime.datetime.fromtimestamp(topic["create_time"] ,timezone_obj ).strftime(datetime_format) }}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
+	<td class="tcr"><a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?p={{ pages_num }}">{{ datetime.datetime.fromtimestamp(topic["last_post_time"] ,timezone_obj ).strftime(datetime_format) }}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
 </tr>
 {% end %}

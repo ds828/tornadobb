@@ -1,4 +1,4 @@
-{% if permission %}
+
 	{% if "sticky" in permission %}
 		| <a href="cmd?c=sticky" onclick='return confirm("{{ _('Do you want to make it sticky') }}?")'>
 			{% if topic.get("sticky",False) %} {{ _("unsticky") }} {% else %} {{ _("sticky") }} {% end %}</a>
@@ -49,6 +49,3 @@
 				</optgroup>
 			</select>
 	{% end %}
-{% end %}
-
-

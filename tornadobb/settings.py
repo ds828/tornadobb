@@ -347,6 +347,7 @@ tornadobb_handlers = [
 			(TORNADOBB_ROOT_URL + "/mp$", MarkitupPreviewHandler),
 			(TORNADOBB_ROOT_URL + "/sendmail$", SendEmailHandler),
 			(TORNADOBB_ROOT_URL + "/tz$", TimezoneHandler),
+			url(TORNADOBB_ROOT_URL + "/search$", SearchHandler,name="search_page"),
 			url(TORNADOBB_ROOT_URL, MainHandler,name="home_page"),
 			(TORNADOBB_ROOT_URL + "/forum/[a-z0-9]+/[a-z0-9]+/new$", PostNewTopicHandler),#post new topic
 		    (TORNADOBB_ROOT_URL + "/forum/[a-z0-9]+/[a-z0-9]+/$", ForumHandler),

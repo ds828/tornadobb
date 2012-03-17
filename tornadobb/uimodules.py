@@ -91,7 +91,6 @@ class Forum_Crumbs(tornado.web.UIModule):
 			url_list.append(topic_url)
 			title_list.append(topic_name)
 			
-			
 		print url_list
 		print title_list
 		return self.render_string("module_forum_crumbs.html", title_list = title_list,url_list = url_list)

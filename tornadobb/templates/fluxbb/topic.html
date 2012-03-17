@@ -19,11 +19,15 @@
 							<div class="inbox crumbsplus">
 								{% module Forum_Crumbs(topic["subject"]) %}
 								<div class="pagepost">
-								{% module Pagination(data["pagination_obj"],"post") %}
-								<p style="margin-left:45%">
-								{% include "inc_moderator_control_pad.html" %}
-								{% module NewPost() %}
-								</p>
+									{% module Pagination(data["pagination_obj"],"post") %}
+									{% if permission %}
+										<p style="margin-left:45%">
+										{% include "inc_moderator_control_pad.html" %}
+										{% module NewPost() %}
+										</p>
+									{% else %}
+										<p  style="margin-left:90%">{% module NewPost() %}</p>
+									{% end %}
 								</div>
 								<div class="clearer"></div>
 							</div>
@@ -35,10 +39,14 @@
 							<div class="inbox crumbsplus">
 								<div class="pagepost">
 								{% module Pagination(data["pagination_obj"],"post") %}
-								<p style="margin-left:45%">
-								{% include "inc_moderator_control_pad.html" %}
-								{% module NewPost() %}
-								</p>
+								{% if permission %}
+									<p style="margin-left:45%">
+									{% include "inc_moderator_control_pad.html" %}
+									{% module NewPost() %}
+									</p>
+								{% else %}
+									<p  style="margin-left:90%">{% module NewPost() %}</p>
+								{% end %}
 								</div>
 								{% module Forum_Crumbs(topic["subject"]) %}
 								<div class="clearer"></div>
