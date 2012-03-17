@@ -29,11 +29,8 @@ import logging
 __all__ = [	"tornadobb_handlers",
 			"tornadobb_settings",
 			#"db_backend",
-<<<<<<< HEAD
 			]
-=======
-		]
->>>>>>> privacy
+
 ###########################################
 #
 #	You can change below
@@ -53,11 +50,7 @@ TORNADOBB_ROOT_URL = r"/tornadobb"	#required
 TORNADOBB_ADMIN_URL = r"/admin"	#required
 TORNADOBB_FIRST_ADMIN_NAME="admin"	#required
 TORNADOBB_FIRST_ADMIN_PASSWORD="admin"	#required
-<<<<<<< HEAD
 TORNADOBB_FIRST_ADMIN_EMAIL="songdi19@gmail.com"	#required
-=======
-TORNADOBB_FIRST_ADMIN_EMAIL="admin@tornadobb.com"	#required
->>>>>>> privacy
 TORNADOBB_SESSION_EXPIRE = 30 #mins
 TORNADOBB_TIME_ZONE="Australia/Sydney"
 #TORNADOBB_TIME_ZONE="Asia/Shanghai"

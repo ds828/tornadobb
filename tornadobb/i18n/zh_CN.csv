@@ -49,6 +49,7 @@
 "Confirm new password","确认新的密码"
 "Compose your signature","编写你的签名"
 "close_topic","关闭主题"
+"characters","字符"
 #D
 "Dashboard","控制面板"
 "Database","数据库"
@@ -137,6 +138,7 @@
 "Not registered yet","还有没注册"
 "New password","新的密码"
 "Next","后一页"
+"No signature currently stored in profile","当前配置信息中没有头像"
 #O
 "Operating system","操作系统"
 "open","打开"

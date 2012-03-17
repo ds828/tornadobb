@@ -523,8 +523,6 @@ class UserProfileHandler(BaseHandler):
 
 		user = db_backend.do_show_user_info(self.current_user["_id"])
 		if user:
-		#view_only = False
-			errors = ["test errors"]
 			self.render("user_essentials.html",data=locals())
 		else:
 			self.write_error(404)
