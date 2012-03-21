@@ -180,6 +180,27 @@ class mongodb(backend_base):
 		
 		return self._database["user"].find_one({"name":name},fields=["_id"])
 		
+	def do_show_user_info_with_id(self,user_id):
+		
+		try:
+			if type(user_id) is not ObjectId:
+				user_id = ObjectId(user_id)
+		except InvalidId,e:
+			return None
+		
+		fields = [
+					"name",
+					"email",
+					"registered_time",
+					"last_access",
+					"topics_num",
+					"replies_num",
+					"display_email",
+					"role",
+					"avatar",
+				]
+		return self._database["user"].find_one({"_id":user_id},fields=fields)
+		
 	def do_show_user_info_with_name(self,name):
 		
 		fields = [

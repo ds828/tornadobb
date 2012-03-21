@@ -1,9 +1,9 @@
 {% extends "single_block_base.html" %}
-{% block title %}{{_("My replies")}} - {{ tornadobb_settings.get('tornadobb.forum_title','TornadoBB Forum') }}{% end %}
+{% block title %}{{_("Posted replies")}} - {{ tornadobb_settings.get('tornadobb.forum_title','TornadoBB Forum') }}{% end %}
 {% block single_block %}
 <div>
 	<label><span>{{_("Forum")}}<br /></span>
-		<select name="id" onchange="window.location=('?id=' + this.options[this.selectedIndex].value)">
+		<select name="id" onchange="window.location=('?uid={{ data['user_id'] }}&id=' + this.options[this.selectedIndex].value)">
 			<option value="#">---{{ _("Forum") }}---</option>
 			{% for category in handler.settings["tornadobb.category_forum"] %}
 				<optgroup label="{{ category['name'] }}">
@@ -23,7 +23,7 @@
 </div>
 <br />
 {% if data.get("topics",None) %}
-	<h2><span>{{_("My replies")}} »&#160;{{_(forum_name)}}</span></h2>
+	<h2><span>{{_("Posted replies")}} »&#160;{{_(forum_name)}}</span></h2>
 	<div class="linkst">
 		<div class="inbox crumbsplus">
 			<div class="pagepost">

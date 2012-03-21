@@ -23,14 +23,14 @@
 import tornado.web
 from tornado.httpclient import *
 from base import *
-import datetime, time
-import hashlib
-import os
-import random
 from mypostmarkup import render_bbcode
 from settings import db_backend
 from pytz import common_timezones
 from util import *
+import datetime, time
+import hashlib
+import os
+import random
 
 class MainHandler(BaseHandler):
 	
@@ -718,6 +718,11 @@ class UserTopicsHandler(BaseHandler):
 	@authenticated
 	def get(self):
 		
+		user_id = self.get_argument("uid",None)
+		if not user_id:
+			self.write_error(404)
+			return
+		
 		if "id" in self.request.arguments:
 			category_forum_id = self.get_argument("id",None)
 			category_id_and_forum_id = category_forum_id.split("/")
@@ -727,9 +732,9 @@ class UserTopicsHandler(BaseHandler):
 			pages_num = None
 			total_items_num = None
 			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_topics(self.current_user["_id"],forum_id,jump_to_page_no,topics_num_per_page)
+			topics = db_backend.do_show_user_topics(user_id,forum_id,jump_to_page_no,topics_num_per_page)
 			#print topics
-			pagination_obj = db_backend.do_create_user_topics_pagination(self.current_user["_id"],category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+			pagination_obj = db_backend.do_create_user_topics_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 		
 		elif "c_id" in self.request.arguments:
 			category_id = self.get_argument("c_id")
@@ -738,8 +743,8 @@ class UserTopicsHandler(BaseHandler):
 			pages_num = self.get_argument("a",None) #total page count
 			total_items_num = self.get_argument("i",None) #total item count
 			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_topics(self.current_user["_id"],forum_id,jump_to_page_no,topics_num_per_page)
-			pagination_obj = db_backend.do_create_user_topics_pagination(self.current_user["_id"],category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+			topics = db_backend.do_show_user_topics(user_idforum_id,jump_to_page_no,topics_num_per_page)
+			pagination_obj = db_backend.do_create_user_topics_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 			
 		self.render("user_topics.html",data=locals())
 		
@@ -747,6 +752,11 @@ class UserRepliesHandler(BaseHandler):
 	@authenticated
 	def get(self):
 		
+		user_id = self.get_argument("uid",None)
+		if not user_id:
+			self.write_error(404)
+			return
+		
 		if "id" in self.request.arguments:
 			category_forum_id = self.get_argument("id",None)
 			category_id_and_forum_id = category_forum_id.split("/")
@@ -756,9 +766,9 @@ class UserRepliesHandler(BaseHandler):
 			pages_num = None
 			total_items_num = None
 			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_replies(self.current_user["_id"],forum_id,jump_to_page_no,topics_num_per_page)
+			topics = db_backend.do_show_user_replies(user_id ,forum_id,jump_to_page_no,topics_num_per_page)
 			#print topics
-			pagination_obj = db_backend.do_create_user_replies_pagination(self.current_user["_id"],category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+			pagination_obj = db_backend.do_create_user_replies_pagination(user_id ,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 		
 		elif "c_id" in self.request.arguments:
 			category_id = self.get_argument("c_id")
@@ -767,8 +777,8 @@ class UserRepliesHandler(BaseHandler):
 			pages_num = self.get_argument("a",None) #total page count
 			total_items_num = self.get_argument("i",None) #total item count
 			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_replies(self.current_user["_id"],forum_id,jump_to_page_no,topics_num_per_page)
-			pagination_obj = db_backend.do_create_user_replies_pagination(self.current_user["_id"],category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+			topics = db_backend.do_show_user_replies(user_id ,forum_id,jump_to_page_no,topics_num_per_page)
+			pagination_obj = db_backend.do_create_user_replies_pagination(user_id ,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 			
 		self.render("user_replies.html",data=locals())
 				
@@ -849,6 +859,21 @@ class UserForgetPasswordHandler(BaseHandler):
 		else:
 			self.write_error(404)
 			return
+			
+class UserInfoHandler(BaseHandler):
+	
+	@authenticated
+	def get(self):
+		user_id = self.get_argument("uid",None)
+		if user_id:
+			user = db_backend.do_show_user_info_with_id(user_id)
+			if user:
+				self.render("user_info.html",data = locals())
+				return
+				
+		self.write_error(404)
+		return
+		
 
 def send_forget_password_email(request_handler,email_address,username,password):
 	

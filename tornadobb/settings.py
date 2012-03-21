@@ -106,6 +106,7 @@ version="0.1.1"
 #
 ###########################################################
 TORNADOBB_ROOT_PATH = os.path.dirname(__file__)
+print TORNADOBB_ROOT_PATH
 import sys
 sys.path.append(TORNADOBB_ROOT_PATH)
 
@@ -363,6 +364,7 @@ tornadobb_handlers = [
 		    (TORNADOBB_ROOT_URL + "/active$", UserActiveHandler),
 		    (TORNADOBB_ROOT_URL + "/forget$", UserForgetPasswordHandler),
 		    (TORNADOBB_ROOT_URL + "/active$", UserActiveHandler),
+		    (TORNADOBB_ROOT_URL + "/user-info$", UserInfoHandler),
 		    url(TORNADOBB_ROOT_URL + "/profile?", UserProfileHandler,name="profile_page"),
 		    (TORNADOBB_ROOT_URL + "/profile/avatar$", UserAvatarHandler),
 		    (TORNADOBB_ROOT_URL + "/profile/personality$", UserSignatureHandler),

@@ -28,7 +28,7 @@
 						{% else %}
 							{% set avatar = post['poster_id'] + avatar %}
 						{% end %}
-						<dd class="postavatar"><a href=""><img src="{{ handler.settings.get('tornadobb.root_url','/tornadobb') }}/static/avatar/{{avatar}}" alt="{{ post['poster_name'] }}" width="80" height="80" /></a></dd>
+						<dd class="postavatar"><a href="{{ root_url }}/user-info?uid={{ post['poster_id'] }}"><img src="{{ handler.settings.get('tornadobb.root_url','/tornadobb') }}/static/avatar/{{avatar}}" alt="{{ post['poster_name'] }}" width="80" height="80" /></a></dd>
 						<dd><span>{{_("Registered")}}: {{ datetime.datetime.fromtimestamp(post["poster_registered_time"], timezone_obj).strftime(datetime_format) }}</span></dd>
 						<dd><span>{{_("Posts")}}: {{ post.get("poster_posts_num",0) }}</span></dd>
 						{% if post.get("poster_display_email")%}

@@ -131,8 +131,6 @@
 "Max length","最大长度"
 "Max lines","最大行数"
 "move_topic","移动主题"
-"My topics","我的主题"
-"My replies","我的回帖"
 #N
 "Name","名字"
 "New","新的主题"
@@ -181,6 +179,8 @@
 "Post New Topic","发布新主题"
 "Post preview","发布预览"
 "Post a reply","回帖"
+"Posted topics","发布的主题"
+"Posted replies","发布的回帖"
 "Profile menu","配置文件目录"
 "Passwords must be at least {0} characters long. Passwords are case sensitive","密码必须最少{0}个字符，请注意大小写"
 "Personality","个性化"
