@@ -145,6 +145,7 @@ class mongodb(backend_base):
 						"role",
 						"tz",
 						"verify",
+						"style",
 					]
 			
 			user = self._database["user"].find_and_modify({"name":user_name,"password":password},{"$set":{"last_access":current_time,"xsrf":xsrf_value}},fields=fields)
