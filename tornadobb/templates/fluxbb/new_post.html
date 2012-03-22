@@ -69,8 +69,8 @@
 											<legend>{{_("Options")}}</legend>
 											<div class="infldset">
 												<div class="txtarea">
-													<label><input type="checkbox" name="need_replay" value="True" id="need_replay1" tabindex="104" />{{ _("reply to see the post") }}<br /></label>
-													<input type="checkbox" name="need_replay2" value="True" id="need_replay2" tabindex="105" disabled="disabled"/>{{ _("reply to see the attachments") }}<br /></label>
+													<label><input type="checkbox" name="need_reply1" value="True" id="need_reply1" tabindex="104" />{{ _("reply to see the post") }}<br /></label>
+													<input type="checkbox" name="need_reply2" value="True" id="need_reply2" tabindex="105" disabled="disabled"/>{{ _("reply to see the attachments") }}<br /></label>
 												</div>
 											</div>
 										</fieldset>
@@ -160,7 +160,7 @@ $(document).ready(function(){
 					console.info(url)
 					console.info(name)
 					$("#attach_list").append("<li><span><a href='"+ url +"' target='_blank'>"+ name +"</a><input type='hidden' value='" + name +"' name='attach_name' readonly><input type='hidden' value='" + url +"' name='attach_url'></span>  <a href='#' onclick='return delete_attache(this);'>{{ _('delete') }}</a></li>");
-					$("#need_replay2").removeAttr("disabled"); 
+					$("#need_reply2").removeAttr("disabled"); 
 				}
 			}
 		return false;
@@ -171,7 +171,7 @@ $(document).ready(function(){
 function delete_attache(target){
 		$(target).parent().remove();
 		if ($("#attach_list").html()==""){
-			$("#need_replay2").attr("disabled","disabled").removeAttr("checked");
+			$("#need_reply2").attr("disabled","disabled").removeAttr("checked");
 		}
 		return false;
 	}

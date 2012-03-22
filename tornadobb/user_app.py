@@ -35,15 +35,7 @@ import random
 class MainHandler(BaseHandler):
 	
 	def get(self):
-		
-		if self.current_user:
-			is_auth = self.current_user.get("is_auth",False)
-			print is_auth
-			if is_auth:
-				print 'is_auth is true'
-			else:
-				print 'is_auth is false'
-		
+				
 		if not self.current_user or self.current_user.get("is_auth",False):
 			#guest
 			guest_id = self.get_secure_cookie("_id")
@@ -64,9 +56,9 @@ class ForumHandler(BaseHandler):
 	@tornado.web.addslash
 	def get(self,category_id,forum_id,*args,**kwargs):
 		
-		print self.request.query
+		#print self.request.query
 		
-		print kwargs
+		#print kwargs
 		
 		permission = kwargs.get("permission",[])
 		
@@ -117,9 +109,6 @@ class ForumHandler(BaseHandler):
 			 # go to the first page
 			topics = db_backend.do_jump_to_first_page(forum_id,topics_num_per_page,filter_view,order_by,dist_level)
 
-		print '------------------------------ show fourm topics----------------------------'
-		print topics
-
 		if topics:
 			current_page_top = topics[0]["last_post_time"]
 			current_page_bottom = topics[-1]["last_post_time"]
@@ -141,7 +130,6 @@ class TopicHandler(BaseHandler):
 	@tornado.web.addslash
 	def get(self,category_id,forum_id,topic_id,*args,**kwargs):
 
-		print self.request.query
 		permission = kwargs.get("permission",[])
 		jump_to_page_no = int(self.get_argument("p",1))# jump to page
 		pages_num = self.get_argument("a",None) #total page count
@@ -155,20 +143,20 @@ class TopicHandler(BaseHandler):
 			self.write_error(500)
 			return
 		
-		print '----------------------- %d' % jump_to_page_no
 		if jump_to_page_no == 1:
-			print 'views number + 1'
 			db_backend.do_add_topic_views_num(forum_id,topic_id)	
-		#print topic_obj
+		##print topic_obj
 		pagination_obj = db_backend.do_create_post_pagination(forum_id,topic_id,jump_to_page_no,posts_num_per_page,pages_num,total_items_num)
 		# get current user whether alreay reply this topic boolean
 		hide_content = topic_obj.get("need_reply",False)
+
 		hide_attach = topic_obj.get("need_reply_for_attach",False)
 		#current_user = self.current_user
-		#TODO: HOW can current user get replies
-		if "_id" in self.current_user and self.current_user and db_backend.do_check_already_reply(forum_id,topic_id,self.current_user["_id"]):
-			hide_content = False
-			hide_attach = False
+		if hide_content or hide_attach:
+			#TODO: HOW can current user get replies
+			if self.current_user and "_id" in self.current_user and db_backend.do_check_already_reply(forum_id,topic_id,self.current_user["_id"]):
+				hide_content = False
+				hide_attach = False
 
 		self.render('topic.html',data=locals())
 
@@ -179,10 +167,9 @@ class TopicManagementHandler(BaseHandler):
 	@load_permission
 	def get(self,category_id,forum_id,topic_id,*args,**kwargs):
 
-		print self.request.query
 		permission = kwargs.get("permission",[])
 		command = self.get_argument("c",None)# jump to page
-		print command
+		#print command
 		errors = None
 		if command and command in permission:
 			if command == "sticky" and not db_backend.do_make_topic_sticky(forum_id,topic_id):
@@ -237,7 +224,6 @@ class PostNewTopicHandler(BaseHandler):
 	@check_url_avaliable
 	def post(self,category_id,forum_id,*args):
 		
-		print self.request.arguments
 		"""
 		{'need_replay_for_attache': ['True'], '_xsrf': ['93e8153e619c4db2be146df3bd52c90d'], 'attache': ['http://adfadfad'], 'need_replay': ['True'], 'message': ['adfadfads'], 'subject': ['adfadf']}
 		"""
@@ -256,8 +242,8 @@ class PostNewTopicHandler(BaseHandler):
 			for i in xrange(0,len(urls)):
 				attach.append({"name":names[i],"url":urls[i]})
 
-		need_reply = bool(self.get_arguments("need_reply1",False))
-		need_reply_for_attach = bool(self.get_arguments("need_reply2",False))
+		need_reply = bool(self.get_argument("need_reply1",False))
+		need_reply_for_attach = bool(self.get_argument("need_reply2",False))
 		
 		now = time.time()
 		topic = {
@@ -308,8 +294,6 @@ class ReplyTopicHandler(BaseHandler):
 	@check_url_avaliable
 	def post(self,category_id,forum_id,topic_id):
 
-		print self.current_user["_id"]
-
 		post = {
 				"poster_id":self.current_user["_id"],
 				"post_time":time.time(),
@@ -326,8 +310,6 @@ class PostEditHandler(BaseHandler):
 	@check_url_avaliable
 	@load_permission
 	def post(self,category_id,forum_id,topic_id,*args,**kwargs):
-
-		print self.request.arguments
 		
 		permission = kwargs.get("permission",[])
 		post_id = self.get_argument("post_id")
@@ -356,7 +338,7 @@ class PostDeleteHandler(BaseHandler):
 	@load_permission
 	def get(self,category_id,forum_id,topic_id,*args,**kwargs):
 
-		print self.request.arguments
+		#print self.request.arguments
 		permission = kwargs.get("permission",[])
 		post_id = self.get_argument("post_id")
 		if "delete_post" in permission:
@@ -380,7 +362,7 @@ class QuoteHandler(BaseHandler):
 	@authenticated
 	@check_url_avaliable
 	def post(self,category_id,forum_id,topic_id):
-		print self.request.arguments
+		#print self.request.arguments
 		
 		post = {
 				"poster_id":self.current_user["_id"],
@@ -427,7 +409,7 @@ class UserLoginHandler(BaseHandler):
 		return self.render("login.html",data={})
 		
 	def post(self):
-		print self.request.arguments	
+		#print self.request.arguments	
 		username = self.get_argument('username',None)
 		password =  self.get_argument('password',None)
 		remeber_me = self.get_argument('save_pass',False)
@@ -508,7 +490,7 @@ class UserRegisterHandler(BaseHandler):
 		return self.render("register.html",data={})
 		
 	def post(self):
-		print self.request.arguments	
+		#print self.request.arguments	
 		#check username
 		if not db_backend.do_check_user_name(self.get_argument('username',None)):
 			errors = ["This username has already been used"]
@@ -543,7 +525,7 @@ class UserProfileHandler(BaseHandler):
 	@authenticated
 	def get(self):
 
-		user = db_backend.do_show_user_info(self.current_user["_id"])
+		user = db_backend.do_show_user_info_with_id(self.current_user["_id"])
 		if user:
 			self.render("user_essentials.html",data=locals())
 		else:
@@ -564,7 +546,7 @@ class UserAvatarHandler(BaseHandler):
 	@authenticated
 	def get(self):
 		
-		print self.request.arguments
+		#print self.request.arguments
 
 		self.render("user_avatar.html",data=locals())
 	
@@ -573,12 +555,10 @@ class UserAvatarHandler(BaseHandler):
 		user_id = self.get_argument("_id",None)
 		xsrf_value = self.get_argument("xsrf",None)
 		if not user_id or not xsrf_value or not db_backend.do_check_xsrf_for_avatar_upload(user_id,xsrf_value):
-			print '403'
 			self.write_error(403)
 			return
 			
 		name,ext = os.path.splitext(self.get_argument("Filename"))
-		print ext
 		file1 = self.request.files['Filedata'][0]
 		output_file = open(self.settings["tornadobb.root_path"] + "/static/avatar/" + user_id + ext, 'w')
 		output_file.write(file1['body'])
@@ -612,7 +592,7 @@ class UserSignatureHandler(BaseHandler):
 		
 	@authenticated
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		signature = self.get_argument("signature","")
 		if db_backend.do_save_user_signature(self.current_user["_id"],signature):
 			self.redirect(self.request.path)
@@ -628,7 +608,7 @@ class UserPasswordHandler(BaseHandler):
 		
 	@authenticated
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		
 		old_password = self.get_argument("old_password",None)
 		new_password = self.get_argument("new_password1",None)
@@ -654,7 +634,7 @@ class UserEmailHandler(BaseHandler):
 		
 	@authenticated
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		
 		password = self.get_argument("password",None)
 		new_email = self.get_argument("new_email1",None)
@@ -680,7 +660,7 @@ class UserDisplayHandler(BaseHandler):
 		
 	@authenticated
 	def post(self):
-		print self.request
+		#print self.request
 		style = self.get_argument("style",None)
 		if style:
 			if db_backend.do_update_user_display(self.current_user["_id"],style):
@@ -733,7 +713,7 @@ class UserTopicsHandler(BaseHandler):
 			total_items_num = None
 			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
 			topics = db_backend.do_show_user_topics(user_id,forum_id,jump_to_page_no,topics_num_per_page)
-			#print topics
+
 			pagination_obj = db_backend.do_create_user_topics_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 		
 		elif "c_id" in self.request.arguments:
@@ -743,7 +723,7 @@ class UserTopicsHandler(BaseHandler):
 			pages_num = self.get_argument("a",None) #total page count
 			total_items_num = self.get_argument("i",None) #total item count
 			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_topics(user_idforum_id,jump_to_page_no,topics_num_per_page)
+			topics = db_backend.do_show_user_topics(user_id,forum_id,jump_to_page_no,topics_num_per_page)
 			pagination_obj = db_backend.do_create_user_topics_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 			
 		self.render("user_topics.html",data=locals())
@@ -767,7 +747,7 @@ class UserRepliesHandler(BaseHandler):
 			total_items_num = None
 			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
 			topics = db_backend.do_show_user_replies(user_id ,forum_id,jump_to_page_no,topics_num_per_page)
-			#print topics
+
 			pagination_obj = db_backend.do_create_user_replies_pagination(user_id ,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 		
 		elif "c_id" in self.request.arguments:
@@ -778,7 +758,7 @@ class UserRepliesHandler(BaseHandler):
 			total_items_num = self.get_argument("i",None) #total item count
 			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
 			topics = db_backend.do_show_user_replies(user_id ,forum_id,jump_to_page_no,topics_num_per_page)
-			pagination_obj = db_backend.do_create_user_replies_pagination(user_id ,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+			pagination_obj = db_backend.do_create_user_replies_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
 			
 		self.render("user_replies.html",data=locals())
 				
@@ -790,7 +770,7 @@ class ResendVerifyMailHandler(BaseHandler):
 		
 	def post(self):
 		
-		print self.request
+		#print self.request
 		
 		username = self.get_argument("username")
 		password = self.get_argument("password")
@@ -813,7 +793,7 @@ class ResendVerifyMailHandler(BaseHandler):
 class UserActiveHandler(BaseHandler):
 	
 	def get(self):
-		print self.request.arguments
+		#print self.request.arguments
 		username = self.get_argument("u",None)
 		password = self.get_argument("p",None)
 		if username and password and db_backend.do_active_user_account(username,password):

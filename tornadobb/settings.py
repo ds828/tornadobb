@@ -19,6 +19,7 @@
 #       along with this program; if not, write to the Free Software
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
+
 import os
 import tornado.web
 import tornado.locale
@@ -28,7 +29,6 @@ import logging
 
 __all__ = [	"tornadobb_handlers",
 			"tornadobb_settings",
-			#"db_backend",
 			]
 
 ###########################################
@@ -37,44 +37,65 @@ __all__ = [	"tornadobb_handlers",
 #
 ###########################################
 # Forum title
-FORUM_TITLE = "TornadoBB Forum"	#required
+FORUM_TITLE = "TornadoBB Forum"	
+
 # Forum sub title
-FORUM_SUB_TITLE = "A Simple & Fast Forum based on Tornodo Frameworks written by Python"	#required
+FORUM_SUB_TITLE = "A Simple & Fast Forum based on Tornodo Frameworks written by Python"
+
 #html page template
 FORUM_TEMPLATE = "fluxbb"
-# choiced style
-FORUM_STYLE = "Air"	#required, css file name without extend file name
+
+# selected default style
+# required, css file name without extend file name
+FORUM_STYLE = "Air"
+
 #root url
-TORNADOBB_ROOT_URL = r"/tornadobb"	#required
-#admin url, access it with TORNADOBB_ROOT_URL/TORNADOBB_ADMIN_URL, you can write a complicated url for security
-TORNADOBB_ADMIN_URL = r"/admin"	#required
-TORNADOBB_FIRST_ADMIN_NAME="admin"	#required
-TORNADOBB_FIRST_ADMIN_PASSWORD="admin"	#required
-TORNADOBB_FIRST_ADMIN_EMAIL="songdi19@gmail.com"	#required
+TORNADOBB_ROOT_URL = r"/tornadobb"
+
+###########################################
+#
+#	setup administrator
+#
+###########################################
+
+# admin url, access it with TORNADOBB_ROOT_URL/TORNADOBB_ADMIN_URL
+# You can write a very complicated url for security, such as: HQr7$OP, whatever
+TORNADOBB_ADMIN_URL = r"/admin"
+
+TORNADOBB_FIRST_ADMIN_NAME="admin"
+TORNADOBB_FIRST_ADMIN_PASSWORD="admin"
+TORNADOBB_FIRST_ADMIN_EMAIL="songdi19@gmail.com"
+
+# expired time for session
 TORNADOBB_SESSION_EXPIRE = 30 #mins
+
+# default time zone
 TORNADOBB_TIME_ZONE="Australia/Sydney"
+
 #TORNADOBB_TIME_ZONE="Asia/Shanghai"
 
 ###########################################################
 #
-# Database parameters
+# setup database
 #
 ###########################################################
 
+# for mongodb
 DATABASE_SETTINGS = {
-		"engine": "db_backends.mongodb", # defautl for monogdb
-        "host": "localhost",             # Set to localhost for localhost. Not used with sqlite3.
-        "port": 27017,                   # Set to 27017 for mongodb default. Not used with sqlite3."
-        "data_file":"db_tornadobb",		 # Set database file for mongodb
-        "safe_mode": True,
-        "last_error_options":{"j":False,"w":1,"wtimeout":5000,"fsync":False},
+		"engine": "db_backends.mongodb", # name of monogdb moduel
+        "host": "localhost",             # Set host address
+        "port": 27017,                   # Set port
+        "data_file":"db_tornadobb",		 # Set database file
+        "safe_mode": True,				 # True is to run as safe mode
+        "last_error_options":{"j":False,"w":1,"wtimeout":5000,"fsync":False}, #if safe_mode is True, mongodb will use this as last_error_options
 }
-"""
-DATABASE_SETTINGS = {
-		"engine": "db_backends.sqlite3",
-        "data_file":"db_tornadobb",		 # Set database file for mongodb
-}
-"""
+
+# for sqlit3, NO IMPLEMENT yet
+#DATABASE_SETTINGS = {
+#		"engine": "db_backends.sqlite3",
+#        "data_file":"db_tornadobb",		 # Set database file for mongodb
+#}
+
 
 ###########################################################
 #
@@ -84,10 +105,10 @@ DATABASE_SETTINGS = {
 SMTP_SETTINGS = {
 
 					"server":"smtp.gmail.com",
-					"port":None,
 					"use_authentication": True,
 					"tls_port": 587,
 					"ssl_port": 465,
+					"port":None,
 					"username":"",
 					"password":"",
 					"email_address":"",
@@ -99,14 +120,14 @@ SMTP_SETTINGS = {
 #
 ###########################################################
 
-version="0.1.1"
+version="0.1"
+
 ###########################################################
 #
 #	Add current path into system path
 #
 ###########################################################
 TORNADOBB_ROOT_PATH = os.path.dirname(__file__)
-print TORNADOBB_ROOT_PATH
 import sys
 sys.path.append(TORNADOBB_ROOT_PATH)
 
@@ -175,7 +196,7 @@ _expired_total_seconds = (td.microseconds + (td.seconds + td.days * 24 * 3600) *
 
 ###########################################################
 #
-#	i18n
+#	i18n support
 #
 ###########################################################
 
@@ -187,14 +208,14 @@ tornado.locale.load_translations(os.path.join(TORNADOBB_ROOT_PATH, "i18n"))
 #
 ###########################################################
 
-_emoticon_1_settings = {
-		":D" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-happy.png",
-		":(" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-unhappy.png",
-		":o" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-surprised.png",
-		":p" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-tongue.png",
-		";)" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-wink.png",
-		":)" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-smile.png",
-		}
+#_emoticon_1_settings = {
+#		":D" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-happy.png",
+#		":(" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-unhappy.png",
+#		":o" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-surprised.png",
+#		":p" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-tongue.png",
+#		";)" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-wink.png",
+#		":)" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-smile.png",
+#		}
 		
 _emoticon_2_settings = {
 		"m1" : TORNADOBB_ROOT_URL + "/static/images/emoticon2/mood1.gif",
@@ -237,7 +258,7 @@ _permission_settings = [
 						"edit_post",
 						"highlight",
 					] 
-# for furture features
+# for topic type, NOT implement yet
 """
 _topic_type_settings = [
 						"text",
@@ -300,9 +321,9 @@ tornadobb_settings = {
 		"tornadobb.session_expire" : _expired_total_seconds,
 		"tornadobb.style" : FORUM_STYLE,
 		"tornadobb.style_settings" : _css_style_settings,
-		#"tornadobb.verify_new_topic": False,
-		#"tornadobb.topic_default_type" : "text",
-		#"tornadobb.topic_type_settings": _topic_type_settings,
+		#"tornadobb.verify_new_topic": False, #NOT implement yet
+		#"tornadobb.topic_default_type" : "text",#NOT implement yet
+		#"tornadobb.topic_type_settings": _topic_type_settings,#NOT implement yet
 		"tornadobb.topic_default_highlight":"",
 		"tornadobb.emoticon_settings" : _emoticon_2_settings,
 		"tornadobb.permission_settings" : _permission_settings,
@@ -343,7 +364,7 @@ from user_app import *
 from admin_app import *
 
 tornadobb_handlers = [
-			#for the tornadobb can share with other tornado app, can not set static_path, so using below
+			#for the tornadobb can share with other tornado app, it can not have a "static_path" setting, so using below
 			(TORNADOBB_ROOT_URL + "/static/(.*)", tornado.web.StaticFileHandler, {"path": os.path.join(TORNADOBB_ROOT_PATH, "static")}),
 			(TORNADOBB_ROOT_URL + "/mp$", MarkitupPreviewHandler),
 			(TORNADOBB_ROOT_URL + "/sendmail$", SendEmailHandler),

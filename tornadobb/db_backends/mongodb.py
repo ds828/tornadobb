@@ -42,6 +42,7 @@ class mongodb(backend_base):
 			db_conn = Connection(db_param['host'], db_param['port'])			
 			self.__class__._database = db_conn[db_param.get("db_file","db_tornadobb")]
 			
+			#setup safe_mode
 			safe_mode = db_param.get("safe_mode",False)
 			if safe_mode:
 				self.__class__._database.safe = True
@@ -51,18 +52,27 @@ class mongodb(backend_base):
 				self.__class__._database.safe = False
 				self.__class__._database.unset_lasterror_options()
 			
+			#judge whether does guest_access_log exist
+			
 			has_guest = False
 			all_collections = self.__class__._database.collection_names()
 			for collection_name in all_collections:
 				if collection_name == "guest_access_log":
 					has_guest = True
-
+			
+			# if not, create it
 			if not has_guest:
 				self.__class__._database.create_collection("guest_access_log",size = 100000,capped = True, max = 500)
+				self.__class__._database["guest_access_log"].create_index([("last_access",DESCENDING)])
 			
 			#create index
+			# for user
 			self.__class__._database["user"].create_index([("name",DESCENDING)])
+			self.__class__._database["user"].create_index([("name",DESCENDING),("password",DESCENDING)])
+			self.__class__._database["user"].create_index([("_id",DESCENDING),("password",DESCENDING)])
 			self.__class__._database["user"].create_index([("last_access",DESCENDING)])
+			
+			
 		except Exception, e:
 			logging.exception(e)
 
@@ -71,16 +81,11 @@ class mongodb(backend_base):
 		return self.__class__._database
 		
 	def do_create_first_admin(self,admin_name,password,email,register_time):
-	
+		""" create a admin account ,if this admin account exists, just update it"""
 		try:
-			  
-			print list(self._database["user"].find(fields=["name"]))
-			
-			print "admin name: %s" % admin_name
-			
 			if self._database["user"].find_one({"name":admin_name}):
 				self._database["user"].update({"name":admin_name},{"$set":{"password":password,"role":"admin","email":email,"registered_time":register_time,"verify":True}})
-				print '---------------------- update admin -----------------------------'	
+				logging.info("update admin name: %s" % admin_name)
 				return True
 			else:
 				admin = { 
@@ -91,9 +96,8 @@ class mongodb(backend_base):
 					"registered_time":register_time,
 					"verify":True,
 					}
-				print '---------------------- create admin -----------------------------'	
-				print self._database["user"].insert(admin)
-				print self._database["user"].find_one({"name":admin_name}) 
+				self._database["user"].insert(admin)
+				logging.info("create admin name: %s" % admin_name)
 				return True
 			
 		except OperationFailure,e:
@@ -102,13 +106,32 @@ class mongodb(backend_base):
 
 			
 	def do_check_user_name(self,user_name):
-		
+		""" 
+			check this user account whether already been registered before
+			If used, return True, or False
+		"""
 		if user_name and not self._database["user"].find_one({"name":user_name},fields=["_id"]):
 			return True
 		else:
 			return False
 	
 	def do_user_login(self,user_name,password,current_time,xsrf_value):
+		"""  
+			do user login action 
+			If the account is not verifed, return "not_verify",None
+			OR return "ok", user dict
+			If some error cccures, return "fail",None
+			the fields of user dict MUST have:
+				"name",
+				"locale",
+				"postable",
+				"closed",
+				"avatar",
+				"permission",
+				"role",
+				"tz",
+				"verify",
+		"""
 
 		if user_name and password and current_time:
 			fields = [
@@ -133,6 +156,10 @@ class mongodb(backend_base):
 		return "fail",None
 	
 	def do_set_user_access_log(self,user_id,current_time):
+		"""
+			according to the interval setting in tornadobb_settings
+			after each interval, set a access time for user
+		"""
 		
 		try:
 			if type(user_id) is not ObjectId:
@@ -147,40 +174,57 @@ class mongodb(backend_base):
 
 	def do_user_logout(self,user_id):
 		"""
-		try:
-			if type(user_id) is not ObjectId:
-				user_id = ObjectId(user_id)
-		except InvalidId,e:
-			return False
-		
-		self._database["user"].update({"_id":user_id},{"$set":{"online":False}})
+			for mongodb, this method is useless
+			the judgement of user online status depends on "last_access"
 		"""
 		return True
 
 	def do_user_register(self,user):
 		
+		"""
+			do user register
+			user is dict which MUST have:
+			user = {
+					"name" : username,
+					"password": password,
+					"email" : email,
+					"registered_time":time.time(),
+					"display_email":display_email,
+					}
+		"""
 		try:
 			user_id = self._database["user"].insert(user)
 			return str(user_id)
 		except OperationFailure,e:
 			logging.exception(e)
 			return None
-
-	def do_show_user_info(self,user_id):
-		
-		try:
-			if type(user_id) is not ObjectId:
-				user_id = ObjectId(user_id)
-		except InvalidId,e:
-			return None
-		
-		return self._database["user"].find_one({"_id":user_id})
 		
 	def do_show_user_id_with_name(self,name):
+		
+		"""
+			find one user id weith its name
+			this method only is used by AdminModeratorHandler in admin_app.py
+			
+		"""
 		
 		return self._database["user"].find_one({"name":name},fields=["_id"])
 		
 	def do_show_user_info_with_id(self,user_id):
+		
+		"""
+			find one user with user id
+			return user dict
+			the fields MUST have
+					"name",
+					"email",
+					"registered_time",
+					"last_access",
+					"topics_num",
+					"replies_num",
+					"display_email",
+					"role",
+					"avatar",
+		"""
 		
 		try:
 			if type(user_id) is not ObjectId:
@@ -203,6 +247,21 @@ class mongodb(backend_base):
 		
 	def do_show_user_info_with_name(self,name):
 		
+		"""
+			find one user with user name
+			return user dict
+			the fields MUST have
+					"name",
+					"email",
+					"registered_time",
+					"last_access",
+					"topics_num",
+					"replies_num",
+					"display_email",
+					"role",
+					"avatar",
+		"""
+		
 		fields = [
 					"name",
 					"email",
@@ -217,6 +276,11 @@ class mongodb(backend_base):
 				
 	def do_show_user_signature(self,user_id):
 		
+		"""
+			shoud the signature of user with user id
+		
+		"""
+		
 		try:
 			if type(user_id) is not ObjectId:
 				user_id = ObjectId(user_id)
@@ -230,6 +294,10 @@ class mongodb(backend_base):
 			return None
 		
 	def do_save_user_signature(self,user_id,signature):
+		
+		"""
+			save the signature for user
+		"""
 		
 		try:
 			if type(user_id) is not ObjectId:
@@ -246,6 +314,10 @@ class mongodb(backend_base):
 			
 	def do_update_user_password(self,user_id,old_password,new_password):
 		
+		"""
+			update user password
+		"""
+		
 		try:
 			if type(user_id) is not ObjectId:
 				user_id = ObjectId(user_id)
@@ -261,18 +333,34 @@ class mongodb(backend_base):
 	
 	def do_show_newest_users(self,limit=20):
 		
+		"""
+			show the newest users with limit count
+			return user list, user count
+			
+		"""
+		
 		users = self._database["user"].find(sort=[("_id",-1)],fields=["_id","name"],limit=limit)
 		count = users.count()
 		return list(users),count
 		
 	def do_show_online_users(self,expired_time,limit=50):
 		
-		print self._database["user"].find({"last_access":{"$gt":expired_time}},fields=["_id","name"],limit=limit).explain()
+		"""
+			show online users with limit count
+			If last_access is great than expired time, the user is online
+			return user_list, user count
+		"""
+		
 		users = self._database["user"].find({"last_access":{"$gt":expired_time}},fields=["_id","name"],limit=limit)
 		count = users.count()
 		return list(users),count
 
 	def do_create_guest_access_log(self,current_time):
+		
+		"""
+			for a guest, create a access log for it
+			return gest_id as string
+		"""
 		
 		try:
 			guest_id = self._database["guest_access_log"].insert({"last_access":current_time})
@@ -284,15 +372,16 @@ class mongodb(backend_base):
 
 	def do_set_guest_access_log(self,guest_id,current_time):
 		
+		"""
+			according to the interval setting in tornadobb_settings
+			after each interval, set a access time for guest
+		"""
+		
 		try:
 			if type(guest_id) is not ObjectId:
 				guest_id = ObjectId(guest_id)
-
-			log= {
-				"_id":guest_id,
-				"last_access":current_time,
-				}		
-			self._database["guest_access_log"].save(log)
+	
+			self._database["guest_access_log"].update({"_id":guest_id},{"$set":{"last_access":current_time}})
 			return True
 		
 		except InvalidId:
@@ -302,6 +391,10 @@ class mongodb(backend_base):
 			return False	
 	
 	def do_show_online_guests_num(self,expire_time):
+		
+		"""
+			show online guest count
+		"""
 		
 		return self._database["guest_access_log"].find({"last_access":{"$gt":expire_time}}).count()
 	
@@ -314,6 +407,23 @@ class mongodb(backend_base):
 	
 	def do_show_all_categories_forums_for_homepage(self):
 		
+		"""
+			for homepage , show category and forum info which the homepage need
+			the fields are:
+					"name",
+					"forum._id",
+					"forum.name",
+					"forum.des",
+					"forum.topics_num",
+					"forum.replies_num",
+					"forum.last_post_time",
+					"forum.last_poster_name",
+					"forum.last_post_topic_id",
+					"forum.position",
+					"forum.closed",
+					"forum.moderator",
+		"""
+
 		fields = [
 					"name",
 					"forum._id",
@@ -330,11 +440,14 @@ class mongodb(backend_base):
 				]
 		
 		category = list(self._database["category_forum"].find({"closed":False},sort=[("position",1)],fields=fields))
-		
-		print category
-		
 		return category
+		
+		
 	def do_show_all_categories_forums_name_and_id(self):
+		
+		"""
+			for cache categories and forums, only load their ids and names
+		"""
 		
 		categories = list(self._database["category_forum"].find({"closed":False},sort=[("position",1)],fields=["name","forum._id","forum.name","forum.closed"]))
 		
@@ -344,11 +457,12 @@ class mongodb(backend_base):
 				forum["_id"] = str(forum["_id"])
 		
 		return categories
-		
+	"""		
 	def do_only_show_all_categories_name_and_id(self):
 		
 		return list(self._database["category_forum"].find(sort=[("position",1)],fields=["name"]))
-		
+	"""		
+	"""
 	def do_show_one_category(self,category_id):
 		
 		try:
@@ -358,8 +472,18 @@ class mongodb(backend_base):
 			return None
 		
 		return self._database["category_forum"].find_one({"_id":category_id})
-		
+	"""	
 	def do_create_category(self,category):
+		
+		"""
+			create a new category
+			the category dict MUST have:
+			category = {
+						"name" : name.strip(),
+						"position" : int(position),
+						"closed":False,
+						}
+		"""
 		
 		try:
 			self._database["category_forum"].insert(category)
@@ -370,6 +494,11 @@ class mongodb(backend_base):
 			return False
 	
 	def do_update_category(self,category_id,category_name,category_position):
+		
+		"""
+			update a category
+		
+		"""
 		
 		try:
 			if type(category_id) is not ObjectId:
@@ -386,6 +515,10 @@ class mongodb(backend_base):
 			
 	def do_open_close_category(self,category_id,closed=False):
 		
+		"""
+			set the category to close or open
+		"""
+		
 		try:
 			if type(category_id) is not ObjectId:
 				category_id = ObjectId(category_id)
@@ -398,11 +531,12 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False		
-
+	"""
 	def do_show_all_forums(self):
 		
 		return list(self._database["category_forum"].find(sort=[("position",1),("forum.position",1)]))
-		
+	"""
+	"""	
 	def do_show_one_forum(self,category_id,forum_id):
 		
 		try:
@@ -420,8 +554,19 @@ class mongodb(backend_base):
 					return forum
 		else:
 			return None
-
+	"""
 	def do_create_forum(self,category_id,forum):
+		
+		"""
+			create a new forum
+			forum dict:
+			forum = {
+						"name" : name.strip(),
+						"position" : int(position),
+						"des" : des,
+						"closed":False,
+						}
+		"""
 		
 		try:
 			if type(category_id) is not ObjectId:
@@ -430,8 +575,12 @@ class mongodb(backend_base):
 			forum["_id"] = str(ObjectId())
 
 			self._database["category_forum"].update({"_id":category_id},{ "$addToSet" : { "forum" : forum }})
-			#TODO: create collection for forum and create index
-			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("last_access",DESCENDING)])
+			#TODO: HERE create collection for forum and create index
+			self._database[forum["_id"]].create_index([("hidden",ASCENDING)])
+			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("dist",DESCENDING),(dist_level,ASCENDING)])
+			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("last_post_time",DESCENDING)])
+			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("last_post_time",DESCENDING),("dist",DESCENDING),(dist_level,ASCENDING)])
+			self._database[forum["_id"]].create_index([("subject",ASCENDING)])
 			return True
 		except InvalidId:
 			return False
@@ -472,6 +621,12 @@ class mongodb(backend_base):
 			return False
 		
 	def do_open_close_forum(self,category_id,forum_id,closed=False):
+		
+		"""
+			set one forum to open or close
+		
+		"""
+		
 		try:
 			if type(category_id) is not ObjectId:
 				category_id = ObjectId(category_id)
@@ -531,6 +686,7 @@ class mongodb(backend_base):
 
 			self._database["user"].update({"_id":moderator_id},{"$set":{"perm_"+forum_id : permission}})		
 			return True
+			
 		except InvalidId:
 			return False
 		except OperationFailure as e:
@@ -601,6 +757,7 @@ class mongodb(backend_base):
 			return False
 
 	#TODO: clear sort by forum.topics.sticky
+	"""
 	def do_show_forum_topics_and_num(self,category_id,forum_id):
 		
 		try:
@@ -615,6 +772,7 @@ class mongodb(backend_base):
 			return category,category["forum"][0]["topics_num"]
 		else:
 			return None,None
+	"""
 	"""
 	def do_post_topic(self,category_id,forum_id,topic):
 		
@@ -839,6 +997,8 @@ class mongodb(backend_base):
 		
 	def do_create_user_topics_pagination(self,user_id,category_id,forum_id,current_page_no,items_num_per_page,pages_num,total_items_num):
 		
+		bk_user_id = user_id
+		
 		if not pages_num:
 			
 			try:
@@ -861,6 +1021,7 @@ class mongodb(backend_base):
 			pages_num = int(pages_num)
 
 		pagination_obj = {
+							"user_id" : bk_user_id,
 							"category_id" : category_id, 
 							"forum_id" : forum_id,
 							"has_previous": current_page_no > 1,
@@ -872,6 +1033,8 @@ class mongodb(backend_base):
 		return pagination_obj
 		
 	def do_create_user_replies_pagination(self,user_id,category_id,forum_id,current_page_no,items_num_per_page,pages_num,total_items_num):
+		
+		bk_user_id = user_id
 		
 		if not pages_num:
 			
@@ -896,6 +1059,7 @@ class mongodb(backend_base):
 			pages_num = int(pages_num)
 
 		pagination_obj = {
+							"user_id" : bk_user_id,
 							"category_id" : category_id, 
 							"forum_id" : forum_id,
 							"has_previous": current_page_no > 1,
@@ -916,7 +1080,7 @@ class mongodb(backend_base):
 	
 		begin = (current_page_no - 1) * items_num_per_page
 		
-		topic = self._database[forum_id].find_one({"_id":topic_id},fields={"subject":1,"posts":{"$slice": [begin, items_num_per_page]}})
+		topic = self._database[forum_id].find_one({"_id":topic_id},fields={"subject":1,"need_reply":1,"need_reply_for_attach":1,"posts":{"$slice": [begin, items_num_per_page]}})
 
 		posts = topic["posts"]		
 		user_list = list(set([post["poster_id"] for post in posts]))
@@ -1208,7 +1372,8 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False
-			
+	
+	"""		
 	def do_view_topic(self,forum_id,topic_id):
 		
 		try:
@@ -1223,7 +1388,7 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False
-		
+	"""	
 	def do_edit_post(self,forum_id,topic_id,post_obj):
 		
 		try:

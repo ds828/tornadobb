@@ -32,9 +32,7 @@ class BaseHandler(tornado.web.RequestHandler):
 	def get_current_user(self):
 
 		is_auth = self.get_secure_cookie("is_auth")
-		
 		locale = self.get_secure_cookie("locale")
-		
 		interval = self.settings["tornadobb.set_access_log_interval"]
 		
 		if not is_auth:
@@ -44,16 +42,15 @@ class BaseHandler(tornado.web.RequestHandler):
 			#locale:
 			#count:	
 			
-			print '----------------base.py-------------------'
 			guest_id = self.get_secure_cookie("guest_id")
 			count = self.get_secure_cookie("count")
-			print count
+			
 			if guest_id and count:
 				count = int(count)
 				if count / interval == 1:
 					db_backend.do_set_guest_access_log(guest_id,time.time())
 					count = 0
-					print '------------------ write access log for guest----------------------'
+					
 			else:
 				guest_id = db_backend.do_create_guest_access_log(time.time())
 				if guest_id:
@@ -64,7 +61,6 @@ class BaseHandler(tornado.web.RequestHandler):
 
 			self.set_secure_cookie("count",str(count + 1))
 			
-			print '--------------- GUEST -----------------'
 			
 			if locale:
 				return {"locale":locale}
@@ -140,7 +136,6 @@ class BaseHandler(tornado.web.RequestHandler):
 		upload plugin can NOT send cookies with POST method
 		"""
 		if "profile/avatar" in self.request.path:
-			print "----------------------- from avatar -----------------"
 			return
 		else:
 			super(BaseHandler, self).check_xsrf_cookie()
@@ -156,7 +151,6 @@ class AdminBaseHandler(BaseHandler):
 	def get_current_user(self):
 		
 		user = super(AdminBaseHandler, self).get_current_user()
-		print user
 		if user and user.get("role","") == "admin":
 			return user
 		else:
@@ -212,7 +206,6 @@ def load_permission(method):
 	def wrapper(self, *args, **kwargs):
 					
 		permission = None
-		print self.current_user.get("is_auth")
 		if self.current_user and self.current_user.get("is_auth"):
 			role = self.current_user.get("role",None)
 			if role:
@@ -229,12 +222,8 @@ class SendEmailHandler(BaseHandler):
 		
 	def post(self):
 			
-		print '-----------------POST method in sendmail---------------------'
-		print self.request
 		receiver = self.get_argument("receiver")
 		subject = self.get_argument("subject")
 		plain = self.get_argument("plain")
 		html = self.request.arguments["html"][0]
-		print html
 		send_mail(receiver,subject,plain,html)
-		print '----------------- sendmail OK ---------------------'

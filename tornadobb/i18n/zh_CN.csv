@@ -147,6 +147,7 @@
 "Online","在线"
 "Options","选项"
 "Old password","旧密码"
+"Offline","离线"
 #P
 "Pages","分页"
 "Previous","前一页"
@@ -173,6 +174,7 @@
 "Position must be one integer","位置必须是一个整数"
 "Please input something and submit","请输入再提交"
 "Preview","预览"
+"preview","预览"
 "Profile","配置文件"
 "Password","密码"
 "Posts","回帖"

@@ -91,8 +91,8 @@ class Forum_Crumbs(tornado.web.UIModule):
 			url_list.append(topic_url)
 			title_list.append(topic_name)
 			
-		print url_list
-		print title_list
+		#print url_list
+		#print title_list
 		return self.render_string("module_forum_crumbs.html", title_list = title_list,url_list = url_list)
 
 
@@ -136,8 +136,8 @@ class Pagination(tornado.web.UIModule):
 		if pages_num <= pagination_pages_num + 2:
 			begin = 2
 			end = pages_num
-			print begin
-			print end
+			#print begin
+			#print end
 			if target == "topic":
 				return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
 			elif target == "post":

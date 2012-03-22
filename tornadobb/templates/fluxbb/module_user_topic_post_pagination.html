@@ -1,3 +1,4 @@
+{% set user_id = pagination_obj.get("user_id") %}
 {% set current_page_num = pagination_obj.get("current_page_num") %}
 {% set pages_num = pagination_obj.get('pages_num',None) %}
 {% set total_items_num = pagination_obj.get('total_items_num',None) %}
@@ -5,13 +6,13 @@
 {% set forum_id = pagination_obj.get('forum_id',None) %}
 <p class="pagelink conl"><span class="pages-label">{{_("Pages")}}: </span>
     {% if pagination_obj.get("has_previous",False) %}	
-     <a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p={{ current_page_num-1 }}&a={{ pages_num }}&i={{ total_items_num }}">{{_("Previous")}}</a>
+     <a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p={{ current_page_num-1 }}&a={{ pages_num }}&i={{ total_items_num }}&uid={{ user_id }}">{{_("Previous")}}</a>
     {% end %}
     <!-- show first page-->
 	{% if current_page_num == 1%}
 	<strong class="item1">1</strong>
 	{% else %}
-    <a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p=1">1</a>
+    <a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p=1&uid={{ user_id }}">1</a>
     {% end %}
     
     {% if show_prev_space %}
@@ -20,7 +21,7 @@
 
 	{% for page_num in xrange(begin,end) %}
 		{% if page_num == current_page_num %}<strong class="item">{{ page_num }}</strong> 
-		{% else %}<a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p={{ page_num }}&a={{ pages_num }}&i={{ total_items_num }}">{{ page_num }}</a>
+		{% else %}<a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p={{ page_num }}&a={{ pages_num }}&i={{ total_items_num }}&uid={{ user_id }}">{{ page_num }}</a>
 		{% end %}
 	{% end %}
 
@@ -32,10 +33,10 @@
 		{% if current_page_num == pages_num %}
 		<strong class="item1">{{ pages_num}}</strong> 
 		{% else %}
-		<a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p={{pages_num }}&a={{ pages_num }}&i={{ total_items_num }}">{{ pages_num }}</a>
+		<a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p={{pages_num }}&a={{ pages_num }}&i={{ total_items_num }}&uid={{ user_id }}">{{ pages_num }}</a>
 		{% end %}
 		{% if pagination_obj.get("has_next",False) %}
-		<a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p={{ current_page_num+1 }}&a={{ pages_num }}&i={{ total_items_num }}">{{_("Next")}}</a>
+		<a href="?c_id={{ category_id }}&f_id={{ forum_id }}&p={{ current_page_num+1 }}&a={{ pages_num }}&i={{ total_items_num }}&uid={{ user_id }}">{{_("Next")}}</a>
 		{% end %}
 	{% end %}
 </p>
