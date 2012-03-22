@@ -1,1 +1,17 @@
-A Simple & Fast Forum based on Tornodo Frameworks written by Python
+TornadoBB is a Simple & Fast Forum based on Tornodo Frameworks written by Python and mongoDB
+
+Features:
+
+-- fast and lightweight
+-- easy to install and config
+-- easy to extend functions
+-- basic functions as a forum
+-- simple code
+-- perfect for the user who own youself server or VPS
+
+Requirement:
+
+-- python 2.6 or above
+-- tornado web framework
+-- pytz
+-- postmarkup
