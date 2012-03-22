@@ -1,0 +1,21 @@
+{% extends "single_block_base.html" %}
+{% block title %}{{ _("Forum Rules")}} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
+{% block single_block %}
+<div id="rules" class="block">
+	<div class="hd"><h2><span>Forum rules</span></h2></div>
+	<div class="box">
+		<div id="rules-block" class="inbox">
+			<div class="usercontent">
+				<p>We hope that the tone of this forum is friendly and helpful, please keep that in mind when posting, we also have the following more specific rules we expect to be followed in all posts:</p>
+				<ul>
+				<li><p>Don&#039;t attack other users, companies or products, you can post your opinion, and you can criticise, but posts written purely to offend will be removed.</p></li>
+				<li><p>If you think someone else has made a bad post or is causing some kind of problem, don&#039;t try to deal with it yourself, report it to a moderator.</p></li>
+				<li><p>Topics in the {{ tornadobb_settings["tornadobb.forum_title"]}} part of the forum need to be about {{ tornadobb_settings["tornadobb.forum_title"]}}, make unrelated posts in the general discussion section. If they are not, they may be moved or removed.</p></li>
+				<li><p>Posts should be on topic and preferably make a positive contribution to the discussion.</p></li>
+				</ul>
+				<p>Breaking the rules may result in your post being removed or edited, repeatedly breaking rules may result in a temporary or permanent ban.</p></div>
+			</div>
+		</div>
+	</div>
+</div>
+{% end %}

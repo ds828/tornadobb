@@ -854,6 +854,11 @@ class UserInfoHandler(BaseHandler):
 		self.write_error(404)
 		return
 		
+class ForumRulesHandler(BaseHandler):
+	
+	def get(self):
+		
+		self.render("rules.html",data={})
 
 def send_forget_password_email(request_handler,email_address,username,password):
 	

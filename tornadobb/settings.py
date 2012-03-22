@@ -408,7 +408,7 @@ tornadobb_handlers = [
 			url(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/?$", AdminMemberHandler,name="admin_member_page"),
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/close$", AdminMemberOpenCloseHandler),
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/postable$", AdminMemberShutHandler),
-			
+			(TORNADOBB_ROOT_URL + "/rules$", ForumRulesHandler),
 			]
 
 ###########################################################
