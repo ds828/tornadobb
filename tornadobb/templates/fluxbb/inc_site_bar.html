@@ -1,14 +1,14 @@
 <div id="sitebar">
 	<div id="sitebar-content">
 		<div id="sitelogo">
-			<a href="/" title="TornadoBB Home"><img src="" alt="TornadoBB Home" /></a>
+			<a href="" title="TornadoBB Home"><img src="tornadobb" alt="TornadoBB Home" /></a>
 		</div>
 		<div id="sitewelcome">
 			<div id="sitewelcome-inner">
 			{% if current_user and current_user.get("is_auth",False) %}
-				<p id="loggedin">{{ _("You are logged in as") }} <strong>{{ current_user["name"] }}</strong> : <a href="">{{_("profile")}}</a> | <a href="">{{_("logout")}}</a></p>
+				<p id="loggedin">{{ _("You are logged in as") }} <strong>{{ current_user["name"] }}</strong> : <a href="{{ root_url }}/profile">{{_("profile")}}</a> | <a href="{{ root_url }}/logout">{{_("logout")}}</a></p>
 			{% else %}
-				<p id="loggedin">{{_("You are not logged in") }}. {{_("Please")}} <a href="">{{_("login")}}</a> {{_("or")}} <a href="">{{_("register")}}</a>.</p>
+				<p id="loggedin">{{_("You are not logged in") }}. {{_("Please")}} <a href="{{ root_url }}/login">{{_("login")}}</a> {{_("or")}} <a href="{{ root_url }}/register">{{_("register")}}</a>.</p>
 			{% end %}
 			</div>
 		</div>
