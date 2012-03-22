@@ -35,12 +35,13 @@ except ImportError:
 
 class mongodb(backend_base):
 	
+	_db_conn = None
 	_database = None
 	
 	def __init__(self,db_param):
 		try:
-			db_conn = Connection(db_param['host'], db_param['port'])			
-			self.__class__._database = db_conn[db_param.get("db_file","db_tornadobb")]
+			self.__class__._db_conn = Connection(db_param['host'], db_param['port'])			
+			self.__class__._database = self.__class__._db_conn[db_param.get("db_file","db_tornadobb")]
 			
 			#setup safe_mode
 			safe_mode = db_param.get("safe_mode",False)
@@ -1639,3 +1640,17 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False
+
+	def do_show_database_info(self):
+		
+		conn = self.__class__._db_conn
+		
+		db_info = {
+					"host": conn.host,
+					"port": conn.port,
+					"nodes":conn.nodes,
+					"read_preference":conn.read_preference,
+					
+				}
+		
+		return db_info

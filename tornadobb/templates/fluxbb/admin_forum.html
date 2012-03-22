@@ -45,11 +45,11 @@
 							<td><input type="text" name="forum_des" value="{{ forum['des'] }}" size="20" maxlength="{{ forum_des_max }}" /></td>
 							<td>
 							{% if forum.get("closed",False) %}
-							<a href="close?c_id={{ category['_id'] }}&f_id={{ forum['_id'] }}&c=open">open</a>
+							<a href="close?c_id={{ category['_id'] }}&f_id={{ forum['_id'] }}&c=open">{{_("open")}}</a>
 							{% else %}
-							<a href="close?c_id={{ category['_id'] }}&f_id={{ forum['_id'] }}&c=close">close</a>
+							<a href="close?c_id={{ category['_id'] }}&f_id={{ forum['_id'] }}&c=close">{{_("close")}}</a>
 							{% end %}
-							 | <a href="delete?c_id={{ category['_id'] }}&f_id={{ forum['_id'] }}">delete</a></td>
+							 | <a href="delete?c_id={{ category['_id'] }}&f_id={{ forum['_id'] }}">{{_("delete")}}</a></td>
 						</tr>
 						{% end %}
 					{% end %}

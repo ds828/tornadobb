@@ -1,26 +1,10 @@
-##########################
-#
-#category name
-#
-##########################
-"Pictures","贴图专区"
-"Video","视频专区"
-
-##########################
-#
-#forum name
-#
-##########################
-"Asian Girls","亚洲女孩"
-"West Girls","欧美女孩"
-
-
 #A
 "Active","最新回帖"
 "Active email form","激活邮件来自"
 "active your account","激活你的帐号"
 "An active account email has alerady sent to ","激活邮件已经发送到"
 "Action","操作"
+"admin","管理员"
 "Admin menu","管理员菜单"
 "Add category","添加类别"
 "Add Forum","添加论坛"
@@ -30,12 +14,11 @@
 "avaliable","有效的"
 "Attachment","附件"
 "Agree the forum rule","同意论坛规则"
-"An avatar is a small image that will be displayed under your username in your posts. It must not be any bigger than 80 x 80 pixels and 20,480 bytes (20 KiB)",""
-"An email will be sent to your new address with an activation link. You must click the link in the email you receive to activate the new address",""
-
-"Please active your account before login","请在登录前，激活你的帐号"
+"An avatar is a small image that will be displayed under your username in your posts. It must not be any bigger than 80 x 80 pixels and 20,480 bytes (20 KiB)","一个头像显示在你的帖子的旁边，不要超过80X80像素和20,480字节"
+"An email will be sent to your new address with an activation link. You must click the link in the email you receive to activate the new address","一封邮件发送到你的新地址，你必须点击这个邮件中的链接来激活你的新邮箱"
 #B
 "Board statistics","统计面板"
+"Ban users","限制用户"
 #C
 "Category","目录"
 "Check for upgrade","检查升级"
@@ -50,6 +33,7 @@
 "Compose your signature","编写你的签名"
 "close_topic","关闭主题"
 "characters","字符"
+"Control permissions for users","控制用户权限"
 #D
 "Dashboard","控制面板"
 "Database","数据库"
@@ -131,6 +115,7 @@
 "Max length","最大长度"
 "Max lines","最大行数"
 "move_topic","移动主题"
+"Manage moderators","管理版主"
 #N
 "Name","名字"
 "New","新的主题"
@@ -148,6 +133,7 @@
 "Options","选项"
 "Old password","旧密码"
 "Offline","离线"
+"Organize categories and forums","组织类别和论坛"
 #P
 "Pages","分页"
 "Previous","前一页"
@@ -171,6 +157,7 @@
 "Please relogin for reloading new avatar","请重新登录来重新加载新头像"
 "Please enter the same password as above","请输入与上面相同的密码"
 "Please enter a new password","请提供一个新密码"
+"Please active your account before login","请在登录前，激活你的帐号"
 "Position must be one integer","位置必须是一个整数"
 "Please input something and submit","请输入再提交"
 "Preview","预览"
@@ -253,6 +240,7 @@
 #W
 "Write your message and submit","写信息然后提交"
 "Wrong username or email","错误的用户名或邮件地址"
+"Welcome to the TornadoBB administration control panel","欢迎来到TornadoBB管理员控制台"
 #X
 #Y
 "You are not logged in","你还没有登录"

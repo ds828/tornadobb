@@ -139,6 +139,16 @@ class BaseHandler(tornado.web.RequestHandler):
 			return
 		else:
 			super(BaseHandler, self).check_xsrf_cookie()
+			
+	__error = {
+					403:'403.html',
+					404:'404.html',
+					500:'500.html',
+			}
+			
+	def write_error(self,status_code, **kwargs):
+		
+		self.render(self.__class__.__error[status_code],data={})
 	
 	def get(self):
 		self.write_error(404)

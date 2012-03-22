@@ -10,13 +10,13 @@
 			</dl>
 			<dl class="conl">
 				<dt><strong>{{_("User information")}}</strong></dt>
-				<dd><span>{{_("Newest registered user")}}: {% for user in data.get("newest_users",[])[0:6] %} <a href="">{{ user }}</a> {% end %}</span></dd>
+				<dd><span>{{_("Newest registered user")}}: {% for user in data.get("newest_users",[])[0:6] %} <a href="{{ data["root_url"] }}/user-info?uid={{ user['_id'] }}">{{ user["name"] }}</a> {% end %}</span></dd>
 				<dd><span>{{_("Registered users online")}}: <strong>{{ data.get("total_online_users",0) }}</strong></span></dd>
 				<dd><span>{{_("Guests online")}}: <strong>{{ data.get("total_online_guests",0) }}</strong></span></dd>
 			</dl>
 			<dl id="onlinelist" class="clearb">
 				<dt><strong>{{_("Online")}}: </strong></dt>				
-				<dd>{% for user in data.get("online_users",[])[0:20] %} <a href="">{{ user }}</a> {% end %}</dd>
+				<dd>{% for user in data.get("online_users",[])[0:20] %} <a href="{{ data["root_url"] }}/user-info?uid={{ user['_id'] }}">{{ user["name"] }}</a> {% end %}</dd>
 			</dl>
 		</div>
 	</div>

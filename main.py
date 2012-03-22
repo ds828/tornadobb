@@ -30,7 +30,7 @@ from tornadobb.settings import *
 
 handlers = []
 handlers = handlers + tornadobb_handlers
-#print handlers
+
 settings = dict(
             cookie_secret = "43oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
             xsrf_cookies = True,

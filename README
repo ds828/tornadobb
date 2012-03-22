@@ -16,5 +16,7 @@ Requirement:
 
 -- python 2.6 or above
 -- tornado web framework
+-- mongoDB
 -- pytz
+-- pygments
 -- postmarkup

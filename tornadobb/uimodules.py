@@ -122,6 +122,7 @@ class Board_Info(tornado.web.UIModule):
 		expire_time = time.time() - self.handler.settings["tornadobb.session_expire"]
 		online_users,total_online_users = settings.db_backend.do_show_online_users(expire_time)
 		total_online_guests = settings.db_backend.do_show_online_guests_num(expire_time)
+		root_url = self.handler.settings["tornadobb.root_url"]
 		 
 		return self.render_string("module_board_info.html", data=locals())
 

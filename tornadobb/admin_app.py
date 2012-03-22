@@ -28,7 +28,7 @@ import datetime, time
 class AdminDashboardHandler(AdminBaseHandler):
 	@authenticated
 	def get(self):
-
+		database_info = db_backend.do_show_database_info()
 		self.render('admin_dashboard.html',data=locals())
 
 class AdminCategoryHandler(AdminBaseHandler):

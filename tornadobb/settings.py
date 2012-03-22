@@ -40,7 +40,7 @@ __all__ = [	"tornadobb_handlers",
 FORUM_TITLE = "TornadoBB Forum"	
 
 # Forum sub title
-FORUM_SUB_TITLE = "A Simple & Fast Forum based on Tornodo Frameworks written by Python"
+FORUM_SUB_TITLE = "A Simple & Fast Forum based on Tornodo Frameworks written by Python and MongoDB"
 
 #html page template
 FORUM_TEMPLATE = "fluxbb"
@@ -208,14 +208,14 @@ tornado.locale.load_translations(os.path.join(TORNADOBB_ROOT_PATH, "i18n"))
 #
 ###########################################################
 
-#_emoticon_1_settings = {
-#		":D" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-happy.png",
-#		":(" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-unhappy.png",
-#		":o" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-surprised.png",
-#		":p" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-tongue.png",
-#		";)" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-wink.png",
-#		":)" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-smile.png",
-#		}
+_emoticon_1_settings = {
+		":D" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-happy.png",
+		":(" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-unhappy.png",
+		":o" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-surprised.png",
+		":p" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-tongue.png",
+		";)" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-wink.png",
+		":)" : TORNADOBB_ROOT_URL + "/static/images/emoticon/emoticon-smile.png",
+		}
 		
 _emoticon_2_settings = {
 		"m1" : TORNADOBB_ROOT_URL + "/static/images/emoticon2/mood1.gif",
@@ -334,7 +334,7 @@ tornadobb_settings = {
 		"tornadobb.smtp_settings" : SMTP_SETTINGS,
 		"tornadobb.set_access_log_interval" : 10,
 		"tornadobb.pagination_pages_num" : 5,
-		"tornadobb.topics_num_per_page" : 1,
+		"tornadobb.topics_num_per_page" : 20,
 		"tornadobb.posts_num_per_page" : 10,
 		"tornadobb.distillat_threshold" : 60, # replies number
 		"tornadobb.subject_min_chars_num":1,
@@ -410,3 +410,10 @@ tornadobb_handlers = [
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/postable$", AdminMemberShutHandler),
 			
 			]
+
+###########################################################
+#
+#	output some info
+#
+###########################################################
+print "TornadoBB is runing on %s" % TORNADOBB_ROOT_PATH

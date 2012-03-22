@@ -1,0 +1,47 @@
+{% extends "single_block_base.html" %}
+{% block title %}{{ _("User Info")}} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
+{% block single_block %}
+{% import datetime %}
+{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
+{% if current_user and current_user.get("is_auth",False) %}
+	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
+	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
+	{% if user_timezone_name != timezone_name %}
+		{% from pytz import timezone %}
+		{% set timezone_obj = timezone(user_timezone_name) %}
+	{% end %}
+{% end %}
+{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
+{% set user = data["user"]%}
+<div class="blockform">
+	<h2><span>{{_("User Info")}}</span></h2>
+	<div class="box">
+		<div class="inform">
+				<fieldset>
+					<legend>{{ user["name"] }}{{_("'s Info")}}</legend>
+					
+					<div class="infldset">
+					<dl>
+						
+						{% set avatar = user.get('avatar',None) %}
+						{% if not avatar %}
+							{% set avatar = "default/default.jpg" %}
+						{% else %}
+							{% set avatar = str(user['_id']) + avatar %}
+						{% end %}
+						<dd class="postavatar"><img src="{{ handler.settings.get('tornadobb.root_url','/tornadobb') }}/static/avatar/{{avatar}}" width="80" height="80" /></dd>
+						{% if user.get("display_email",False)%}
+						<dd class="usercontacts"><span class="email"><a href="mailto:{{ user['email'] }}">Email</a></span></dd>
+						{% end %}
+						<dt><strong>{{ user["name"]}}</strong></dt>
+						<dd class="usertitle"><strong>{{ _(user.get("role","Member")) }}</strong></dd>
+					</dl>
+						<p>{{_("Registered")}}: {{ datetime.datetime.fromtimestamp(user["registered_time"], timezone_obj).strftime(datetime_format) }}</p>
+						<p>{{_("Last visit")}}: {{ datetime.datetime.fromtimestamp(user["last_access"], timezone_obj).strftime(datetime_format) }}</p>
+						<p class="actions">{{_("Posts")}}: {{ user.get("topics_num",0) + user.get("replies_num",0) }} - <a href="{{ root_url }}/profile/topics?uid={{ user['_id'] }}">{{_("Show all topics")}}</a> - <a href="{{ root_url }}/profile/replies?uid={{ user['_id'] }}">{{_("Show all replies")}}</a></p>
+					</div>
+				</fieldset>
+			</div>
+	</div>
+</div>
+{% end %}

@@ -2,22 +2,18 @@
 {% block title %}{{_("Forum administration")}} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
 {% block menu_dashboard %}isactive{% end %}
 {% block right_content %}
+{% import platform %}
+{% import util %}
 <h2><span>{{_("Forum administration")}}</span></h2>
 <div id="adintro" class="box">
 	<div class="inbox">
 		<p>
-			Welcome to the FluxBB administration control panel. From here you can control vital aspects of the board. Depending on whether you are an administrator or a moderator you can:<br /><br />
-			&#160;- Organize categories and forums.<br />
-
-			&#160;- Set forum-wide options and preferences.<br />
-			&#160;- Control permissions for users and guests.<br />
-			&#160;- View IP statistics for users.<br />
-			&#160;- Ban users.<br />
-			&#160;- Censor words.<br />
-			&#160;- Set up user ranks.<br />
-
-			&#160;- Prune old posts.<br />
-			&#160;- Handle post reports.				</p>
+			{{_("Welcome to the TornadoBB administration control panel")}}<br /><br />
+			&#160;- {{_("Organize categories and forums")}}<br />
+			&#160;- {{_("Control permissions for users")}}<br />
+			&#160;- {{_("Manage moderators")}}<br />
+			&#160;- {{_("Ban users")}}<br />
+		</p>
 	</div>
 </div>
 
@@ -28,22 +24,25 @@
 		<dl>
 			<dt>TornadoBB {{_("version")}}</dt>
 			<dd>
-				v{{ tornadobb_settings["tornadobb.version"]}} - <a href="">{{_("Check for upgrade")}}</a><br />
+				version: {{ tornadobb_settings["tornadobb.version"]}} - <a href="">{{_("Check for upgrade")}}</a><br />
 			</dd>
 			<dt>{{_("Server load")}}</dt>
 			<dd>
-
-				0.12 0.15 0.17 - 1 user(s) online					</dd>
+				{{ util.load_stat() }}
+			</dd>
 			<dt>{{_("Environment")}}</dt>
 			<dd>
-				{{_("Operating system")}}: Linux<br />
-				PHP: 5.3.6-13ubuntu3.6 - <a href="">Show info</a><br />
+				{{_("Operating system")}}: {{ platform.platform() }}<br />
+				Python: {{  platform.python_version() }}<br />
 			</dd>
 
 			<dt>{{_("Database")}}</dt>
 			<dd>
-				MySQL Improved 5.1.58
-				<br />Rows: 137						<br />Size: 289.96 KB					</dd>
+				{% set db_info = data["database_info"] %}
+				{% for k,v in db_info.items() %}
+					{{ _(k) }} : {{ v }}<br />
+				{% end  %}
+			</dd>
 		</dl>
 	</div>
 </div>
