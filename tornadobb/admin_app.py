@@ -37,12 +37,12 @@ class AdminCategoryHandler(AdminBaseHandler):
 	def get(self):
 		
 		category_set = db_backend.do_show_all_categories()
-		print category_set
+		#print category_set
 		self.render('admin_category.html',data=locals())
 		
 	@authenticated	
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		name = self.get_argument("category_name",None)
 		position = self.get_argument("category_position",None)
 		if name and position:
@@ -63,7 +63,7 @@ class AdminCategoryEditHandler(AdminBaseHandler):
 
 	@authenticated
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		
 		_id = self.request.arguments["category_id"]
 		name = self.request.arguments["category_name"]
@@ -109,7 +109,7 @@ class AdminForumHandler(AdminBaseHandler):
 	
 	@authenticated
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		
 		category_id = self.get_argument("category_id",None)
 		name = self.get_argument("forum_name",None)
@@ -134,7 +134,7 @@ class AdminForumEditHandler(AdminBaseHandler):
 	
 	@authenticated
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		
 		old_category_id = self.request.arguments["old_category_id"]
 		new_category_id = self.request.arguments["new_category_id"]
@@ -144,7 +144,7 @@ class AdminForumEditHandler(AdminBaseHandler):
 		des = self.request.arguments["forum_des"]
 		
 		for i,one_forum_id in enumerate(forum_id):
-			print one_forum_id
+			#print one_forum_id
 			if not db_backend.do_update_forum(new_category_id[i],old_category_id[i],one_forum_id,name[i],int(position[i]),des[i]):
 				self.write_error(500)
 				return
@@ -156,7 +156,7 @@ class AdminForumOpenCloseHandler(AdminBaseHandler):
 	
 	@authenticated
 	def get(self):
-		print self.request.arguments
+		#print self.request.arguments
 		category_id = self.get_argument("c_id",None)
 		forum_id = self.get_argument("f_id",None)
 		cmd = self.get_argument("c",None)
@@ -186,7 +186,7 @@ class AdminModeratorHandler(AdminBaseHandler):
 	
 	@authenticated	
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		category_forum_id = self.get_argument("category_forum_id",None)
 		moderator_name = self.get_argument("moderator_name",None)
 		if category_forum_id and moderator_name and "permission" in self.request.arguments:
@@ -211,7 +211,7 @@ class AdminModeratorEditHandler(AdminBaseHandler):
 		
 	@authenticated		
 	def post(self):
-		print self.request.arguments
+		#print self.request.arguments
 		
 		forum_id = self.get_argument("forum_id",None)
 		moderator_id = self.get_argument("moderator_id",None)
@@ -250,7 +250,7 @@ class AdminMemberHandler(AdminBaseHandler):
 	@tornado.web.addslash
 	def post(self):
 		
-		print self.request.arguments
+		#print self.request.arguments
 		member_name = self.get_argument("member_name",None)
 		if member_name:
 			member_set = db_backend.do_show_user_info_with_name(member_name)

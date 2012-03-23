@@ -42,7 +42,7 @@
 							</td>	
 							<td><input class="name" type="text" name="forum_name" value="{{ forum['name'] }}" size="10" maxlength="{{ forum_max}}" /></td>
 							<td><input class="position" type="text" name="forum_position" value="{{ forum['position'] }}" size="3" maxlength="3" /></td>
-							<td><input type="text" name="forum_des" value="{{ forum['des'] }}" size="20" maxlength="{{ forum_des_max }}" /></td>
+							<td><input class="des" type="text" name="forum_des" value="{{ forum['des'] }}" size="20" maxlength="{{ forum_des_max }}" /></td>
 							<td>
 							{% if forum.get("closed",False) %}
 							<a href="close?c_id={{ category['_id'] }}&f_id={{ forum['_id'] }}&c=open">{{_("open")}}</a>
@@ -126,6 +126,19 @@ $(document).ready(function() {
 				$(this)[0].focus();
 				}
 		});
+		
+		if (result == false)
+			return false;
+		var reg_des = reg_name ;
+		$("#forumedit .des").each(function(){
+			if (reg_des.test($(this).val())){}
+			else{
+				alert("{{ _('Please enter a description') }}");
+				result = false;
+				$(this)[0].focus();
+				}
+		});
+		
 		return result;
 	});
 	
@@ -142,6 +155,7 @@ $(document).ready(function() {
 				digits: true
 			},
 			forum_des: {
+				required: true,
 				minlength: {{ forum_des_min }},
 				maxlength: {{ forum_des_max }}
 			}
@@ -158,6 +172,7 @@ $(document).ready(function() {
 				digits: "{{ _('Position must be one integer') }}"
 			},
 			forum_des:	{
+				required: "{{ _('Please enter a description') }}",
 				minlength: "{{  _('Please enter at least {0} characters').format(forum_des_min) }}",
 				maxlength: "{{  _('Please enter at most {0} characters').format(forum_des_max) }}"
 			}

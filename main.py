@@ -25,7 +25,9 @@ import os
 import tornado.ioloop
 import tornado.web
 import tornado.httpserver
+from tornado.options import define, options
 
+os.environ['PYTHON_EGG_CACHE'] = '/tmp'
 from tornadobb.settings import *
 
 handlers = []
@@ -35,21 +37,24 @@ settings = dict(
             cookie_secret = "43oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
             xsrf_cookies = True,
             autoescape = "xhtml_escape",
-            debug = True
+
         )
 
 settings = dict(settings, **tornadobb_settings)
 
-application = tornado.web.Application(handlers,**settings)
 
-from tornado.options import define, options
-
-define("port", default=8888, help="run on the given port", type=int)
+define("port", default=8000, help="run on the given port", type=int)
+define('debug',default=False,help='run in debug mode with autoreload (default: false)',type=bool)
 
 if __name__ == "__main__":
 	
 	tornado.options.parse_command_line()
-	http_server = tornado.httpserver.HTTPServer(application)
+
+	settings["debug"] = options.debug
+	#settings["static_path"] = os.path.join(os.path.dirname(__file__), "static")
+
+	application = tornado.web.Application(handlers,**settings)
+	http_server = tornado.httpserver.HTTPServer(application,xheaders=True)
 	http_server.listen(options.port)
 	tornado.ioloop.IOLoop.instance().start()
 

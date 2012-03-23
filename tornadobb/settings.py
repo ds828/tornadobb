@@ -330,7 +330,7 @@ tornadobb_settings = {
 		"tornadobb.highlight_settings" : _highlight_settings,
 		"tornadobb.category_forum" : _category_forum,
 		"tornadobb.datetime_format": " %Y-%m-%d %H:%M ",
-		"tornadobb.default_locale" : "zh-CN",
+		"tornadobb.default_locale" : "en-US",
 		"tornadobb.smtp_settings" : SMTP_SETTINGS,
 		"tornadobb.set_access_log_interval" : 10,
 		"tornadobb.pagination_pages_num" : 5,
@@ -349,9 +349,9 @@ tornadobb_settings = {
 		"tornadobb.category_min_chars_num" : 5,
 		"tornadobb.category_max_chars_num" : 25,
 		"tornadobb.forum_min_chars_num" : 5,
-		"tornadobb.forum_max_chars_num" : 25,
+		"tornadobb.forum_max_chars_num" : 20,
 		"tornadobb.forum_des_min_chars_num" : 0,
-		"tornadobb.forum_des_max_chars_num" : 25,
+		"tornadobb.forum_des_max_chars_num" : 50,
         }
 
 ###########################################################
@@ -411,9 +411,3 @@ tornadobb_handlers = [
 			(TORNADOBB_ROOT_URL + "/rules$", ForumRulesHandler),
 			]
 
-###########################################################
-#
-#	output some info
-#
-###########################################################
-print "TornadoBB is runing on %s" % TORNADOBB_ROOT_PATH

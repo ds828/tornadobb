@@ -455,7 +455,7 @@ class mongodb(backend_base):
 		
 		for category in categories:
 			category["_id"] = str(category["_id"])
-			for forum in category["forum"]:
+			for forum in category.get("forum",[]):
 				forum["_id"] = str(forum["_id"])
 		
 		return categories
@@ -579,9 +579,9 @@ class mongodb(backend_base):
 			self._database["category_forum"].update({"_id":category_id},{ "$addToSet" : { "forum" : forum }})
 			#TODO: HERE create collection for forum and create index
 			self._database[forum["_id"]].create_index([("hidden",ASCENDING)])
-			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("dist",DESCENDING),(dist_level,ASCENDING)])
+			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("dist",DESCENDING),("dist_level",ASCENDING)])
 			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("last_post_time",DESCENDING)])
-			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("last_post_time",DESCENDING),("dist",DESCENDING),(dist_level,ASCENDING)])
+			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",ASCENDING)])
 			self._database[forum["_id"]].create_index([("subject",ASCENDING)])
 			return True
 		except InvalidId:
