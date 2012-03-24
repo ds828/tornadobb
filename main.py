@@ -49,7 +49,9 @@ define('debug',default=False,help='run in debug mode with autoreload (default: f
 
 if __name__ == "__main__":
 	
+	
 	tornado.options.parse_command_line()
+	settings["debug"] = options.debug
 	application = tornado.web.Application(handlers,**settings)
 	http_server = tornado.httpserver.HTTPServer(application,xheaders=True)
 	http_server.listen(options.port)
