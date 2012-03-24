@@ -46,13 +46,10 @@ settings = dict(settings, **tornadobb_settings)
 define("port", default=8000, help="run on the given port", type=int)
 define('debug',default=False,help='run in debug mode with autoreload (default: false)',type=bool)
 
+
 if __name__ == "__main__":
 	
 	tornado.options.parse_command_line()
-
-	settings["debug"] = options.debug
-	#settings["static_path"] = os.path.join(os.path.dirname(__file__), "static")
-
 	application = tornado.web.Application(handlers,**settings)
 	http_server = tornado.httpserver.HTTPServer(application,xheaders=True)
 	http_server.listen(options.port)

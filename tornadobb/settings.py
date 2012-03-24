@@ -40,7 +40,7 @@ __all__ = [	"tornadobb_handlers",
 FORUM_TITLE = "TornadoBB Forum"	
 
 # Forum sub title
-FORUM_SUB_TITLE = "A Simple & Fast Forum based on Tornodo Frameworks written by Python and MongoDB"
+FORUM_SUB_TITLE = "A Simple & Fast Forum based on Tornodo written by Python and MongoDB"
 
 #html page template
 FORUM_TEMPLATE = "fluxbb"
