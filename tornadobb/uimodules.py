@@ -22,6 +22,7 @@
 
 import tornado.web
 import time
+import datetime
 import settings
 
 class Title(tornado.web.UIModule):
@@ -70,10 +71,10 @@ class Forum_Crumbs(tornado.web.UIModule):
 			order = ""
 		
 		if filter_view == "dist":
-			query = "/?f=dist" + order
+			query = "?f=dist" + order
 			area = "Distillate"
 		elif filter_view == "hide":
-			query = "/?f=hide" + order
+			query = "?f=hide" + order
 			area = "Hide"
 
 		#for forum url
@@ -181,9 +182,9 @@ class Pagination(tornado.web.UIModule):
 
 class Topic_Detail_List(tornado.web.UIModule):
 	 
-	 def render(self,category_id,forum_id,topics):
+	 def render(self,category_id,forum_id,topics,filter_view):
 		 
-		return self.render_string("module_topic_detail_list.html", category_id = category_id,forum_id = forum_id, topics = topics)
+		return self.render_string("module_topic_detail_list.html", category_id = category_id,forum_id = forum_id, topics = topics, filter_view = filter_view)
 	
 class Post_Detail_List(tornado.web.UIModule):
 	 
@@ -197,3 +198,17 @@ class Forum_Jumper(tornado.web.UIModule):
 	
 	 def render(self):
 		return self.render_string("module_forum_jumper.html")
+		
+class Show_Time(tornado.web.UIModule):
+	
+	def render(self,time):
+		
+		user = self.handler.current_user
+		if user and user.get("is_auth",False):
+			tz_obj = user.get("tz_obj",self.handler.settings["tornadobb.timezone_obj"])	
+		else:
+			tz_obj = self.handler.settings["tornadobb.timezone_obj"]
+			
+		datetime_format = self.handler.settings["tornadobb.datetime_format"]
+		formatted_time = datetime.datetime.fromtimestamp(time ,tz_obj).strftime(datetime_format)
+		return self.render_string("module_show_time.html",time = formatted_time)

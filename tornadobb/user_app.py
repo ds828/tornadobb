@@ -34,6 +34,7 @@ import random
 
 class MainHandler(BaseHandler):
 	
+	@tornado.web.addslash
 	def get(self):
 				
 		if not self.current_user or self.current_user.get("is_auth",False):
@@ -116,10 +117,10 @@ class ForumHandler(BaseHandler):
 		else:
 			pagination_obj = db_backend.do_create_topic_pagination(forum_id,jump_to_page_no,0,0,topics_num_per_page,pages_num,total_items_num,filter_view,order_by,dist_level)
 
-		forum_obj = {
-					 "topic_filter" : filter_view, #"all" , "dist"  , "hide"
-					 "topics" : topics
-					}
+		#forum_obj = {
+					 #"topic_filter" : filter_view, #"all" , "dist"  , "hide"
+		#			 "topics" : topics
+		#			}
 
 		self.render('forum.html',data=locals())
 
@@ -131,13 +132,14 @@ class TopicHandler(BaseHandler):
 	def get(self,category_id,forum_id,topic_id,*args,**kwargs):
 
 		permission = kwargs.get("permission",[])
+		filter_view = self.get_argument("f","all")
 		jump_to_page_no = int(self.get_argument("p",1))# jump to page
 		pages_num = self.get_argument("a",None) #total page count
 		total_items_num = self.get_argument("i",None) #total item count
 				
 		posts_num_per_page = self.settings["tornadobb.posts_num_per_page"]
 		expire_time = time.time() - self.settings["tornadobb.session_expire"]
-		topic_obj  = db_backend.do_show_topic_posts(forum_id,topic_id,jump_to_page_no,posts_num_per_page,expire_time)
+		topic_obj  = db_backend.do_show_topic_posts(forum_id,topic_id,jump_to_page_no,posts_num_per_page,expire_time,filter_view)
 
 		if not topic_obj:
 			self.write_error(500)
@@ -146,7 +148,7 @@ class TopicHandler(BaseHandler):
 		if jump_to_page_no == 1:
 			db_backend.do_add_topic_views_num(forum_id,topic_id)	
 		##print topic_obj
-		pagination_obj = db_backend.do_create_post_pagination(forum_id,topic_id,jump_to_page_no,posts_num_per_page,pages_num,total_items_num)
+		pagination_obj = db_backend.do_create_post_pagination(forum_id,topic_id,jump_to_page_no,posts_num_per_page,pages_num,total_items_num,filter_view)
 		# get current user whether alreay reply this topic boolean
 		hide_content = topic_obj.get("need_reply",False)
 
@@ -180,6 +182,8 @@ class TopicManagementHandler(BaseHandler):
 				errors = ["Fail to make it close"]
 			elif command == "hide_topic" and not db_backend.do_make_topic_hidden(forum_id,topic_id):
 				errors = ["Fail to make it hidden"]
+			elif command == "unhide_topic" and not db_backend.do_make_topic_unhidden(forum_id,topic_id):
+				errors = ["Fail to make it unhidden"]
 			elif  command == "delete_topic" and not db_backend.do_make_topic_delete(category_id,forum_id,topic_id):
 				errors = ["Fail to make it delete"]
 			elif command == "move_topic":
@@ -203,7 +207,6 @@ class TopicManagementHandler(BaseHandler):
 					errors = ["Fail to make it highlight"]
 			
 			if errors:
-				#self.render("error.html",data=locals())
 				self.write_error(500)
 				return
 			else:
@@ -216,12 +219,18 @@ class PostNewTopicHandler(BaseHandler):
 	
 	@authenticated
 	@check_url_avaliable
+	@tornado.web.removeslash
 	def get(self,category_id,forum_id,*args):
+		
+		if not self.current_user.get("postable",True):
+			self.redirect(self.settings["tornadobb.root_url"])
+			return
 		
 		self.render('new_post.html',data=locals())
 		
 	@authenticated
 	@check_url_avaliable
+	@tornado.web.removeslash
 	def post(self,category_id,forum_id,*args):
 		
 		"""
@@ -376,6 +385,7 @@ class QuoteHandler(BaseHandler):
 
 class SearchHandler(BaseHandler):
 	
+	@tornado.web.removeslash
 	def get(self):
 		return self.render("search.html",data={})
 	
@@ -405,6 +415,7 @@ class MarkitupPreviewHandler(BaseHandler):
 	
 class UserLoginHandler(BaseHandler):
 	
+	@tornado.web.removeslash
 	def get(self):
 		return self.render("login.html",data={})
 		
@@ -460,15 +471,22 @@ class UserLoginHandler(BaseHandler):
 			self.set_secure_cookie("is_auth", '1',expires=expires)
 			
 			self.redirect(self.get_argument("next",self.reverse_url("home_page")))
+			return
 		elif response == "fail":
 			errors = ["Wrong user name or password"]
-			self.render("login.html",data=locals())
+			
 		elif response == "not_verify":
 			errors = ["Your account is not actived yet","please active it with the active email we sent to you before"]
-			self.render("login.html",data=locals())
-
+			
+		elif response == "closed":
+			 errors = ["Your account is closed"]
+			
+		self.render("login.html",data=locals())
+		return 
+			
 class UserLogoutHandler(BaseHandler):
 	
+	@tornado.web.removeslash
 	def get(self):
 		
 		if not self.get_secure_cookie("save_pass",False):
@@ -485,6 +503,7 @@ class UserLogoutHandler(BaseHandler):
 
 class UserRegisterHandler(BaseHandler):
 	
+	@tornado.web.removeslash
 	def get(self):
 		
 		return self.render("register.html",data={})
@@ -522,9 +541,11 @@ class UserRegisterHandler(BaseHandler):
 				return
 
 class UserProfileHandler(BaseHandler):
+	
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
-
+		
 		user = db_backend.do_show_user_info_with_id(self.current_user["_id"])
 		if user:
 			self.render("user_essentials.html",data=locals())
@@ -534,6 +555,7 @@ class UserProfileHandler(BaseHandler):
 			
 	@authenticated
 	def post(self):
+		
 		tz = self.get_argument("tz",None)
 		if tz and db_backend.do_update_user_timezone(self.current_user["_id"],tz):
 			self.set_secure_cookie("tz",tz)
@@ -544,6 +566,7 @@ class UserProfileHandler(BaseHandler):
 
 class UserAvatarHandler(BaseHandler):
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
 		
 		#print self.request.arguments
@@ -583,6 +606,7 @@ class UserAvatarHandler(BaseHandler):
 
 class UserSignatureHandler(BaseHandler):
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
 
 		signature = db_backend.do_show_user_signature(self.current_user["_id"])
@@ -602,6 +626,7 @@ class UserSignatureHandler(BaseHandler):
 
 class UserPasswordHandler(BaseHandler):
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
 		
 		self.render("user_password.html",data=locals())
@@ -628,6 +653,7 @@ class UserPasswordHandler(BaseHandler):
 class UserEmailHandler(BaseHandler):
 	
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
 
 		self.render("user_email.html",data=locals())
@@ -654,6 +680,7 @@ class UserEmailHandler(BaseHandler):
 class UserDisplayHandler(BaseHandler):
 	
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
 		
 		self.render("user_display.html",data=locals())
@@ -675,6 +702,7 @@ class UserDisplayHandler(BaseHandler):
 
 class UserPrivacyHandler(BaseHandler):
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
 		
 		display_email = db_backend.do_show_display_email_option(self.current_user["_id"])
@@ -696,6 +724,7 @@ class UserPrivacyHandler(BaseHandler):
 				
 class UserTopicsHandler(BaseHandler):
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
 		
 		user_id = self.get_argument("uid",None)
@@ -730,6 +759,7 @@ class UserTopicsHandler(BaseHandler):
 		
 class UserRepliesHandler(BaseHandler):
 	@authenticated
+	@tornado.web.removeslash
 	def get(self):
 		
 		user_id = self.get_argument("uid",None)
@@ -764,6 +794,7 @@ class UserRepliesHandler(BaseHandler):
 				
 class ResendVerifyMailHandler(BaseHandler):
 		
+	@tornado.web.removeslash	
 	def get(self):
 		
 		self.render("resend_active_email.html",data=locals())
@@ -815,6 +846,7 @@ class TimezoneHandler(BaseHandler):
 
 class UserForgetPasswordHandler(BaseHandler):
 
+	@tornado.web.removeslash
 	def get(self):
 		
 		self.render("forget_password.html",data=locals())
@@ -856,9 +888,21 @@ class UserInfoHandler(BaseHandler):
 		
 class ForumRulesHandler(BaseHandler):
 	
+	@tornado.web.removeslash
 	def get(self):
 		
 		self.render("rules.html",data={})
+		
+class ChangeLanguageHandler(BaseHandler):
+	
+	@tornado.web.removeslash
+	def get(self):
+		
+		language = self.get_argument("l",None)
+		if language:
+			self.set_secure_cookie("locale",language)
+		
+		self.redirect(self.reverse_url("home_page"))
 
 def send_forget_password_email(request_handler,email_address,username,password):
 	

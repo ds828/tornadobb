@@ -1,25 +1,12 @@
-
-	{% if "sticky" in permission %}
-		| <a href="cmd?c=sticky" onclick='return confirm("{{ _('Do you want to make it sticky') }}?")'>
-			{% if topic.get("sticky",False) %} {{ _("unsticky") }} {% else %} {{ _("sticky") }} {% end %}</a>
-	{% end %}
-	{% if "distillate" in permission %}
-		| <a href="cmd?c=distillate" onclick='return confirm("{{ _('Do you want to make it distillate') }}?")'>
-			{% if topic.get("distillate_level",0) >= tornadobb_settings.get("tornadobb.distillat_threshold",60) or topic.get("distillate",False)%} {{ _("undistillate") }} {% else %} {{ _("distillate") }} {% end %}</a>
-	{% end %}
-	{% if "close_topic" in permission %}
-		| <a href="cmd?c=close_topic" onclick='return confirm("{{ _('Do you want to close this topic') }}?")'>
-			{% if topic.get("closed",False) %} {{ _("reopen") }} {% else %} {{ _("close") }} {% end %}</a>
-	{% end %}
-	{% if "hide_topic" in permission %}
-		| <a href="cmd?c=hide_topic" onclick='return confirm("{{ _('Do you want to hide this topic') }}?")'>
-			{% if topic.get("hidden",False) %} {{ _("unhide") }} {% else %} {{ _("hide") }} {% end %}</a>
-	{% end %}
-	{% if "delete_topic" in permission %}
-		| <a href="cmd?c=delete_topic" onclick='return confirm("{{ _('Do you want to delete it') }}?")'>{{ _("delete") }}</a>
-	{% end %}
-	{% if "move_topic" in permission %}
-		| <select onchange=" if (confirm('{{ _('Do you want to move it') }}?')) window.location=('cmd?c=move_topic&p='+this.options[this.selectedIndex].value);" >
+{% if data.get("filter_view","all") == "hide" %}
+		| {% if topic.get("sticky",False) %} {{ _("unsticky") }} {% else %} {{ _("sticky") }} {% end %}
+		| {% if topic.get("dist_level",0) >= tornadobb_settings.get("tornadobb.distillat_threshold",60) or topic.get("dist",False)%} {{ _("undistillate") }} {% else %} {{ _("distillate") }} {% end %}
+		| {% if topic.get("closed",False) %} {{ _("open") }} {% else %} {{ _("close") }} {% end %}
+		{% if "hide_topic" in permission %}
+		| <a href="cmd?c=unhide_topic" onclick='return confirm("{{ _('Do you want to do this process') }}?")'>{{ _("unhide") }}</a>
+		{% end %}
+		| {{ _("delete") }}
+		| <select disabled>
 				<option>{{ _("move to") }}</option>
 				{% for category in tornadobb_settings["tornadobb.category_forum"] %}
 					<optgroup label="{{ category['name'] }}">
@@ -29,9 +16,7 @@
 					</optgroup>
 				{% end %}
 			</select>
-	{% end %}
-	{% if "highlight" in permission %}
-		| <select onchange="if (confirm('{{ _('Do you want to make it highlight') }}?')) window.location=('cmd?c=highlight&p='+this.options[this.selectedIndex].value);" >
+		| <select disabled>
 				<option>{{ _("highlight") }}</option>
 				<optgroup label="{{ _('using') }}">
 				{% for highlight in tornadobb_settings["tornadobb.highlight_settings"] %}
@@ -48,4 +33,65 @@
 				{% end %}
 				</optgroup>
 			</select>
+{% else %}
+	{% if "sticky" in permission %}
+		| <a href="cmd?c=sticky" onclick='return confirm("{{ _('Do you want to do this process') }}?")'>
+			{% if topic.get("sticky",False) %} {{ _("unsticky") }} {% else %} {{ _("sticky") }} {% end %}</a>
+	{% else %}
+		| {% if topic.get("sticky",False) %} {{ _("unsticky") }} {% else %} {{ _("sticky") }} {% end %}
 	{% end %}
+	{% if "distillate" in permission %}
+		| <a href="cmd?c=distillate" onclick='return confirm("{{ _('Do you want to do this process') }}?")'>
+			{% if topic.get("dist_level",0) >= tornadobb_settings.get("tornadobb.distillat_threshold",60) or topic.get("dist",False)%} {{ _("undistillate") }} {% else %} {{ _("distillate") }} {% end %}</a>
+	{% else %}
+		| {% if topic.get("dist_level",0) >= tornadobb_settings.get("tornadobb.distillat_threshold",60) or topic.get("dist",False)%} {{ _("undistillate") }} {% else %} {{ _("distillate") }} {% end %}
+	{% end %}
+	{% if "close_topic" in permission %}
+		| <a href="cmd?c=close_topic" onclick='return confirm("{{ _('Do you want to do this process') }}?")'>
+			{% if topic.get("closed",False) %} {{ _("open") }} {% else %} {{ _("close") }} {% end %}</a>
+	{% else %}
+		| {% if topic.get("closed",False) %} {{ _("open") }} {% else %} {{ _("close") }} {% end %}
+	{% end %}
+	{% if "hide_topic" in permission %}
+		| <a href="cmd?c=hide_topic" onclick='return confirm("{{ _('Do you want to do this process') }}?")'>{{ _("hide") }}</a>
+	{% else %}
+		| {{ _("hide") }}
+	{% end %}
+	{% if "delete_topic" in permission %}
+		| <a href="cmd?c=delete_topic" onclick='return confirm("{{ _('Do you want to do this process') }}?")'>{{ _("delete") }}</a>
+	{% else %}
+		| {{ _("delete") }}
+	{% end %}
+		| <select onchange=" if (confirm('{{ _('Do you want to do this process') }}?')) window.location=('cmd?c=move_topic&p='+this.options[this.selectedIndex].value);" {% if "move_topic" not in permission %}disabled{% end %}>
+				<option>{{ _("move to") }}</option>
+				{% for category in tornadobb_settings["tornadobb.category_forum"] %}
+					<optgroup label="{{ category['name'] }}">
+					{% for forum in category.get("forum",[])%}
+						{% if data["forum_id"] == forum["_id"] %}
+						<option value="{{ category['_id'] }}/{{ forum['_id'] }}" selected>{{ forum["name"] }}</option>
+						{%else%}
+						<option value="{{ category['_id'] }}/{{ forum['_id'] }}">{{ forum["name"] }}</option>
+						{% end %}
+					{% end %}
+					</optgroup>
+				{% end %}
+			</select>
+	
+		| <select onchange="if (confirm('{{ _('Do you want to do this process') }}?')) window.location=('cmd?c=highlight&p='+this.options[this.selectedIndex].value);" {% if "highlight" not in permission %}disabled{% end %} >
+				<option>{{ _("highlight") }}</option>
+				<optgroup label="{{ _('using') }}">
+				{% for highlight in tornadobb_settings["tornadobb.highlight_settings"] %}
+					{% if highlight in topic.get("high_light",[]) %}
+						<option value="{{ highlight }}">{{ highlight }}</option>
+					{% end %}
+				{% end %}
+				</optgroup>
+				<optgroup label="{{ _('avaliable') }}">
+				{% for highlight in tornadobb_settings["tornadobb.highlight_settings"] %}
+					{% if highlight not in topic.get("high_light",[]) %}
+						<option value="{{ highlight }}">{{ highlight }}</option>
+					{% end %}
+				{% end %}
+				</optgroup>
+			</select>
+{% end %}

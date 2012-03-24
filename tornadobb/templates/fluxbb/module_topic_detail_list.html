@@ -1,14 +1,3 @@
-{% import datetime %}
-{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
-{% if current_user and current_user.get("is_auth",False) %}
-	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
-	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
-	{% if user_timezone_name != timezone_name %}
-		{% from pytz import timezone %}
-		{% set timezone_obj = timezone(user_timezone_name) %}
-	{% end %}
-{% end %}
-{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
 {% set items_per_page = handler.settings["tornadobb.posts_num_per_page"] %}
 {% set root_url = handler.settings["tornadobb.root_url"]%}
 {% for i,topic in enumerate(topics)%}
@@ -19,8 +8,8 @@
 		<div class="tclcon">
 			<div>
 				{% if is_sticky %}<span class="stickytext">Sticky:</span>{% end %}
-				{% if topic.get("closed",False) %}<span class="closedtext">({{ _("Closed") }})</span>{% end %}	
-				<a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
+				{% if topic.get("closed",False) %}<span class="stickytext">({{ _("Closed") }})</span>{% end %}	
+				<a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?f={{ filter_view }}" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
 				<span class="byuser">by {{ topic["creater_name"] }}</span>
 			</div>
 		</div>
@@ -32,6 +21,6 @@
 	{% else %}
 		{% set pages_num = topic.get('replies_num',0)/items_per_page + 1 %}
 	{% end %}
-	<td class="tcr"><a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?p={{ pages_num }}">{{ datetime.datetime.fromtimestamp(topic["last_post_time"] ,timezone_obj ).strftime(datetime_format) }}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
+	<td class="tcr"><a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?p={{ pages_num }}">{% module Show_Time(topic["last_post_time"]) %}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
 </tr>
 {% end %}

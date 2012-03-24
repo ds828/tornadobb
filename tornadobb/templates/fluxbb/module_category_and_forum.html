@@ -1,15 +1,5 @@
 {% import datetime %}
 {% set root_url = handler.settings.get('tornadobb.root_url','/tornadobb') %}
-{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
-{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
-{% if current_user and current_user.get("is_auth",False) %}
-	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
-	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
-	{% if user_timezone_name != timezone_name %}
-		{% from pytz import timezone %}
-		{% set timezone_obj = timezone(user_timezone_name) %}
-	{% end %}
-{% end %}
 {% for i,category in enumerate(categories) %}
 <div id="idx1" class="blocktable">
 	<h2><span>{{ _(category["name"]) }}</span></h2>
@@ -46,7 +36,7 @@
 						{% set last_post_time = forum.get("last_post_time",None) %}
 						{% if last_post_time %}
 						<a href="{{ root_url}}/topic/{{ category['_id'] }}/{{ forum['_id'] }}/{{ forum['last_post_topic_id'] }}/">
-							{{ datetime.datetime.fromtimestamp(last_post_time, timezone_obj).strftime(datetime_format) }}
+							{% module Show_Time(last_post_time) %}
 						</a> <span class="byuser">by {{ forum.get("last_poster_name","") }}</span>
 						{% end %}
 						</td>

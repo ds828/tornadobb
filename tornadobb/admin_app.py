@@ -27,6 +27,7 @@ import datetime, time
 
 class AdminDashboardHandler(AdminBaseHandler):
 	@authenticated
+	@tornado.web.addslash
 	def get(self):
 		database_info = db_backend.do_show_database_info()
 		self.render('admin_dashboard.html',data=locals())
@@ -62,6 +63,7 @@ class AdminCategoryHandler(AdminBaseHandler):
 class AdminCategoryEditHandler(AdminBaseHandler):
 
 	@authenticated
+	@tornado.web.addslash
 	def post(self):
 		#print self.request.arguments
 		
@@ -98,6 +100,13 @@ class AdminCategoryOpenCloseHandler(AdminBaseHandler):
 		else:
 			self.write_error(500)
 		
+class AdminCategoryDeleteHandler(AdminBaseHandler):
+	
+	@authenticated
+	def get(self):
+
+		self.write_error(404)
+	
 
 class AdminForumHandler(AdminBaseHandler):
 	@authenticated
@@ -175,6 +184,13 @@ class AdminForumOpenCloseHandler(AdminBaseHandler):
 		else:
 			self.write_error(404)
 
+class AdminForumDeleteHandler(AdminBaseHandler):
+	
+	@authenticated
+	def get(self):
+
+		self.write_error(404)
+
 class AdminModeratorHandler(AdminBaseHandler):
 	
 	@authenticated
@@ -209,7 +225,7 @@ class AdminModeratorHandler(AdminBaseHandler):
 			
 class AdminModeratorEditHandler(AdminBaseHandler):
 		
-	@authenticated		
+	@authenticated
 	def post(self):
 		#print self.request.arguments
 		

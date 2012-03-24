@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="forum">
+	<div class="main site-main">
+		<div class="main-inner">
+			<div id="punprofile" class="pun">
+				<div class="punwrap">
+					<div id="brdheader" class="block">
+						<div class="box">
+							<div id="brdmenu" class="inbox">
+								<ul>
+									<li id="navindex" class="{% block menu_index %}isactive{% end %}"><a href="{{ root_url }}">{{ _("Index") }}</a></li>
+									<li id="navrules" class="{% block menu_rules %}{% end %}"><a href="{{root_url}}/rules">{{ _("Rules") }}</a></li>
+									<li id="navsearch" class="{% block menu_search %}{% end %}"><a href="{{root_url}}/search">{{ _("Search") }}</a></li>
+									<li id="navprofile" class="{% block menu_profile %}{% end %}"><a href="{{root_url}}/profile">{{ _("Profile") }}</a></li>
+									<li id="navlogout" class="{% block menu_logout %}{% end %}"><a href="{{root_url}}/logout">{{ _("Logout") }}</a></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div id="brdmain">
+						<div id="msg" class="block">
+							<h2><span>Info</span></h2>
+							<div class="box">
+								<div class="inbox">
+									<p>{% block error_content %}{% end %}</p>
+									<p><a href="javascript: history.go(-1)">{{_("Go back")}}</a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="brdfooter" class="block">
+						{% include "inc_board_foot.html" %}
+					</div>
+				</div>
+				<div class="end-box"><div><!-- Bottom corners --></div></div>
+			</div>
+		</div>
+	</div>
+</div>
+{% end %}

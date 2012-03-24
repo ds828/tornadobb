@@ -99,6 +99,8 @@ class BaseHandler(tornado.web.RequestHandler):
 		else:
 			tz_obj = self.settings["tornadobb.timezone_obj"]
 		
+		user["tz_obj"] = tz_obj
+		
 		style = self.get_secure_cookie("style")
 		if style:
 			user["style"] = style
@@ -220,6 +222,7 @@ def load_permission(method):
 			role = self.current_user.get("role",None)
 			if role:
 				if role == "moderator":
+					forum_id = args[1]
 					user_id = self.current_user["_id"]		
 					permission = db_backend.do_show_moderator_permission(user_id,forum_id)
 				elif role == "admin":

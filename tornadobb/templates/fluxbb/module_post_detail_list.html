@@ -1,20 +1,9 @@
 {% autoescape None %}
-{% import datetime %}
-{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
-{% if current_user and current_user.get("is_auth",False) %}
-	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
-	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
-	{% if user_timezone_name != timezone_name %}
-		{% from pytz import timezone %}
-		{% set timezone_obj = timezone(user_timezone_name) %}
-	{% end %}
-{% end %}
 {% from mypostmarkup import render_bbcode %}
-{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
 {% set root_url = handler.settings.get('tornadobb.root_url','/tornadobb') %}
 {% for i,post in enumerate(topic["posts"]) %} 	
 <div class="blockpost rowodd firstpost blockpost1">
-	<h2><span><span class="conr">#{{ base_idx + i }}</span> <a href="">{{ datetime.datetime.fromtimestamp(post["post_time"], timezone_obj).strftime(datetime_format)}}</a></span></h2>
+	<h2><span><span class="conr">#{{ base_idx + i }}</span>{% module Show_Time(post["post_time"]) %}</span></h2>
 	<div class="box">
 		<div class="inbox">
 			<div class="postbody">
@@ -29,7 +18,7 @@
 							{% set avatar = str(post['poster_id']) + avatar %}
 						{% end %}
 						<dd class="postavatar"><a href="{{ root_url }}/user-info?uid={{ post['poster_id'] }}"><img src="{{ handler.settings.get('tornadobb.root_url','/tornadobb') }}/static/avatar/{{avatar}}" alt="{{ post['poster_name'] }}" width="80" height="80" /></a></dd>
-						<dd><span>{{_("Registered")}}: {{ datetime.datetime.fromtimestamp(post["poster_registered_time"], timezone_obj).strftime(datetime_format) }}</span></dd>
+						<dd><span>{{_("Registered")}}: {% module Show_Time(post["poster_registered_time"]) %}</span></dd>
 						<dd><span>{{_("Posts")}}: {{ post.get("poster_posts_num",0) }}</span></dd>
 						{% if post.get("poster_display_email")%}
 						<dd class="usercontacts"><span class="email"><a href="mailto:{{ post['poster_email'] }}">Email</a></span></dd>
@@ -50,7 +39,7 @@
 						{% end %}
 						</p>
 						{% if post.get("editer_name",None) %}
-							<p class="postedit"><em>{{ _("Last edited by") }} {{post["editer_name"]}} ({{ datetime.datetime.fromtimestamp(post["edit_time"], timezone_obj).strftime(datetime_format) }})</em></p>
+							<p class="postedit"><em>{{ _("Last edited by") }} {{post["editer_name"]}} ({% module Show_Time(post["edit_time"]) %})</em></p>
 						{% end %}
 						{% if hide_attach %}
 							<p>{{ _("to see the attachments, user must reply first") }}.</p>

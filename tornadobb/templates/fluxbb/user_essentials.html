@@ -2,17 +2,6 @@
 {% block title %}{{_("Essentials")}} - {{_("Profile")}} - {{_(tornadobb_settings['tornadobb.forum_title'])}}{% end%}
 {% block menu_essentials %}isactive{% end %}
 {% block right_content %}
-{% import datetime %}
-{% set timezone_obj = handler.settings["tornadobb.timezone_obj"] %}
-{% if current_user and current_user.get("is_auth",False) %}
-	{% set timezone_name = handler.settings["tornadobb.timezone_name"] %}
-	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
-	{% if user_timezone_name != timezone_name %}
-		{% from pytz import timezone %}
-		{% set timezone_obj = timezone(user_timezone_name) %}
-	{% end %}
-{% end %}
-{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
 {% set user = data["user"] %}
 <h2><span>{{ user["name"] }} - {{_("Essentials")}}</span></h2>
 	<div class="box">
@@ -69,8 +58,8 @@
 				<fieldset>
 					<legend>{{_("User activity")}}</legend>
 					<div class="infldset">
-						<p>{{_("Registered")}}: {{ datetime.datetime.fromtimestamp(user["registered_time"], timezone_obj).strftime(datetime_format) }}</p>
-						<p>{{_("Last visit")}}: {{ datetime.datetime.fromtimestamp(user["last_access"], timezone_obj).strftime(datetime_format) }}</p>
+						<p>{{_("Registered")}}: {% module Show_Time(user["registered_time"]) %}</p>
+						<p>{{_("Last visit")}}: {% module Show_Time(user["last_access"]) %}</p>
 						<p class="actions">{{_("Posts")}}: {{ user.get("topics_num",0) + user.get("replies_num",0) }} - <a href="{{ root_url }}/profile/topics?uid={{ user['_id'] }}">{{_("Show all topics")}}</a> - <a href="{{ root_url }}/profile/replies?uid={{ user['_id'] }}">{{_("Show all replies")}}</a></p>
 					</div>
 				</fieldset>

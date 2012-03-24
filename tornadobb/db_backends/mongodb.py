@@ -149,11 +149,13 @@ class mongodb(backend_base):
 					]
 			
 			user = self._database["user"].find_and_modify({"name":user_name,"password":password},{"$set":{"last_access":current_time,"xsrf":xsrf_value}},fields=fields)
-			if user:
+			if user and user.get("closed",False):
 				if not user.get("verify",False):
 					return "not_verify",None
 				else:
 					return "ok",user
+			else:
+				return "closed",user
 			
 		return "fail",None
 	
@@ -244,6 +246,7 @@ class mongodb(backend_base):
 					"display_email",
 					"role",
 					"avatar",
+					"tz",
 				]
 		return self._database["user"].find_one({"_id":user_id},fields=fields)
 		
@@ -578,10 +581,9 @@ class mongodb(backend_base):
 
 			self._database["category_forum"].update({"_id":category_id},{ "$addToSet" : { "forum" : forum }})
 			#TODO: HERE create collection for forum and create index
-			self._database[forum["_id"]].create_index([("hidden",ASCENDING)])
-			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("dist",DESCENDING),("dist_level",ASCENDING)])
-			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("last_post_time",DESCENDING)])
-			self._database[forum["_id"]].create_index([("hidden",ASCENDING),("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",ASCENDING)])
+			self._database[forum["_id"]].create_index([("dist",DESCENDING),("dist_level",ASCENDING)])
+			self._database[forum["_id"]].create_index([("last_post_time",DESCENDING)])
+			self._database[forum["_id"]].create_index([("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",ASCENDING)])
 			self._database[forum["_id"]].create_index([("subject",ASCENDING)])
 			return True
 		except InvalidId:
@@ -795,135 +797,127 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return None
-	"""			
+	"""	
+
 	def do_jump_to_first_page(self,forum_id,items_num_per_page,filter_view="all",order_by="post",dist_level=60):
 
-		if filter_view == "all":
-			query = {"hidden":False}
-		elif filter_view == "dist":
-			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level }}],"hidden":False}
-		elif filter_view == "hide":
-			query = {"hidden":True}
-		else:
-			query = {"hidden":False}
-			
+		collection_name = forum_id
+		
+		sort = ("last_post_time",-1)	
 		if order_by == "create":
 			sort = ("create_time",-1)
-		else:
-			sort = ("last_post_time",-1)
+		
+		query = {}
+		if filter_view == "hide":
 			
-		return list(self._database[forum_id].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_per_page))
+			collection_name = forum_id + "_hide"
+			
+		elif filter_view == "dist":
+			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level }}]}
+			
+		return list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_per_page))
 		
 		
 	def do_jump_to_lastest_page(self,forum_id,items_num_per_page,filter_view="all",order_by="post",dist_level=60):
-		
-		if filter_view == "all":
-			query = {"hidden":False}
-		elif filter_view == "dist":
-			query = { "$or" : [{ "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"hidden":False }
-		elif filter_view == "hide":
-			query = {"hidden":True}
-		else:
-			query = {"hidden":False}
-			
-		if order_by == "create":
-			sort = ("create_time",1)
-		else:
-			sort = ("last_post_time",1)
 					
 		items_num_lastest_page = self._database[forum_id].count() % items_num_per_page
 		
 		if items_num_lastest_page == 0:
 			items_num_lastest_page = items_num_per_page
+		
+		collection_name = forum_id
+		
+		sort = ("last_post_time",1)	
+		if order_by == "create":
+			sort = ("create_time",1)
+		
+		query = {}
+		if filter_view == "hide":
 			
-		topics =  list(self._database[forum_id].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_lastest_page))
+			collection_name = forum_id + "_hide"
+			
+		elif filter_view == "dist":
+			query = { "$or" : [{ "dist":True } , { "dist_level" : { "$gt" : dist_level}}]}
+			
+		topics =  list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_lastest_page))
 		topics.reverse()
 		return topics
 	
 	def do_show_prev_page_topics(self,forum_id,begin,items_num_per_page,filter_view="all",order_by="post",dist_level=60):
 		
 		begin = begin + 0.005
+		collection_name = forum_id
 		
-		if filter_view == "all":
-			query = {"last_post_time":{"$gt":begin},"hidden":False}
-		elif filter_view == "dist":
-			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$gt":begin},"hidden":False }
-		elif filter_view == "hide":
-			query = {"hidden":True,"last_post_time":{"$gt":begin}}
-		else:
-			query = {"last_post_time":{"$gt":begin},"hidden":False}
-			
+		sort = ("last_post_time",1)
 		if order_by == "create":
 			sort = ("create_time",1)
-		else:
-			sort = ("last_post_time",1)
-			
-		topics = list(self._database[forum_id].find(query,sort=[sort],fields={"posts":0},limit=items_num_per_page))
+		
+		query = {"last_post_time":{"$gt":begin}}
+		
+		if filter_view == "hide":
+			collection_name = forum_id + "_hide"
+		elif filter_view == "dist":
+			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$gt":begin}}
+				
+		topics = list(self._database[collection_name].find(query,sort=[sort],fields={"posts":0},limit=items_num_per_page))
 		topics.reverse()
 		return topics
 		
 	def do_show_next_page_topics(self,forum_id,begin,items_num_per_page,filter_view="all",order_by="post",dist_level=60):
 		
 		begin = begin - 0.005
+		collection_name = forum_id
 		
-		if filter_view == "all":
-			query = {"last_post_time":{"$lt":begin}, "hidden":False}
-		elif filter_view == "dist":
-			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$lt":begin},"hidden":False }
-		elif filter_view == "hide":
-			query = {"hidden":True,"last_post_time":{"$lt":begin}}
-		else:
-			query = {"last_post_time":{"$lt":begin},"hidden":False}
-			
+		sort = ("last_post_time",-1)	
 		if order_by == "create":
 			sort = ("create_time",-1)
-		else:
-			sort = ("last_post_time",-1)
 		
-		return list(self._database[forum_id].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_per_page))
+		query = {"last_post_time":{"$lt":begin}}
+		if filter_view == "hide":
+			collection_name = forum_id + "_hide"
+		elif filter_view == "dist":
+			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$lt":begin}}	
+			
+		return list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_per_page))
 		
 	def do_jump_back_to_show_topics(self,forum_id,begin,items_num_per_page,current_page_no,jump_to_page_no,filter_view="all",order_by="post",dist_level=60):
 		
 		begin = begin - 0.005
-		
-		if filter_view == "all":
-			query = {"last_post_time":{"$lt":begin},"hidden":False}
-		elif filter_view == "dist":
-			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$lt":begin},"hidden":False}
-		elif filter_view == "hide":
-			query = {"hidden":True,"last_post_time":{"$lt":begin}}
-		else:
-			query = {"last_post_time":{"$lt":begin},"hidden":False}
-			
+		offset = jump_to_page_no - current_page_no - 1
+		collection_name = forum_id
+
+		sort = ("last_post_time",-1)
 		if order_by == "create":
 			sort = ("create_time",-1)
-		else:
-			sort = ("last_post_time",-1)
-			
-		offset = jump_to_page_no - current_page_no - 1
 		
-		return list(self._database[forum_id].find(query,sort=[("sticky",-1),sort],fields={"posts":0}).skip(offset * items_num_per_page).limit(items_num_per_page))	
+		query = {"last_post_time":{"$lt":begin}}
+		
+		if filter_view == "hide":
+
+			collection_name = forum_id + "_hide"
+			
+		elif filter_view == "dist":
+			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$lt":begin}}	
+
+		return list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0}).skip(offset * items_num_per_page).limit(items_num_per_page))	
 		
 	def do_jump_forward_to_show_topics(self,forum_id,begin,items_num_per_page,current_page_no,jump_to_page_no,filter_view="all",order_by="post",dist_level=60):
 		
 		begin = begin + 0.005
+		offset = current_page_no - jump_to_page_no - 1
+		collection_name = forum_id
 		
-		if filter_view == "all":
-			query = {"last_post_time":{"$gt":begin},"hidden":False}
-		elif filter_view == "dist":
-			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$gt":begin},"hidden":False}
-		elif filter_view == "hide":
-			query = {"hidden":True,"last_post_time":{"$gt":begin}}
-		else:
-			query = {"last_post_time":{"$gt":begin},"hidden":False}
-			
+		sort = ("last_post_time",1)	
 		if order_by == "create":
 			sort = ("create_time",1)
-		else:
-			sort = ("last_post_time",1)
 		
-		offset = current_page_no - jump_to_page_no - 1
-		topics = list(self._database[forum_id].find(query,sort=[("sticky",-1),sort],fields={"posts":0}).skip(offset * items_num_per_page).limit(items_num_per_page))
+		query = {"last_post_time":{"$gt":begin}}
+		if filter_view == "hide":
+			collection_name = forum_id + "_hide"
+		elif filter_view == "dist":
+			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$gt":begin}}
+		
+		topics = list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0}).skip(offset * items_num_per_page).limit(items_num_per_page))
 		topics.reverse()
 		return topics
 		
@@ -931,16 +925,16 @@ class mongodb(backend_base):
 		
 		if not pages_num:
 			
-			if filter_view == "all":
-				query = {"hidden":False}
+			query = {}
+			collection_name = forum_id
+			if filter_view == "hide":
+				
+				collection_name = forum_id + "_hide"
+				
 			elif filter_view == "dist":
-				query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"hidden":False}
-			elif filter_view == "hide":
-				query = {"hidden":True}
-			else:
-				query = {"hidden":False}
-			
-			topics_num = self._database[forum_id].find(query,fields=["_id"]).count()
+				query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}]}
+				
+			topics_num = self._database[collection_name].find(query,fields=["_id"]).count()
 			
 			quotient,remainder = divmod(topics_num,items_num_per_page)
 			if remainder == 0:
@@ -964,7 +958,7 @@ class mongodb(backend_base):
 						}
 		return pagination_obj
 	
-	def do_create_post_pagination(self,forum_id,topic_id,current_page_no,items_num_per_page,pages_num,total_items_num):
+	def do_create_post_pagination(self,forum_id,topic_id,current_page_no,items_num_per_page,pages_num,total_items_num,filter_view="all"):
 		
 		if not pages_num:
 			
@@ -974,7 +968,11 @@ class mongodb(backend_base):
 			except InvalidId,e:
 				return None
 			
-			topic = self._database[forum_id].find_one({"_id":topic_id},fields=["posts"])
+			collection_name = forum_id
+			if filter_view == "hide":
+				collection_name = forum_id + "_hide"
+			
+			topic = self._database[collection_name].find_one({"_id":topic_id},fields=["posts"])
 			if topic:
 				
 				total_items_num = len(topic.get("posts",[]))
@@ -1072,7 +1070,7 @@ class mongodb(backend_base):
 						}
 		return pagination_obj		
 		
-	def do_show_topic_posts(self,forum_id,topic_id,current_page_no,items_num_per_page,expire_time):
+	def do_show_topic_posts(self,forum_id,topic_id,current_page_no,items_num_per_page,expire_time,filter_view="all"):
 
 		try:
 			if type(topic_id)is not ObjectId:
@@ -1082,7 +1080,22 @@ class mongodb(backend_base):
 	
 		begin = (current_page_no - 1) * items_num_per_page
 		
-		topic = self._database[forum_id].find_one({"_id":topic_id},fields={"subject":1,"need_reply":1,"need_reply_for_attach":1,"posts":{"$slice": [begin, items_num_per_page]}})
+		fields = {
+					"subject":1,
+					"need_reply":1,
+					"need_reply_for_attach":1,
+					"sticky":1,
+					"dist_level":1,
+					"dist":1,
+					"closed":1,
+					"posts":{"$slice": [begin, items_num_per_page]}
+					}
+		
+		collection_name = forum_id
+		if filter_view == "hide":
+			collection_name = forum_id + "_hide"
+		
+		topic = self._database[collection_name].find_one({"_id":topic_id},fields=fields)
 
 		posts = topic["posts"]		
 		user_list = list(set([post["poster_id"] for post in posts]))
@@ -1182,9 +1195,29 @@ class mongodb(backend_base):
 			if type(topic_id)is not ObjectId:
 				topic_id = ObjectId(topic_id)
 
-			topic = self._database[forum_id].find_one({"_id":topic_id},fields=["hidden"])
+			topic = self._database[forum_id].find_one({"_id":topic_id})
 			if topic:
-				self._database[forum_id].update({"_id":topic_id},{"$set":{"hidden": not topic.get("hidden",False)}})
+				self._database[forum_id + "_hide"].save(topic)
+				self._database[forum_id].remove({"_id":topic_id})
+				return True
+			else:
+				return False
+		except InvalidId:
+			return False
+		except OperationFailure as e:
+			logging.exception(e)
+			return False
+	
+	def do_make_topic_unhidden(self,forum_id,topic_id):
+		
+		try:
+			if type(topic_id)is not ObjectId:
+				topic_id = ObjectId(topic_id)
+
+			topic = self._database[forum_id + "_hide"].find_one({"_id":topic_id})
+			if topic:
+				self._database[forum_id].save(topic)
+				self._database[forum_id + "_hide"].remove({"_id":topic_id})
 				return True
 			else:
 				return False
@@ -1205,7 +1238,7 @@ class mongodb(backend_base):
 			topic = self._database[forum_id].find_one({"_id":topic_id},fields=["creater_id"])
 			if topic:
 				user_id = ObjectId(topic["creater_id"])
-				self._database["user"].update({"_id":user_id},{"$pull":{"topic_"+ forum_id : topic_id}})
+				self._database["user"].update({"_id":user_id},{"$addToSet":{"topic_"+ forum_id : str(topic_id)}})
 				self._database[forum_id].remove({"_id":topic_id})
 				self._database["category_forum"].update({"_id":category_id,"forum._id":forum_id},{"$inc":{"forum.$.topics_num":-1}})
 				return True
@@ -1219,6 +1252,7 @@ class mongodb(backend_base):
 
 	def do_make_topic_move(self,old_category_id,old_forum_id,new_category_id,new_forum_id,topic_id):
 		
+		str_topic_id = str(topic_id)
 		try:
 			if type(old_category_id) is not ObjectId:
 				old_category_id = ObjectId(old_category_id)
@@ -1226,13 +1260,13 @@ class mongodb(backend_base):
 				new_category_id = ObjectId(new_category_id)
 			if type(topic_id)is not ObjectId:
 				topic_id = ObjectId(topic_id)	
-
+			
 			topic = self._database[old_forum_id].find_one({"_id":topic_id})
 			if topic:
 				user_id = ObjectId(topic["creater_id"])
-				self._database[new_forum_id].save(topic)
 				self._database[old_forum_id].remove({"_id":topic_id})
-				self._database["user"].update({"_id":user_id},{"$pull":{"topic_" + old_forum_id:topic_id},"$push":{"topic_" + new_forum_id:topic_id}})
+				self._database[new_forum_id].save(topic)
+				self._database["user"].update({"_id":user_id},{"$addToSet":{"topic_" + old_forum_id:str_topic_id},"$addToSet":{"topic_" + new_forum_id:str_topic_id}})
 				self._database["category_forum"].update({"_id":old_category_id,"forum._id":old_forum_id},{"$inc":{"forum.$.topics_num":-1}})
 				self._database["category_forum"].update({"_id":new_category_id,"forum._id":new_forum_id},{"$inc":{"forum.$.topics_num":1}})
 				return True
@@ -1314,8 +1348,8 @@ class mongodb(backend_base):
 		
 			topic_obj["posts"][0]["_id"] = str(ObjectId())
 			topic_obj["posts"][0]["poster_id"] = user_id
-			topic_id = self._database[forum_id].save(topic_obj)
-			self._database["user"].update({"_id":user_id},{"$push":{"topic_" + forum_id:topic_id},"$inc":{"topics_num":1}})
+			topic_id = self._database[forum_id].insert(topic_obj)
+			self._database["user"].update({"_id":user_id},{"$addToSet":{"topic_" + forum_id:str(topic_id)},"$inc":{"topics_num":1}})
 			update = {
 						"$inc":{"forum.$.topics_num":1},
 						"$set":{
@@ -1335,24 +1369,26 @@ class mongodb(backend_base):
 
 	def do_reply_topic(self,category_id,forum_id,topic_id,poster_name,reply_obj):
 		
+		str_topic_id = str(topic_id)
+		
 		try:
 			if type(category_id)is not ObjectId:
 				category_id = ObjectId(category_id)
 			if type(topic_id)is not ObjectId:
 				topic_id = ObjectId(topic_id)
 			user_id = reply_obj["poster_id"]
+			str_user_id = str(user_id)
 			if type(user_id)is not ObjectId:
 				user_id = ObjectId(user_id)
 				reply_obj["poster_id"] = user_id
-			
-			str_user_id = str(user_id)
+				
 			update = {
 						"$inc":{"forum.$.replies_num":1},
 						"$set":{
 								"forum.$.last_post_time":reply_obj["post_time"],
 								"forum.$.last_poster_id":str_user_id,
 								"forum.$.last_poster_user":poster_name,
-								"forum.$.last_post_topic_id":str(topic_id),
+								"forum.$.last_post_topic_id":str_topic_id,
 								},
 					}
 			self._database["category_forum"].update({"_id":category_id,"forum._id":forum_id},update)
@@ -1367,7 +1403,7 @@ class mongodb(backend_base):
 								},
 					}
 			self._database[forum_id].update({"_id":topic_id},update)
-			self._database["user"].update({"_id":user_id},{"$addToSet":{"reply_" + forum_id:topic_id},"$inc":{"replies_num":1}})
+			self._database["user"].update({"_id":user_id},{"$addToSet":{"reply_" + forum_id:str_topic_id},"$inc":{"replies_num":1}})
 			return True
 		except InvalidId:
 			return False
@@ -1447,14 +1483,21 @@ class mongodb(backend_base):
 		try:
 			if type(user_id)is not ObjectId:
 				user_id = ObjectId(user_id)
-			if type(topic_id)is not ObjectId:
-				topic_id = ObjectId(topic_id)
 			
 			reply_field = "reply_" + forum_id
-			user = self._database["user"].find_one({"_id":user_id},fields=[reply_field])
-			for reply in user.get(reply_field,[]):
-				if reply == topic_id:
-					return True
+			topic_field = "topic_" + forum_id
+			user = self._database["user"].find_one({"_id":user_id},fields=[reply_field,topic_field])
+			
+			reply_list = user.get(reply_field,[])
+			if topic_id in reply_list:
+				return True
+				
+			topic_list = user.get(topic_field,[])
+			print topic_list
+			print topic_id
+			if topic_id in topic_list:
+				return True
+
 			return False
 		
 		except InvalidId:

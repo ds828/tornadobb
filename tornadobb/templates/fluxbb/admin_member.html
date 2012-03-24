@@ -2,17 +2,6 @@
 {% block title %}{{ _("Edit Members") }} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
 {% block menu_member %}isactive{% end %}
 {% block right_content %}
-{% import datetime %}
-{% set datetime_format = handler.settings["tornadobb.datetime_format"] %}
-{% set timezone_obj = tornadobb_settings["tornadobb.timezone_obj"] %}
-{% if current_user and current_user.get("is_auth",False) %}
-	{% set timezone_name = tornadobb_settings["tornadobb.timezone_name"] %}
-	{% set user_timezone_name = current_user.get("tz",timezone_name) %}
-	{% if user_timezone_name != timezone_name%}
-		{% from pytz import timezone %}
-		{% set timezone_obj = timezone(user_timezone_name) %}
-	{% end %}
-{% end %}
 {% set user_min = tornadobb_settings.get("tornadobb.username_min_chars_num",2) %}
 {% set user_max = tornadobb_settings.get("tornadobb.username_max_chars_num",25) %}
 <h2 class="block2"><span>{{_("Search Member")}}</span></h2>
@@ -64,16 +53,12 @@
 									</li>
 									<li>{{ _("Registered") }}: 
 										<strong>
-										{% if member.get("registered_time",None) %}
-											{{ datetime.datetime.fromtimestamp(member["registered_time"], timezone_obj).strftime(datetime_format)}}
-										{% end %}
+											{% module Show_Time(member.get("registered_time",0)) %}
 										</strong>
 									</li>
 									<li>{{ _("Last access") }}: 
 										<strong>
-										{% if member.get("last_access",None) %}
-											sss{{ datetime.datetime.fromtimestamp(member["last_access"], timezone_obj).strftime(datetime_format)}}
-										{% end %}
+										{% module Show_Time(member.get("last_access",0) ) %}
 										</strong>
 									</li>
 									<li>{{ _("Topics") }}: <strong>{{ member.get("topics_num",0) }}</strong></li>

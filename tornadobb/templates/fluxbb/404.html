@@ -1,29 +1,4 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="forum">
-	<div class="main site-main">
-		<div class="main-inner">
-			<div id="punprofile" class="pun">
-				<div class="punwrap">
-				{% include "inc_header.html" %}
-					<div id="brdmain">
-						<div id="msg" class="block">
-							<h2><span>Info</span></h2>
-							<div class="box">
-								<div class="inbox">
-									<p>{{_("Fail to find what you want to see")}}.</p>
-									<p><a href="javascript: history.go(-1)">{{_("Go back")}}</a></p>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div id="brdfooter" class="block">
-						{% include "inc_board_foot.html" %}
-					</div>
-				</div>
-				<div class="end-box"><div><!-- Bottom corners --></div></div>
-			</div>
-		</div>
-	</div>
-</div>
+{% extends "error_base.html" %}
+{% block error_content %}
+{{_("Fail to find what you want to see")}}.
 {% end %}

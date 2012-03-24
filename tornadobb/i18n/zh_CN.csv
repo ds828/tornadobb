@@ -40,13 +40,7 @@
 "Description","描述"
 "distillate","精华"
 "Distillate","精华"
-"Do you want to make it sticky","你要置顶这个帖子"
-"Do you want to make it distillate","你要将这个帖子加入精华"
-"Do you want to close this topic","你要关闭这个帖子"
-"Do you want to hide this topic","你要隐藏这个帖子"
-"Do you want to delete it","你要删除这个帖子"
-"Do you want to move it","你要移动这个帖子"
-"Do you want to make it highlight","你要高亮这个帖子"
+"Do you want to do this process","你要置顶这个帖子"
 "delete","删除"
 "Delete","删除"
 "delete_topic","删除主题"
@@ -249,5 +243,6 @@
 "You must enter your existing password","你必须输入现在的密码"
 "Your current time zone","你当前的时区"
 "Your new password has already been sent to ","新密码已经发送到"
+"Your account is closed","你的帐号已经被关闭"
 
 #Z

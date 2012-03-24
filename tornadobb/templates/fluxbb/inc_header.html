@@ -21,6 +21,7 @@
 					<li>
 						<span>{{ _("Topics") }}: <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/?o=create" title="Find topics with new posts since your last visit.">{{ _("New") }}</a> | <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/" title="{{ _('Find topics with recent posts') }}.">{{ _("Active") }}</a> | <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/?f=dist" title="{{ _('Find topics from Distillate Area') }}.">{{ _("Distillate") }}</a> {% if current_user and current_user.get("role",None) %} | <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/?f=hide" title="Find topics with new posts since your last visit.">{{ _("Hide") }}</a>{% end %}</span>
 					</li>
+					<li><a href="{{ root_url}}/language?l=en">English</a> | <a href="{{ root_url}}/language?l=zh_CN">简体中文</a> </li>
 				</ul>
 				{% end %}
 			{% end %}
@@ -45,14 +46,9 @@
 			<ul class="conl">	
 				<li>{{ _("You are not logged in") }}</li>
 			</ul>
-			{% if not handler.request.path == root_url %}
-				{% set forum_or_topic = handler.request.path.partition(root_url)[2].split("/")[1] %}
-				{% if  forum_or_topic in ["forum","topic"] %}
-				<ul class="conr">
-					<li><span>{{ _("Topics") }}: <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/?o=create" title="Find topics with new posts since your last visit.">{{ _("New") }}</a> | <a href="{{ root_url}}/forum/{{ data['category_id']}}/{{ data['forum_id']}}/" title="{{ _('Find topics with recent posts') }}.">{{ _("Active") }}</a></span></li>
-				</ul>
-				{% end %}
-			{% end %}
+			<ul class="conr">					
+					<li><a href="{{ root_url}}/language?l=en">English</a> | <a href="{{ root_url}}/language?l=zh_CN">简体中文</a> </li>
+			</ul>
 			<div class="clearer"></div>
 		</div>
 	</div>

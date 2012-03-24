@@ -4,7 +4,6 @@
 <link rel="stylesheet" type="text/css" href="{{ root_url }}/static/style/highlight.css" />
 {% end %}
 {% block content %}
-{% set topics = data["forum_obj"].get("topics",[])  %}
 <div class="forum">
 	<div class="main site-main">
 		<div class="main-inner">
@@ -38,7 +37,7 @@
 										</tr>
 									</thead>
 									<tbody>
-										{% module Topic_Detail_List(data["category_id"],data["forum_id"],topics) %}
+										{% module Topic_Detail_List(data["category_id"],data["forum_id"],data.get("topics",[]),data.get("filter_view","all")) %}
 									</tbody>
 									</table>
 								</div>
