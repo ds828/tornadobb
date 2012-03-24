@@ -2,17 +2,17 @@
 <h2><span>{{_("Board information")}}</span></h2>
 	<div class="box">
 		<div class="inbox">
-			<dl class="conr">
-				<dt><strong>{{_("Board statistics")}}</strong></dt>
-				<dd><span>{{_("Total number of registered users")}}: <strong>{{ data.get("total_users",0) }}</strong></span></dd>
-				<dd><span>{{_("Total number of topics")}}: <strong>{{ data.get("topics_num",0) }}</strong></span></dd>
-				<dd><span>{{_("Total number of posts")}}: <strong>{{ data.get("posts_num",0) }}</strong></span></dd>
-			</dl>
 			<dl class="conl">
 				<dt><strong>{{_("User information")}}</strong></dt>
 				<dd><span>{{_("Newest registered user")}}: {% for user in data.get("newest_users",[])[0:6] %} <a href="{{ data["root_url"] }}/user-info?uid={{ user['_id'] }}">{{ user["name"] }}</a> {% end %}</span></dd>
 				<dd><span>{{_("Registered users online")}}: <strong>{{ data.get("total_online_users",0) }}</strong></span></dd>
 				<dd><span>{{_("Guests online")}}: <strong>{{ data.get("total_online_guests",0) }}</strong></span></dd>
+			</dl>
+			<dl class="conr">
+				<dt><strong>{{_("Board statistics")}}</strong></dt>
+				<dd><span>{{_("Total number of registered users")}}: <strong>{{ data.get("total_users",0) }}</strong></span></dd>
+				<dd><span>{{_("Total number of topics")}}: <strong>{{ data.get("topics_num",0) }}</strong></span></dd>
+				<dd><span>{{_("Total number of posts")}}: <strong>{{ data.get("replies_num",0) }}</strong></span></dd>
 			</dl>
 			<dl id="onlinelist" class="clearb">
 				<dt><strong>{{_("Online")}}: </strong></dt>				

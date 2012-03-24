@@ -124,6 +124,8 @@ class Board_Info(tornado.web.UIModule):
 		online_users,total_online_users = settings.db_backend.do_show_online_users(expire_time)
 		total_online_guests = settings.db_backend.do_show_online_guests_num(expire_time)
 		root_url = self.handler.settings["tornadobb.root_url"]
+		
+		topics_num,replies_num = settings.db_backend.do_show_topics_replies_number()
 		 
 		return self.render_string("module_board_info.html", data=locals())
 

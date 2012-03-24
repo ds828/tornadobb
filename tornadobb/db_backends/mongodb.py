@@ -149,7 +149,7 @@ class mongodb(backend_base):
 					]
 			
 			user = self._database["user"].find_and_modify({"name":user_name,"password":password},{"$set":{"last_access":current_time,"xsrf":xsrf_value}},fields=fields)
-			if user and user.get("closed",False):
+			if user and not user.get("closed",False):
 				if not user.get("verify",False):
 					return "not_verify",None
 				else:
@@ -1698,3 +1698,18 @@ class mongodb(backend_base):
 				}
 		
 		return db_info
+
+	def do_show_topics_replies_number(self):
+		
+		category_forum = list(self._database["category_forum"].find({},fields=["forum.topics_num","forum.replies_num"]))
+		
+		topics_num = 0
+		replies_num = 0
+		for category in category_forum:
+			for forum in category.get("forum",[]):
+				topics_num += forum.get("topics_num",0)
+				replies_num += forum.get("replies_num",0)
+				
+		return topics_num,replies_num
+				
+		
