@@ -510,16 +510,17 @@ class UserRegisterHandler(BaseHandler):
 		
 	def post(self):
 		#print self.request.arguments	
-		#check username
-		if not db_backend.do_check_user_name(self.get_argument('username',None)):
-			errors = ["This username has already been used"]
-			self.render("register.html",data=locals())
+		username = self.get_argument('username').strip()
+		email = self.get_argument('email1').strip()
+		#check username and email
+		if not db_backend.do_check_user_name(username):
+			errors = ["This username: %s has already been used" % username]
+		elif not db_backend.do_check_user_email(email):
+			errors = ["This email: %s has already been used" % email]
 		else:
 			
-			username = self.get_argument('username').strip()
-			password = self.get_argument('password1')
-			email = self.get_argument('email').strip()
 			display_email = bool(self.get_argument('display_email',False))
+			password = self.get_argument('password1')
 			m = hashlib.md5()
 			m.update(password)
 			password = m.hexdigest().upper()
@@ -535,10 +536,12 @@ class UserRegisterHandler(BaseHandler):
 			if db_backend.do_user_register(user):
 				send_verify_email(self,email,username,password)
 				messages = ["A active email has already been sent to " + email,"Please active your account before login"]
-				self.render("register.html",data=locals())
 			else:
 				self.write_error(500)
 				return
+		
+		self.render("register.html",data=locals())
+		return
 
 class UserProfileHandler(BaseHandler):
 	

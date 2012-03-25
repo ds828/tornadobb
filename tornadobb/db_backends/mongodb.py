@@ -69,6 +69,7 @@ class mongodb(backend_base):
 			#create index
 			# for user
 			self.__class__._database["user"].create_index([("name",DESCENDING)])
+			self.__class__._database["user"].create_index([("email",DESCENDING)])
 			self.__class__._database["user"].create_index([("name",DESCENDING),("password",DESCENDING)])
 			self.__class__._database["user"].create_index([("_id",DESCENDING),("password",DESCENDING)])
 			self.__class__._database["user"].create_index([("last_access",DESCENDING)])
@@ -84,6 +85,7 @@ class mongodb(backend_base):
 	def do_create_first_admin(self,admin_name,password,email,register_time):
 		""" create a admin account ,if this admin account exists, just update it"""
 		try:
+			self._database["user"].ensure_index([("name",DESCENDING)])
 			if self._database["user"].find_one({"name":admin_name}):
 				self._database["user"].update({"name":admin_name},{"$set":{"password":password,"role":"admin","email":email,"registered_time":register_time,"verify":True}})
 				logging.info("update admin name: %s" % admin_name)
@@ -111,7 +113,16 @@ class mongodb(backend_base):
 			check this user account whether already been registered before
 			If used, return True, or False
 		"""
+		self._database["user"].ensure_index([("name",DESCENDING)])
 		if user_name and not self._database["user"].find_one({"name":user_name},fields=["_id"]):
+			return True
+		else:
+			return False
+			
+	def do_check_user_email(self,email):
+		
+		self._database["user"].ensure_index([("email",DESCENDING)])
+		if email and not self._database["user"].find_one({"email":email},fields=["_id"]):
 			return True
 		else:
 			return False

@@ -109,9 +109,9 @@ SMTP_SETTINGS = {
 					"tls_port": 587,
 					"ssl_port": 465,
 					"port":None,
-					"username":"",
-					"password":"",
-					"email_address":"",
+					"username":"tornadobb1@gmail.com",
+					"password":"4nE7dbMk",
+					"email_address":"tornadobb1@gmail.com",
 				}
 
 ###########################################################
