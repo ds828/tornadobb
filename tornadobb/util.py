@@ -21,7 +21,6 @@
 #       MA 02110-1301, USA.
 
 
-import settings
 import logging
 import email
 import mimetypes
@@ -30,9 +29,7 @@ from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
 import smtplib
 
-def send_mail(receiver,subject,plainText,htmlText):
-	
-	smtp_settings = settings.tornadobb_settings["tornadobb.smtp_settings"]
+def send_mail(receiver,subject,plainText,htmlText,smtp_settings):
 	
 	msgRoot = MIMEMultipart('related')
 	msgRoot['Subject'] = subject
@@ -162,8 +159,22 @@ def disk_stat():
 
 def main():
 	
-	memory_stat()
-	
+	smtp_settings = {
+
+					"server":"smtp.gmail.com",
+					"use_authentication": True,
+					"tls_port": 587,
+					"ssl_port": 465,
+					"port":None,
+					"username":"tornadobb1@gmail.com",
+					"password":"",
+					"email_address":"tornadobb1@gmail.com",
+				}
+	receiver = "songdi19@gmail.com"
+	subject = "test subject"
+	plainText = "test content"
+	htmlText = "<a href="">link</a>"
+	send_mail(receiver,subject,plainText,htmlText,smtp_settings)
 	return 0
 
 if __name__ == '__main__':

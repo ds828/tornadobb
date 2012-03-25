@@ -239,4 +239,5 @@ class SendEmailHandler(BaseHandler):
 		subject = self.get_argument("subject")
 		plain = self.get_argument("plain")
 		html = self.request.arguments["html"][0]
-		send_mail(receiver,subject,plain,html)
+		smtp_settings = self.settings["tornadobb.smtp_settings"]
+		send_mail(receiver,subject,plain,html,smtp_settings)
