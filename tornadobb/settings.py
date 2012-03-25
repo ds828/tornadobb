@@ -335,7 +335,7 @@ tornadobb_settings = {
 		"tornadobb.smtp_settings" : SMTP_SETTINGS,
 		"tornadobb.set_access_log_interval" : 10,
 		"tornadobb.pagination_pages_num" : 5,
-		"tornadobb.topics_num_per_page" : 20,
+		"tornadobb.topics_num_per_page" : 5,
 		"tornadobb.posts_num_per_page" : 10,
 		"tornadobb.distillat_threshold" : 60, # replies number
 		"tornadobb.subject_min_chars_num":1,

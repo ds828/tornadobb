@@ -462,22 +462,7 @@ class mongodb(backend_base):
 				forum["_id"] = str(forum["_id"])
 		
 		return categories
-	"""		
-	def do_only_show_all_categories_name_and_id(self):
-		
-		return list(self._database["category_forum"].find(sort=[("position",1)],fields=["name"]))
-	"""		
-	"""
-	def do_show_one_category(self,category_id):
-		
-		try:
-			if type(category_id) is not ObjectId:
-				category_id = ObjectId(category_id)
-		except InvalidId,e:
-			return None
-		
-		return self._database["category_forum"].find_one({"_id":category_id})
-	"""	
+
 	def do_create_category(self,category):
 		
 		"""
@@ -536,30 +521,7 @@ class mongodb(backend_base):
 		except OperationFailure as e:
 			logging.exception(e)
 			return False		
-	"""
-	def do_show_all_forums(self):
-		
-		return list(self._database["category_forum"].find(sort=[("position",1),("forum.position",1)]))
-	"""
-	"""	
-	def do_show_one_forum(self,category_id,forum_id):
-		
-		try:
-			if type(category_id) is not ObjectId:
-				category_id = ObjectId(category_id)
 
-		except InvalidId,e:
-			return None
-		
-		category = self._database["category_forum"].find_one({"_id":category_id,"forum._id":forum_id})
-		if category:
-			for forum in category["forum"]:
-				if forum["_id"] == forum_id:
-					forum["category_name"] = category["name"]
-					return forum
-		else:
-			return None
-	"""
 	def do_create_forum(self,category_id,forum):
 		
 		"""
@@ -581,9 +543,9 @@ class mongodb(backend_base):
 
 			self._database["category_forum"].update({"_id":category_id},{ "$addToSet" : { "forum" : forum }})
 			#TODO: HERE create collection for forum and create index
-			self._database[forum["_id"]].create_index([("dist",DESCENDING),("dist_level",ASCENDING)])
+			self._database[forum["_id"]].create_index([("dist",DESCENDING),("dist_level",DESCENDING)])
 			self._database[forum["_id"]].create_index([("last_post_time",DESCENDING)])
-			self._database[forum["_id"]].create_index([("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",ASCENDING)])
+			self._database[forum["_id"]].create_index([("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",DESCENDING)])
 			self._database[forum["_id"]].create_index([("subject",ASCENDING)])
 			return True
 		except InvalidId:
@@ -612,7 +574,7 @@ class mongodb(backend_base):
 							forum["name"] = forum_name
 							forum["position"] = forum_position
 							forum["des"] = forum_des		
-							self._database["category_forum"].update({"_id":new_category_id},{"$push": {"forum": forum}})
+							self._database["category_forum"].update({"_id":new_category_id},{"$addToSet": {"forum": forum}})
 							self._database["category_forum"].update({"_id":old_category_id},{"$pull": {"forum" : {"_id" : forum_id}}})
 							break
 					return True
@@ -760,45 +722,6 @@ class mongodb(backend_base):
 			logging.exception(e)
 			return False
 
-	#TODO: clear sort by forum.topics.sticky
-	"""
-	def do_show_forum_topics_and_num(self,category_id,forum_id):
-		
-		try:
-			if type(category_id) is not ObjectId:
-				category_id = ObjectId(category_id)
-		except InvalidId,e:
-			return None,None
-				
-		category = self._database["category_forum"].find_one({"_id":category_id,"forum._id":forum_id},sort=[("forum.topics.sticky",1)],fields=["name","forum.name","forum.topics","forum.topics_num"])
-		if category:
-			print category
-			return category,category["forum"][0]["topics_num"]
-		else:
-			return None,None
-	"""
-	"""
-	def do_post_topic(self,category_id,forum_id,topic):
-		
-		try:
-			if type(category_id) is not ObjectId:
-				category_id = ObjectId(category_id)			
-			user_id = topic["creater_id"]
-			if type(user_id) is not ObjectId:
-				user_id = ObjectId(user_id)
-
-			self._database["category_forum"].update({"_id":category_id,"forum._id":forum_id},{"$inc":{"forum.$.topics_num":1}})
-			topic_id = self._database[forum_id].insert(topic)
-			#TODO: add to user's topics list
-			self._database["user"].update({"_id":user_id},{"$push":{"topic_" + forum_id:topic_id}})
-			return str(topic_id)
-		except InvalidId:
-			return None
-		except OperationFailure as e:
-			logging.exception(e)
-			return None
-	"""	
-
 	def do_jump_to_first_page(self,forum_id,items_num_per_page,filter_view="all",order_by="post",dist_level=60):
 
 		collection_name = forum_id
@@ -809,11 +732,11 @@ class mongodb(backend_base):
 		
 		query = {}
 		if filter_view == "hide":
-			
 			collection_name = forum_id + "_hide"
 			
 		elif filter_view == "dist":
 			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level }}]}
+			self._database[collection_name].ensure_index([("dist",DESCENDING),("dist_level",DESCENDING)])
 			
 		return list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_per_page))
 		
@@ -838,6 +761,7 @@ class mongodb(backend_base):
 			
 		elif filter_view == "dist":
 			query = { "$or" : [{ "dist":True } , { "dist_level" : { "$gt" : dist_level}}]}
+			self._database[collection_name].create_index([("dist",DESCENDING),("dist_level",DESCENDING)])
 			
 		topics =  list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_lastest_page))
 		topics.reverse()
@@ -856,8 +780,14 @@ class mongodb(backend_base):
 		
 		if filter_view == "hide":
 			collection_name = forum_id + "_hide"
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING)])
+			
 		elif filter_view == "dist":
 			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$gt":begin}}
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",DESCENDING)])
+			
+		else:
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING)])
 				
 		topics = list(self._database[collection_name].find(query,sort=[sort],fields={"posts":0},limit=items_num_per_page))
 		topics.reverse()
@@ -875,8 +805,14 @@ class mongodb(backend_base):
 		query = {"last_post_time":{"$lt":begin}}
 		if filter_view == "hide":
 			collection_name = forum_id + "_hide"
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING)])
+			
 		elif filter_view == "dist":
 			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$lt":begin}}	
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",DESCENDING)])
+			
+		else:
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING)])
 			
 		return list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0},limit=items_num_per_page))
 		
@@ -893,12 +829,16 @@ class mongodb(backend_base):
 		query = {"last_post_time":{"$lt":begin}}
 		
 		if filter_view == "hide":
-
 			collection_name = forum_id + "_hide"
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING)])
 			
 		elif filter_view == "dist":
 			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$lt":begin}}	
-
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",DESCENDING)])
+		
+		else:
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING)])
+			
 		return list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0}).skip(offset * items_num_per_page).limit(items_num_per_page))	
 		
 	def do_jump_forward_to_show_topics(self,forum_id,begin,items_num_per_page,current_page_no,jump_to_page_no,filter_view="all",order_by="post",dist_level=60):
@@ -914,9 +854,13 @@ class mongodb(backend_base):
 		query = {"last_post_time":{"$gt":begin}}
 		if filter_view == "hide":
 			collection_name = forum_id + "_hide"
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING)])
 		elif filter_view == "dist":
 			query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}],"last_post_time":{"$gt":begin}}
-		
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING),("dist",DESCENDING),("dist_level",DESCENDING)])
+		else:
+			self._database[collection_name].ensure_index([("last_post_time",DESCENDING)])
+					
 		topics = list(self._database[collection_name].find(query,sort=[("sticky",-1),sort],fields={"posts":0}).skip(offset * items_num_per_page).limit(items_num_per_page))
 		topics.reverse()
 		return topics
@@ -933,6 +877,7 @@ class mongodb(backend_base):
 				
 			elif filter_view == "dist":
 				query = { "$or" : [ { "dist":True } , { "dist_level" : { "$gt" : dist_level}}]}
+				self._database[collection_name].ensure_index([("dist",DESCENDING),("dist_level",ASCENDING)])
 				
 			topics_num = self._database[collection_name].find(query,fields=["_id"]).count()
 			
@@ -1668,6 +1613,7 @@ class mongodb(backend_base):
 
 	def do_search_topic_name(self,forum_id,search_field):
 		
+		self._database[forum_id].ensure_index([("subject",ASCENDING)])
 		return list(self._database[forum_id].find({"subject":{"$regex":r".*%s.*" % search_field}},fields={"posts":0}))
 		
 		

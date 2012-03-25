@@ -184,7 +184,7 @@ class Pagination(tornado.web.UIModule):
 
 class Topic_Detail_List(tornado.web.UIModule):
 	 
-	 def render(self,category_id,forum_id,topics,filter_view):
+	 def render(self,category_id,forum_id,topics,filter_view="all"):
 		 
 		return self.render_string("module_topic_detail_list.html", category_id = category_id,forum_id = forum_id, topics = topics, filter_view = filter_view)
 	

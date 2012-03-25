@@ -10,11 +10,11 @@
 				<optgroup label="{{ category['name'] }}">
 				{% for forum in category.get("forum",[])%}
 					{% if not forum.get("closed",False) %}
-						{% if "forum_id" in data and data["forum_id"] == forum['_id'] %}
 						{% set forum_name = forum["name"] %}
+						{% if "forum_id" in data and data["forum_id"] == forum['_id'] %}
 						<option value="{{category['_id']}}/{{ forum['_id'] }}" selected>{{ forum_name }}</option>
 						{% else%}
-						<option value="{{category['_id']}}/{{ forum['_id'] }}">{{ forum["name"] }}</option>
+						<option value="{{category['_id']}}/{{ forum['_id'] }}">{{ forum_name }}</option>
 						{% end %}
 					{% end %}
 				{% end %}
