@@ -420,7 +420,7 @@ class UserLoginHandler(BaseHandler):
 		return self.render("login.html",data={})
 		
 	def post(self):
-		#print self.request.arguments	
+	
 		username = self.get_argument('username',None)
 		password =  self.get_argument('password',None)
 		remeber_me = self.get_argument('save_pass',False)
@@ -430,10 +430,12 @@ class UserLoginHandler(BaseHandler):
 		m = hashlib.md5()
 		m.update(password)
 		password = m.hexdigest().upper()
-	
+
 		response,user = db_backend.do_user_login(username,password,time.time(),self.xsrf_token)
 		if response == "ok":
-			self.clear_all_cookies();
+			
+			self.clear_all_cookies()
+			self.set_cookie("_xsrf",self.xsrf_token)			
 			tornadobb_settings = self.settings
 			self.set_secure_cookie("_id",str(user["_id"]))
 			self.set_secure_cookie("name",user["name"])
@@ -573,22 +575,21 @@ class UserAvatarHandler(BaseHandler):
 	@tornado.web.removeslash
 	def get(self):
 		
-		#print self.request.arguments
-
 		self.render("user_avatar.html",data=locals())
 	
 	def post(self):
-		
+				
 		user_id = self.get_argument("_id",None)
 		xsrf_value = self.get_argument("xsrf",None)
 		if not user_id or not xsrf_value or not db_backend.do_check_xsrf_for_avatar_upload(user_id,xsrf_value):
-			self.write_error(403)
+			self.write("403")
 			return
 			
 		name,ext = os.path.splitext(self.get_argument("Filename"))
 		file1 = self.request.files['Filedata'][0]
-		output_file = open(self.settings["tornadobb.root_path"] + "/static/avatar/" + user_id + ext, 'w')
-		output_file.write(file1['body'])
+		avatar_file = open(self.settings["tornadobb.root_path"] + "/static/avatar/" + user_id + ext, 'w')
+		avatar_file.write(file1['body'])
+		avatar_file.close()
 		
 		user = db_backend.do_show_current_avatar_name(user_id)
 		if user:

@@ -1261,7 +1261,9 @@ class mongodb(backend_base):
 		except InvalidId,e:
 			return False
 		
-		if self._database["user"].find_one({"_id":user_id,"xsrf":xsrf_value},fields=["xsrf"]):
+		user = self._database["user"].find_one({"_id":user_id},fields=["xsrf"])
+
+		if user and user.get("xsrf","") == xsrf_value:
 			return True
 		else:
 			return False

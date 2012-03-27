@@ -41,21 +41,26 @@
 					'fileDesc'  : 'Image Files (.JPG, .GIF, .PNG)',
 					'sizeLimit' : 20480,
 					'onComplete': function(event, ID, fileObj, response, data) {		
-									console.info(response);
+									
 									if (response == 'RELOGIN'){
 										if (confirm("{{ _('Please relogin for reloading new avatar') }}")==true)
 											location.href='{{ root_url}}/login';
 										return false;
 										}
 									if (response == 'OK'){
-											console.info('reload');
-											//window.location.reload(); 
+											alert('{{ _("Upload new avatar OK") }}');
+											return false;
 										}
-										return false;
 									if (response == 'FAIL'){
 										alert("{{ _('Fail to upload avatar image') }}");
 										return false;
 										}
+									if (response == '403'){
+										console.info(response);
+										alert("{{ _('No permission') }}");
+										return false;
+										}
+									return false;
 								}
 					};
 		$('#file_upload').uploadify(settings);
