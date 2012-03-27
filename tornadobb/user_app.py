@@ -433,6 +433,7 @@ class UserLoginHandler(BaseHandler):
 	
 		response,user = db_backend.do_user_login(username,password,time.time(),self.xsrf_token)
 		if response == "ok":
+			self.clear_all_cookies();
 			tornadobb_settings = self.settings
 			self.set_secure_cookie("_id",str(user["_id"]))
 			self.set_secure_cookie("name",user["name"])
