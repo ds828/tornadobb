@@ -17,7 +17,7 @@
 					<div id="brdmain">
 						<div class="linkst">
 							<div class="inbox crumbsplus">
-								{% module Forum_Crumbs(topic["subject"]) %}
+								{% module Forum_Crumbs(topic["subject"],data["from_query"]) %}
 								<div class="pagepost">
 									{% module Pagination(data["pagination_obj"],"post") %}
 									{% if permission %}
@@ -48,7 +48,7 @@
 									<p  style="margin-left:90%">{% module NewPost() %}</p>
 								{% end %}
 								</div>
-								{% module Forum_Crumbs(topic["subject"]) %}
+								{% module Forum_Crumbs(topic["subject"],data["from_query"]) %}
 								<div class="clearer"></div>
 							</div>
 						</div>
@@ -222,7 +222,7 @@
 				maxlength: "{{  _('Please enter at most {0} characters').format(post_max) }}"
 			}
 		}
-		});
+		});		
 	});
 	
 	function edit_post(post_id){
@@ -235,6 +235,11 @@
 		$("#message_edit")[0].focus();
 		$("#message_edit").html($("#"+post_id).html());
 		$("#post_id").val(post_id);
+	}
+	
+	function scale_image(img){
+		if(img.width>650)
+			img.width=650;
 	}
 	
 </script>

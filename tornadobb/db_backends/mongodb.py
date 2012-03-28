@@ -1305,7 +1305,7 @@ class mongodb(backend_base):
 				user_id = ObjectId(user_id)
 		
 			topic_obj["posts"][0]["_id"] = str(ObjectId())
-			topic_obj["posts"][0]["poster_id"] = user_id
+			#topic_obj["posts"][0]["poster_id"] = user_id
 			topic_id = self._database[forum_id].insert(topic_obj)
 			self._database["user"].update({"_id":user_id},{"$addToSet":{"topic_" + forum_id:str(topic_id)},"$inc":{"topics_num":1}})
 			update = {

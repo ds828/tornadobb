@@ -56,8 +56,9 @@ class MyVideoTag(TagBase):
 		if scheme.lower() not in (u'http', u'https', u'ftp'):
 			return u''
 		url = PostMarkup.standard_replace_no_break(url)	
-		return u'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,0,0" width="600" height="450"><param name="allowScriptAccess" value="sameDomain"><param name="movie" value="%s"><param name="quality" value="high"><param name="bgcolor" value="#ffffff"><embed src="%s" quality="high" bgcolor="#ffffff" width="600" height="450" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" /></object>' % (url,url)
-
+		#return u'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,0,0" width="600" height="450"><param name="allowScriptAccess" value="sameDomain"><param name="movie" value="%s"><param name="quality" value="high"><param name="bgcolor" value="#ffffff"><embed src="%s" quality="high" bgcolor="#ffffff" width="600" height="450" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" /></object>' % (url,url)
+		return u'<object width="600" height="450"><param name="movie" value="%s"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="%s" type="application/x-shockwave-flash" width="600" height="450" allowscriptaccess="always" allowfullscreen="true"></embed></object>' % (url,url)
+		
 class MyQuoteTag(TagBase):
 	
 	def __init__(self, name, **kwargs):
@@ -94,9 +95,42 @@ class EmoticonTag(TagBase):
 		emoticon_url = settings.tornadobb_settings["tornadobb.emoticon_settings"].get(url,"")
 		return u'<img src="%s"></img>' % PostMarkup.standard_replace_no_break(emoticon_url)
 
+
+class MyImgTag(ImgTag):
+
+    def __init__(self, name, **kwargs):
+        super(MyImgTag, self).__init__( name, inline=True)
+        
+
+    def render_open(self, parser, node_index):
+
+        contents = self.get_contents(parser)
+        self.skip_contents(parser)
+
+        # Validate url to avoid any XSS attacks
+        if self.params:
+            url = self.params.strip()
+        else:
+            url = strip_bbcode(contents)
+            
+        url = url.replace(u'"', u"%22").strip()
+        if not url:
+            return u''
+        scheme, netloc, path, params, query, fragment = urlparse(url)
+        if not scheme:
+            url = u'http://' + url
+            scheme, netloc, path, params, query, fragment = urlparse(url)
+        if scheme.lower() not in (u'http', u'https', u'ftp'):
+            return u''
+        
+        img_url = PostMarkup.standard_replace_no_break(url)
+
+        return u'<a href="%s" target="_blank"><img src="%s" onload="scale_image(this)"></img></a>' % (img_url,img_url)
+
 _my_postmarkup = create(use_pygments=pygments_available, annotate_links=False)
 #cover default behaive of quote tag
 _my_postmarkup.add_tag(MyVideoTag,u"video")
 _my_postmarkup.add_tag(MyQuoteTag,u"quote")
 _my_postmarkup.add_tag(EmoticonTag,u"emo")
+_my_postmarkup.add_tag(MyImgTag,u"img")
 render_bbcode = _my_postmarkup.render_to_html

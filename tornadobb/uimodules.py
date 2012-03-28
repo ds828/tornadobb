@@ -41,7 +41,7 @@ class Title(tornado.web.UIModule):
 
 class Forum_Crumbs(tornado.web.UIModule):
 	
-    def render(self, topic_name = None):
+    def render(self, topic_name = None, from_query = None):
 		
 		
 		tornadobb_settings = self.handler.settings
@@ -59,7 +59,7 @@ class Forum_Crumbs(tornado.web.UIModule):
 					if id_list[1] == forum["_id"]:
 						forum_name = forum["name"]
 						break
-
+		
 		query = None
 		area = None
 		filter_view = self.handler.get_argument("f",None)
@@ -78,13 +78,24 @@ class Forum_Crumbs(tornado.web.UIModule):
 			area = "Hide"
 
 		#for forum url
+		
 		forum_url = "/".join([root_url,"forum"] + id_list[0:2]) + "/"
+		
 		url_list = [forum_url]
 		title_list = [forum_name]
+		
 		#for area url
 		if area:
 			url_list.append(forum_url + query)
 			title_list.append(area)
+			
+		#for page no
+		# sample: p=4&c=1&a=6&i=30&t=1332915228.81&b=1332915224.84&f=dist&o=xx
+		if from_query:
+			#for page no
+			page_no = [item.split("=")[1] for item in from_query.split("&") if item.split("=")[0] == "p"][0]
+			url_list.append(forum_url + "?" + from_query)
+			title_list.append("[ %s ]" % page_no)
 			
 		#for topic url
 		if topic_name:

@@ -9,7 +9,7 @@
 			<div>
 				{% if is_sticky %}<span class="stickytext">Sticky:</span>{% end %}
 				{% if topic.get("closed",False) %}<span class="stickytext">({{ _("Closed") }})</span>{% end %}	
-				<a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?f={{ filter_view }}" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
+				<a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?f={{ filter_view }}&from={{ url_escape(handler.request.query)}}" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
 				<span class="byuser">by {{ topic["creater_name"] }}</span>
 			</div>
 		</div>

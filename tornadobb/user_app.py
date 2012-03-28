@@ -130,7 +130,7 @@ class TopicHandler(BaseHandler):
 	@load_permission
 	@tornado.web.addslash
 	def get(self,category_id,forum_id,topic_id,*args,**kwargs):
-
+		
 		permission = kwargs.get("permission",[])
 		filter_view = self.get_argument("f","all")
 		jump_to_page_no = int(self.get_argument("p",1))# jump to page
@@ -160,6 +160,11 @@ class TopicHandler(BaseHandler):
 				hide_content = False
 				hide_attach = False
 
+		from_query = self.get_argument("from",None)
+		#None
+		if not from_query:
+			from_query = "p=1"
+		
 		self.render('topic.html',data=locals())
 
 class TopicManagementHandler(BaseHandler):
