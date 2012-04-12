@@ -1052,10 +1052,9 @@ class mongodb(backend_base):
 			collection_name = forum_id + "_hide"
 		
 		topic = self._database[collection_name].find_one({"_id":topic_id},fields=fields)
-
-		posts = topic["posts"]		
+		posts = topic["posts"]
 		user_list = list(set([post["poster_id"] for post in posts]))
-		
+
 		fields = [
 					"name",
 					"role",
@@ -1070,7 +1069,7 @@ class mongodb(backend_base):
 				]
 		
 		users = list(self._database["user"].find({"_id":{"$in":user_list}},fields=fields))
-
+		
 		for post in posts:
 			for user in users:
 				if post["poster_id"] == user["_id"]:
@@ -1305,7 +1304,7 @@ class mongodb(backend_base):
 				user_id = ObjectId(user_id)
 		
 			topic_obj["posts"][0]["_id"] = str(ObjectId())
-			#topic_obj["posts"][0]["poster_id"] = user_id
+			topic_obj["posts"][0]["poster_id"] = user_id
 			topic_id = self._database[forum_id].insert(topic_obj)
 			self._database["user"].update({"_id":user_id},{"$addToSet":{"topic_" + forum_id:str(topic_id)},"$inc":{"topics_num":1}})
 			update = {
@@ -1451,8 +1450,8 @@ class mongodb(backend_base):
 				return True
 				
 			topic_list = user.get(topic_field,[])
-			print topic_list
-			print topic_id
+			#print topic_list
+			#print topic_id
 			if topic_id in topic_list:
 				return True
 
