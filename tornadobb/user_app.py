@@ -518,8 +518,8 @@ class UserRegisterHandler(BaseHandler):
 		
 	def post(self):
 		#print self.request.arguments	
-		username = self.get_argument('username').strip()
-		email = self.get_argument('email1').strip()
+		username = self.get_argument('username')
+		email = self.get_argument('email1')
 		#check username and email
 		if not db_backend.do_check_user_name(username):
 			errors = ["This username: %s has already been used" % username]

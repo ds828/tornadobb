@@ -85,6 +85,12 @@
 		</fieldset>
 	</div>
 </div>
+{% set user_min = tornadobb_settings.get("tornadobb.username_min_chars_num",2) %}
+{% set user_max = tornadobb_settings.get("tornadobb.username_max_chars_num",25) %}
+{% set pwd_min = tornadobb_settings.get("tornadobb.password_min_chars_num",5) %}
+{% set pwd_max = tornadobb_settings.get("tornadobb.password_max_chars_num",25) %}
+<h2 class="block2"><span><a href="add">{{_("Add Member")}}</a></span></h2>
+
 {% end %}
 {% block scripts %}
 <script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    

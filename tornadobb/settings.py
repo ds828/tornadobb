@@ -335,8 +335,8 @@ tornadobb_settings = {
 		"tornadobb.smtp_settings" : SMTP_SETTINGS,
 		"tornadobb.set_access_log_interval" : 10,
 		"tornadobb.pagination_pages_num" : 5,
-		"tornadobb.topics_num_per_page" : 5,
-		"tornadobb.posts_num_per_page" : 10,
+		"tornadobb.topics_num_per_page" : 20,
+		"tornadobb.posts_num_per_page" : 20,
 		"tornadobb.distillat_threshold" : 60, # replies number
 		"tornadobb.subject_min_chars_num":1,
 		"tornadobb.subject_max_chars_num":100,
@@ -410,6 +410,7 @@ tornadobb_handlers = [
 			url(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/?$", AdminMemberHandler,name="admin_member_page"),
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/close$", AdminMemberOpenCloseHandler),
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/postable$", AdminMemberShutHandler),
+			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/add$", AdminMemberAddHandler),
 			(TORNADOBB_ROOT_URL + "/rules/*$", ForumRulesHandler),
 			(TORNADOBB_ROOT_URL + "/language/*$", ChangeLanguageHandler),
 			]

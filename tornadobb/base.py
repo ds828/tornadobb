@@ -37,7 +37,7 @@ class BaseHandler(tornado.web.RequestHandler):
 		
 		if not is_auth:
 			#This is a guest or offline user
-			# guest cookies
+			#guest cookie has below:
 			#guest_id:
 			#locale:
 			#count:	
@@ -235,9 +235,10 @@ class SendEmailHandler(BaseHandler):
 		
 	def post(self):
 			
-		receiver = self.get_argument("receiver")
-		subject = self.get_argument("subject")
-		plain = self.get_argument("plain")
-		html = self.request.arguments["html"][0]
-		smtp_settings = self.settings["tornadobb.smtp_settings"]
-		send_mail(receiver,subject,plain,html,smtp_settings)
+		receiver = self.get_argument("receiver",None)
+		if receiver:
+			subject = self.get_argument("subject")
+			plain = self.get_argument("plain")
+			html = self.request.arguments["html"][0]
+			smtp_settings = self.settings["tornadobb.smtp_settings"]
+			send_mail(receiver,subject,plain,html,smtp_settings)

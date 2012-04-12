@@ -315,3 +315,48 @@ class AdminMemberShutHandler(AdminBaseHandler):
 				self.write_error(500)
 		else:
 			self.write_error(404)
+
+class AdminMemberAddHandler(AdminBaseHandler):
+	
+	@authenticated
+	def get(self):
+		
+		self.render('admin_member_add.html',data=locals())
+	
+	@authenticated
+	def post(self):
+		#print self.request.arguments	
+		username = self.get_argument('username')
+		email = self.get_argument('email',None)
+		#check username and email
+		if not db_backend.do_check_user_name(username):
+			errors = ["This username: %s has already been used" % username]
+		else:
+			display_email = bool(self.get_argument('display_email',False))
+			password = self.get_argument('password1')
+			m = hashlib.md5()
+			m.update(password)
+			password = m.hexdigest().upper()
+			
+			active = bool(self.get_argument('active',False))
+			
+			user = {
+					"name" : username,
+					"password": password,
+					"email" : email,
+					"registered_time":time.time(),
+					"display_email":display_email,
+					}
+					
+			if db_backend.do_user_register(user):
+				if active and db_backend.do_active_user_account(username,password):
+					pass
+				else:
+					self.write_error(500)
+					return
+			else:
+				self.write_error(500)
+				return
+		
+		self.render('admin_member_add.html',data=locals())
+		return

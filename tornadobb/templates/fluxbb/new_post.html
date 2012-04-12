@@ -139,7 +139,6 @@ $(document).ready(function(){
 		if (dia == "" || dia == null || dia =="http://"){}
 		else{
 			video_str = "[video]" + dia + "[/video]";
-			
 			message = $("#message").html();
 			$("#message").html(message + video_str);
 			//$("#video_list").append("<li><input type='text' value='" + dia +"' name='video' readonly ><a href='' onclick='$(this).parent().remove();return false;'>{{ _('delete') }}</a></li>");
@@ -157,8 +156,6 @@ $(document).ready(function(){
 			if (name_dia == "" || name_dia == null){}
 			else{
 					name = name_dia;
-					console.info(url)
-					console.info(name)
 					$("#attach_list").append("<li><span><a href='"+ url +"' target='_blank'>"+ name +"</a><input type='hidden' value='" + name +"' name='attach_name' readonly><input type='hidden' value='" + url +"' name='attach_url'></span>  <a href='#' onclick='return delete_attache(this);'>{{ _('delete') }}</a></li>");
 					$("#need_reply2").removeAttr("disabled"); 
 				}
