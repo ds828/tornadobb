@@ -42,6 +42,9 @@ FORUM_TITLE = "TornadoBB Forum"
 # Forum sub title
 FORUM_SUB_TITLE = "A Simple & Fast Forum based on Tornodo written by Python and MongoDB"
 
+#Forum keywords
+FORUM_KEYWORDS = u""
+
 #html page template
 FORUM_TEMPLATE = "fluxbb"
 
@@ -152,14 +155,6 @@ m = hashlib.md5()
 m.update(TORNADOBB_FIRST_ADMIN_PASSWORD)
 passowrd = m.hexdigest().upper()
 db_backend.do_create_first_admin(TORNADOBB_FIRST_ADMIN_NAME,passowrd,TORNADOBB_FIRST_ADMIN_EMAIL,time.time())
-
-###########################################################
-#
-#	create a cache for categories and forums
-#
-###########################################################
-
-_category_forum = db_backend.do_show_all_categories_forums_name_and_id()
 
 ###########################################################
 #
@@ -316,6 +311,7 @@ tornadobb_settings = {
 		"tornadobb.template_path" : os.path.join(TORNADOBB_ROOT_PATH, "templates/" + FORUM_TEMPLATE),
 		"tornadobb.forum_title" : FORUM_TITLE,
 		"tornadobb.forum_sub_title" : FORUM_SUB_TITLE,
+		"tornadobb.forum_keywords" : FORUM_KEYWORDS,
 		"tornadobb.root_path" : TORNADOBB_ROOT_PATH,
 		"tornadobb.timezone_name":TORNADOBB_TIME_ZONE,
 		"tornadobb.timezone_obj" : _tornadobb_timezone,
@@ -329,7 +325,8 @@ tornadobb_settings = {
 		"tornadobb.emoticon_settings" : _emoticon_2_settings,
 		"tornadobb.permission_settings" : _permission_settings,
 		"tornadobb.highlight_settings" : _highlight_settings,
-		"tornadobb.category_forum" : _category_forum,
+		#	create a cache for categories and forums
+		"tornadobb.category_forum" : db_backend.do_show_all_categories_forums_name_and_id(),
 		"tornadobb.datetime_format": " %Y-%m-%d %H:%M ",
 		"tornadobb.default_locale" : "en-US",
 		"tornadobb.smtp_settings" : SMTP_SETTINGS,

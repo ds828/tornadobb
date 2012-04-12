@@ -204,7 +204,7 @@ def check_url_avaliable(method):
 		
 		for category in self.settings["tornadobb.category_forum"]:
 			if category_id == category["_id"] and category.get("closed",False) == False:
-				for forum in category["forum"]:
+				for forum in category.get("forum",[]):
 					if forum_id == forum["_id"] and forum.get("closed",False) == False:
 						return method(self,category_id,forum_id,topic_id,*args, **kwargs)
 

@@ -342,7 +342,7 @@ class backend_base(object):
 
 	def do_search_topic_name(self,forum_id,search_field):
 		
-		return list(self._database[forum_id].find({"subject":{"$regex":r".*%s.*" % search_field}},fields={"posts":0}))
+		raise NotImplementedError
 		
 	def do_add_topic_views_num(self,forum_id,topic_id):
 		

@@ -155,12 +155,15 @@ class AdminForumEditHandler(AdminBaseHandler):
 		for i,one_forum_id in enumerate(forum_id):
 			#print one_forum_id
 			if not db_backend.do_update_forum(new_category_id[i],old_category_id[i],one_forum_id,name[i],int(position[i]),des[i]):
+				
+				self.settings["tornadobb.category_forum"] = db_backend.do_show_all_categories_forums_name_and_id()
 				self.write_error(500)
 				return
 
-		self.settings["torandobb.category_forum"] = db_backend.do_show_all_categories_forums_name_and_id()
+		self.settings["tornadobb.category_forum"] = db_backend.do_show_all_categories_forums_name_and_id()
 		self.redirect(self.reverse_url("admin_forum_page"))
-
+		return
+		
 class AdminForumOpenCloseHandler(AdminBaseHandler):
 	
 	@authenticated
@@ -183,6 +186,7 @@ class AdminForumOpenCloseHandler(AdminBaseHandler):
 				self.redirect(self.reverse_url("admin_forum_page"))
 		else:
 			self.write_error(404)
+			return
 
 class AdminForumDeleteHandler(AdminBaseHandler):
 	
