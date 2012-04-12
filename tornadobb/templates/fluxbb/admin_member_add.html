@@ -1,0 +1,110 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ _("Add Member") }} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
+{% block menu_member %}isactive{% end %}
+{% block right_content %}
+{% set user_min = tornadobb_settings.get("tornadobb.username_min_chars_num",2) %}
+{% set user_max = tornadobb_settings.get("tornadobb.username_max_chars_num",25) %}
+{% set pwd_min = tornadobb_settings.get("tornadobb.password_min_chars_num",5) %}
+{% set pwd_max = tornadobb_settings.get("tornadobb.password_max_chars_num",25) %}
+<h2 class="block2"><span>{{_("Add Member")}}</span></h2>
+<div class="box">
+	<form id="register" method="post" action="new">
+		{% raw xsrf_form_html() %}
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Please enter a username between {0} and {1} characters long").format(user_min,user_max)}}</legend>
+				<div class="infldset">
+					<label class="required"><strong>{{_("Username")}} <span>({{_("Required")}})</span></strong><br /><input type="text" name="username" id="username" size="25" maxlength="{{ user_max }}" /><br /></label>
+				</div>
+			</fieldset>
+			<fieldset>
+				<legend>{{_("Please enter a password at least {0} characters long").format(pwd_min)}}</legend>
+				<div class="infldset">
+					<label class="required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="password" id="password1" name="password1" size="25" maxlength="{{ pwd_max }}" /><br /></label>
+					<label class="required"><strong>{{_("Confirm password")}} <span>({_("Required")}})</span></strong><br /><input type="password" id="password2" name="password2" size="25" maxlength="{{ pwd_max }}" /><br /></label>
+				</div>
+			</fieldset>
+		</div>
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Enter a valid email address")}}</legend>
+				<div class="infldset">
+					<label class="required"><strong>{{_("Email")}} <span>({_("Required")}})</span></strong><br />
+					<input type="text" name="email1" id="email" size="50" maxlength="80" /><br /></label>
+				</div>
+			</fieldset>
+		</div>
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Set user privacy options")}}</legend>
+				<div class="infldset">
+					<label><input type="checkbox" name="display_email" value="True" />{{_("Display email address")}}.<br /></label>
+				</div>
+			</fieldset>
+		</div>
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("Set user active")}}</legend>
+				<div class="infldset">
+					<label><input type="checkbox" name="active" value="True" checked/>{{_("Active this user NOW")}}.<br /></label>
+				</div>
+			</fieldset>
+		</div>
+		<p class="buttons"><input type="submit" value="{{_('Register')}}" /></p>
+	</form>
+</div>
+
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#register").validate({
+		rules: {
+			username: {
+				required: true,
+				minlength: {{ user_min }},
+				maxlength: {{ user_max }}
+			},
+			password1: {
+				required: true,
+				minlength: {{ pwd_min }},
+				maxlength: {{ pwd_max }}
+			},
+			password2: {
+				required: true,
+				minlength: {{ pwd_min }},
+				maxlength: {{ pwd_max }},
+				equalTo: "#password1"
+			},
+			email: {
+				email: true
+			}
+			
+		},
+		messages: {
+		
+			username: {
+				required: "{{ _('Please enter a username') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(user_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(user_max) }}"
+			},
+			password1: {
+				required: "{{ _('Please enter a password') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(pwd_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(pwd_max) }}"
+			},
+			password2: {
+				required: "{{ _('Please enter a password') }}",
+				minlength: "{{  _('Please enter at least {0} characters').format(pwd_min) }}",
+				maxlength: "{{  _('Please enter at most {0} characters').format(pwd_max) }}",
+				equalTo: "{{ _('Please enter the same password as above') }}"
+			},
+			email: "{{ _('Please enter a valid email address') }}",
+		}
+	});
+});
+</script>
+{% end %}
