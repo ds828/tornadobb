@@ -8,7 +8,7 @@
 {% set pwd_max = tornadobb_settings.get("tornadobb.password_max_chars_num",25) %}
 <h2 class="block2"><span>{{_("Add Member")}}</span></h2>
 <div class="box">
-	<form id="register" method="post" action="new">
+	<form id="register" method="post" action="">
 		{% raw xsrf_form_html() %}
 		<div class="inform">
 			<fieldset>

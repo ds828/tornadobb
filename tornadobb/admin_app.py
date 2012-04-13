@@ -364,3 +364,12 @@ class AdminMemberAddHandler(AdminBaseHandler):
 		
 		self.render('admin_member_add.html',data=locals())
 		return
+
+class AdminMemberAddWithFileHandler(AdminBaseHandler):
+	
+	@authenticated
+	def post(self):
+		
+		file1 = self.request.files['Filedata'][0]
+		print file1['body']
+		

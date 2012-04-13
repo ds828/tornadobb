@@ -16,6 +16,7 @@
 						{% raw xsrf_form_html() %}
 						<label class="conl required"><strong>{{_("Username")}} <span>({{_("Required")}})</span></strong><br /><input type="text" id="username" name="username" size="25" maxlength="{{ user_max }}" tabindex="1" /><br /></label>
 						<label class="conl required"><strong>{{_("Password")}} <span>({{_("Required")}})</span></strong><br /><input type="password" id="password" name="password" size="25" maxlength="{{ pwd_max }}" tabindex="2" /><br /></label>
+						<input type="hidden" name="next" value="{{ data['next'] }}"/>
 						<div class="rbox clearb">
 							<label><input type="checkbox" name="save_pass" value="1" tabindex="3" />{{_("Log me in automatically each time I visit")}}.<br /></label>
 						</div>

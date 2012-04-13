@@ -422,7 +422,9 @@ class UserLoginHandler(BaseHandler):
 	
 	@tornado.web.removeslash
 	def get(self):
-		return self.render("login.html",data={})
+
+		next = self.get_argument("next",self.reverse_url("home_page"))
+		return self.render("login.html",data={"next":next})
 		
 	def post(self):
 	
