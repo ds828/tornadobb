@@ -1,0 +1,9 @@
+#Sample
+#username,password,email,show_email[False],active[True]
+big1,123456,big1@big.com,False,True
+#username,password,email,show_email[True],active[False]
+big2,123456,big2@big.com,True,False
+#username,password,email,show_email[False],active[False]
+big3,123456,big3@big.com,False,
+#username,password,email,show_email[False],active[True]
+big4,123456,big4@big.com,,True
