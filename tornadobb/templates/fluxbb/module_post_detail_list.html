@@ -73,8 +73,8 @@
 						{% if not hide_content and current_user.get("postable",True) %}
 						<li class="postquote"><span><span style="display:none" id="{{ post['_id']}}" name="{{ post['poster_name'] }}" >{{ post["content"] }}</span><a href="#message" class="quote">{{ _("Quote") }}</a></span></li>
 						{% end %}
-						{% if ((current_user["_id"] == post["poster_id"]) or ( permission and "edit_post" in permission )) and current_user.get("postable",True) %}
-						<li class="postedit"><span><a href="#edit_reply" onclick="edit_post('{{ post['_id'] }}')">{{_("Edit")}}</a></span></li>
+						{% if ((current_user["_id"] == str(post["poster_id"])) or ( permission and "edit_post" in permission )) and current_user.get("postable",True) %}
+						<li class="postedit"><span><a href="#edit_reply" onclick="edit_post('{{ post['_id'] }}','{{ post['poster_id'] }}')">{{_("Edit")}}</a></span></li>
 						{% end %}
 						{% if permission and "delete_post" in permission %}
 						<li class="postedit"><span><a href="#" onclick="if (confirm('Delete')) window.location='delete?post_id={{ post['_id'] }}';">{{_("Delete")}}</a></span></li>

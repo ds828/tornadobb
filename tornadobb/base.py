@@ -217,7 +217,7 @@ def load_permission(method):
 	@functools.wraps(method)
 	def wrapper(self, *args, **kwargs):
 					
-		permission = None
+		permission = []
 		if self.current_user and self.current_user.get("is_auth"):
 			role = self.current_user.get("role",None)
 			if role:

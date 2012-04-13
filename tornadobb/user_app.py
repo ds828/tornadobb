@@ -325,13 +325,15 @@ class PostEditHandler(BaseHandler):
 	@load_permission
 	def post(self,category_id,forum_id,topic_id,*args,**kwargs):
 		
-		permission = kwargs.get("permission",[])
+		
 		post_id = self.get_argument("post_id")
+		poster_id = self.get_argument("poster_id")
 		message = self.get_argument("message")
-		if "edit_post" in permission:
+		current_id = self.current_user["_id"]
+		if poster_id == current_id or "edit_post" in kwargs.get("permission"):
 			post = {
 				"_id" : post_id,
-				"editer_id":self.current_user["_id"],
+				"editer_id":current_id,
 				"editer_name":self.current_user["name"],
 				"edit_time":time.time(),
 				"content":message,

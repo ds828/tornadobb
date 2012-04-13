@@ -105,6 +105,7 @@
 											<div class="infldset txtarea">
 												{% raw xsrf_form_html() %}
 												<input type='hidden' id="post_id" value="" name="post_id">
+												<input type='hidden' id="poster_id" value="" name="poster_id">
 												<label class="required"><strong>{{_("Message")}} <span>({{_("Required")}})</span></strong><br />
 												<div id="emoticons">
 													{% for k,v in tornadobb_settings["tornadobb.emoticon_settings"].items()%}
@@ -225,9 +226,9 @@
 		});		
 	});
 	
-	function edit_post(post_id){
-		console.info(post_id);
-		console.info($("#"+post_id).html());
+	function edit_post(post_id,poster_id){
+		//console.info(post_id);
+		//console.info($("#"+post_id).html());
 		
 		$("#quickpost").css("display","none");
 		$("#preview_reply").css("display","none");
@@ -235,6 +236,7 @@
 		$("#message_edit")[0].focus();
 		$("#message_edit").html($("#"+post_id).html());
 		$("#post_id").val(post_id);
+		$("#poster_id").val(poster_id);
 	}
 	
 	function scale_image(img){
