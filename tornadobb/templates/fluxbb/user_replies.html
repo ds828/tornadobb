@@ -3,7 +3,7 @@
 {% block single_block %}
 <div>
 	<label><span>{{_("Forum")}}<br /></span>
-		<select name="id" onchange="window.location=('?uid={{ data['user_id'] }}&id=' + this.options[this.selectedIndex].value)">
+		<select name="id" onchange="window.location=(this.options[this.selectedIndex].value)">
 			<option value="#">---{{ _("Forum") }}---</option>
 			{% for category in handler.settings["tornadobb.category_forum"] %}
 				<optgroup label="{{ category['name'] }}">
@@ -11,9 +11,9 @@
 					{% if not forum.get("closed",False) %}
 						{% if "forum_id" in data and data["forum_id"] == forum['_id'] %}
 						{% set forum_name = forum["name"] %}
-						<option value="{{category['_id']}}/{{ forum['_id'] }}" selected>{{ forum_name }}</option>
+						<option value="{{root_url}}/profile/replies/{{ data['user_id'] }}/{{category['_id']}}/{{ forum['_id'] }}/1" selected>{{ forum_name }}</option>
 						{% else%}
-						<option value="{{category['_id']}}/{{ forum['_id'] }}">{{ forum["name"] }}</option>
+						<option value="{{root_url}}/profile/replies/{{ data['user_id'] }}/{{category['_id']}}/{{ forum['_id'] }}/1">{{ forum["name"] }}</option>
 						{% end %}
 					{% end %}
 				{% end %}
@@ -44,7 +44,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{% module Topic_Detail_List(data["category_id"],data["forum_id"],data["topics"]) %}
+					{% module Topic_Detail_List(data["category_id"],data["forum_id"],data["topics"],url=handler.request.path, current_page = data.get("jump_to_page_no",0)) %}
 				</tbody>
 				</table>
 			</div>
@@ -53,7 +53,7 @@
 	<div class="postlinksb">
 		<div class="inbox crumbsplus">
 			<div class="pagepost">
-			{% module Pagination(data["pagination_obj"],"post") %}
+			{% module Pagination(data["pagination_obj"],"user") %}
 			</div>
 		</div>
 	</div>

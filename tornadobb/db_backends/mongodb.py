@@ -161,14 +161,15 @@ class mongodb(backend_base):
 					]
 			
 			user = self._database["user"].find_and_modify({"name":user_name,"password":password},{"$set":{"last_access":current_time,"xsrf":xsrf_value}},fields=fields)
-			if user and not user.get("closed",False):
-				if not user.get("verify",False):
-					return "not_verify",None
+			if user:
+				if user.get("closed",False):
+					if not user.get("verify",False):
+						return "not_verify",None
+					else:
+						return "ok",user
 				else:
-					return "ok",user
-			else:
-				return "closed",user
-			
+					return "closed",user
+		
 		return "fail",None
 	
 	def do_set_user_access_log(self,user_id,current_time):
@@ -1317,7 +1318,7 @@ class mongodb(backend_base):
 			topic_obj["posts"][0]["_id"] = str(ObjectId())
 			topic_obj["posts"][0]["poster_id"] = user_id
 			topic_id = self._database[forum_id].insert(topic_obj)
-			self._database["user"].update({"_id":user_id},{"$addToSet":{"topic_" + forum_id:str(topic_id)},"$inc":{"topics_num":1}})
+			self._database["user"].update({"_id":user_id},{"$addToSet":{"topic_" + forum_id:topic_id},"$inc":{"topics_num":1}})
 			update = {
 						"$inc":{"forum.$.topics_num":1},
 						"$set":{
@@ -1371,7 +1372,7 @@ class mongodb(backend_base):
 								},
 					}
 			self._database[forum_id].update({"_id":topic_id},update)
-			self._database["user"].update({"_id":user_id},{"$addToSet":{"reply_" + forum_id:str_topic_id},"$inc":{"replies_num":1}})
+			self._database["user"].update({"_id":user_id},{"$addToSet":{"reply_" + forum_id:topic_id},"$inc":{"replies_num":1}})
 			return True
 		except InvalidId:
 			return False
@@ -1449,6 +1450,9 @@ class mongodb(backend_base):
 	def do_check_already_reply(self,forum_id,topic_id,user_id):
 		
 		try:
+			if type(topic_id)is not ObjectId:
+				topic_id = ObjectId(topic_id)
+				
 			if type(user_id)is not ObjectId:
 				user_id = ObjectId(user_id)
 			
@@ -1461,8 +1465,6 @@ class mongodb(backend_base):
 				return True
 				
 			topic_list = user.get(topic_field,[])
-			#print topic_list
-			#print topic_id
 			if topic_id in topic_list:
 				return True
 

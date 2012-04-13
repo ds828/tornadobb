@@ -189,27 +189,90 @@ def authenticated(method):
 			raise HTTPError(403)
 		return method(self, *args, **kwargs)
 	return wrapper
-	
-def check_url_avaliable(method):
+
+def url_parse(method):
 	
 	@functools.wraps(method)
 	def wrapper(self, *args, **kwargs):
 		
-		category_id_and_forum_id_and_topic_id = self.request.path.partition(self.settings["tornadobb.root_url"])[2].split("/")
-		category_id = category_id_and_forum_id_and_topic_id[2]
-		forum_id = category_id_and_forum_id_and_topic_id[3]
-		topic_id = None
-		if len(category_id_and_forum_id_and_topic_id) >= 5:
-			topic_id = category_id_and_forum_id_and_topic_id[4]
+		url_parameters = self.request.path.partition(self.settings["tornadobb.root_url"])[2].split("/")
+		category_id = url_parameters[2]
+		forum_id = url_parameters[3]
+		if url_parameters[1] == "topic":
+			#/tornadobb/topic/4f5b3e0c61a4f60e69000000/4f5b3e0c61a4f60e69000001/4f5b3e0c61a4f60e690001ac/?p=2&a=3&i=41
+			#/tornadobb/topic/4f5b3e0c61a4f60e69000000/4f5b3e0c61a4f60e69000001/4f5b3e0c61a4f60e690001ac/2/3/41
+			#['', 'topic', '4f5b3e0c61a4f60e69000000', '4f5b3e0c61a4f60e69000001', '4f5b3e0c61a4f60e690001ac', '2', '3', '41']
+			topic_id = url_parameters[4]
+			page_param = {
+							"jump_to_page":1,
+							"total_pages_num":0,
+							"total_topics_num":0,
+						}
+			if len(url_parameters) >= 7:
+				#pages
+				page_param["jump_to_page"] = int(url_parameters[5])
+				page_param["total_pages_num"] = int(url_parameters[6])
+				page_param["total_topics_num"] = int(url_parameters[7])
+				
+			for category in self.settings["tornadobb.category_forum"]:
+				if category_id == category["_id"] and category.get("closed",False) == False:
+					for forum in category.get("forum",[]):
+						if forum_id == forum["_id"] and forum.get("closed",False) == False:
+							return method(self,category_id = category_id,forum_id = forum_id,topic_id = topic_id,page_param=page_param, **kwargs)
+			
+		elif url_parameters[1] == "forum":
 		
-		for category in self.settings["tornadobb.category_forum"]:
-			if category_id == category["_id"] and category.get("closed",False) == False:
-				for forum in category.get("forum",[]):
-					if forum_id == forum["_id"] and forum.get("closed",False) == False:
-						return method(self,category_id,forum_id,topic_id,*args, **kwargs)
+		#/tornadobb/forum/4f5b3e0c61a4f60e69000000/4f5b3e0c61a4f60e69000003/33/33/33/33/11.0/11.0
+		#['', 'forum', '4f5b3e0c61a4f60e69000000', '4f5b3e0c61a4f60e69000003', '33', '33', '33', '33', '11.0', '11.0']
+			page_param = {
+							"current_page":1,
+							"jump_to_page":1,
+							"total_pages_num":0,
+							"total_topics_num":0,
+						}
+			if len(url_parameters) >= 10:
+				#pages
+				page_param["current_page"] = int(url_parameters[4])
+				page_param["jump_to_page"] = int(url_parameters[5])
+				page_param["total_pages_num"] = int(url_parameters[6])
+				page_param["total_topics_num"] = int(url_parameters[7])
+				page_param["top_topic_time"] = float(url_parameters[8])
+				page_param["bottom_topic_time"] = float(url_parameters[9])
+				
+			for category in self.settings["tornadobb.category_forum"]:
+				if category_id == category["_id"] and category.get("closed",False) == False:
+					for forum in category.get("forum",[]):
+						if forum_id == forum["_id"] and forum.get("closed",False) == False:
+							return method(self,category_id = category_id,forum_id = forum_id,page_param=page_param,**kwargs)
+		
+		elif url_parameters[1] == "profile":
+		#/tornadobb/profile/topics/4f5b3e0c61a4f60e69000000/4f5b3e0c61a4f60e69000001/4f5b3e0c61a4f60e69000004/1/10/200
+		#['', 'profile', 'topics', '4f5b3e0c61a4f60e69000000', '4f5b3e0c61a4f60e69000001', '4f5b3e0c61a4f60e69000004', '1','10','200']
+
+			page_param = {
+							"total_pages_num":0,
+							"total_items_num":0,
+						}
+			target = url_parameters[2]
+			user_id = url_parameters[3]
+			category_id = url_parameters[4]
+			forum_id = url_parameters[5]	
+			page_param["jump_to_page"] = int(url_parameters[6])
+			
+			if len(url_parameters) == 9:
+			
+				page_param["total_pages_num"] = int(url_parameters[7])
+				page_param["total_topics_num"] = int(url_parameters[8])
+				
+			for category in self.settings["tornadobb.category_forum"]:
+				if category_id == category["_id"] and category.get("closed",False) == False:
+					for forum in category.get("forum",[]):
+						if forum_id == forum["_id"] and forum.get("closed",False) == False:
+							return method(self,category_id = category_id,forum_id = forum_id,user_id=user_id, target=target, page_param=page_param,**kwargs)
 
 		self.write_error(404)
 		return
+		
 	return wrapper
 
 def load_permission(method):

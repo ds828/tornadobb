@@ -15,7 +15,7 @@
 							<div class="inbox crumbsplus">
 								{% module Forum_Crumbs() %}
 								<div class="pagepost">
-								{% module Pagination(data["pagination_obj"]) %}
+								{% module Pagination(data["pagination_obj"],"topic") %}
 								<p style="margin-left:90%">
 								{% module NewPost() %}
 								</p>
@@ -37,7 +37,7 @@
 										</tr>
 									</thead>
 									<tbody>
-										{% module Topic_Detail_List(data["category_id"],data["forum_id"],data.get("topics",[]),data.get("filter_view","all")) %}
+										{% module Topic_Detail_List(data["category_id"],data["forum_id"], data.get("topics",[]), data.get("forum_path",None), data.get("jump_to_page_no",0), data.get("filter_view","all"), data.get("order_by","post")) %}
 									</tbody>
 									</table>
 								</div>
@@ -46,7 +46,7 @@
 						<div class="linksb">
 							<div class="inbox crumbsplus">
 								<div class="pagepost">
-								{% module Pagination(data["pagination_obj"]) %}
+								{% module Pagination(data["pagination_obj"],"topic") %}
 								<p style="margin-left:90%">
 								{% module NewPost() %}
 								</p>

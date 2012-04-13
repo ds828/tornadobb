@@ -23,6 +23,7 @@
 import tornado.web
 import time
 import datetime
+import urlparse
 import settings
 
 class Title(tornado.web.UIModule):
@@ -43,7 +44,6 @@ class Forum_Crumbs(tornado.web.UIModule):
 	
     def render(self, topic_name = None, from_query = None):
 		
-		
 		tornadobb_settings = self.handler.settings
 		root_url = tornadobb_settings.get('tornadobb.root_url','/tornadobb')		
 		rel_url = self.handler.request.path.partition(root_url)[2]
@@ -51,8 +51,7 @@ class Forum_Crumbs(tornado.web.UIModule):
 		
 		
 		category_forum = tornadobb_settings['tornadobb.category_forum']
-		# set a defualt forum name
-		forum_name = category_forum[0]["forum"][0]["name"]
+		
 		for category in category_forum:
 			if id_list[0] == category["_id"]:
 				for forum in category["forum"]:
@@ -90,23 +89,26 @@ class Forum_Crumbs(tornado.web.UIModule):
 			title_list.append(area)
 			
 		#for page no
-		# sample: p=4&c=1&a=6&i=30&t=1332915228.81&b=1332915224.84&f=dist&o=xx
+		# sample: fp=4&f=dist&o=xx&url=url
 		if from_query:
 			#for page no
-			page_no = [item.split("=")[1] for item in from_query.split("&") if item.split("=")[0] == "p"][0]
-			url_list.append(forum_url + "?" + from_query)
+			parsed_url = urlparse.urlparse(from_query)
+			query_dict = dict(urlparse.parse_qsl(parsed_url.path))
+			
+			page_no = query_dict["fp"]
+			filter_view = query_dict["f"]
+			order_by = query_dict["o"]
+			url = query_dict["url"]
+			url_list.append(url + "?f=" + filter_view + "&o=" + order_by)
 			title_list.append("[ %s ]" % page_no)
 			
 		#for topic url
 		if topic_name:
 			topic_url = "/".join([root_url,"topic"] + id_list) + "/"
-			url_list.append(topic_url)
+			url_list.append("")
 			title_list.append(topic_name)
-			
-		#print url_list
-		#print title_list
-		return self.render_string("module_forum_crumbs.html", title_list = title_list,url_list = url_list)
 
+		return self.render_string("module_forum_crumbs.html", title_list = title_list,url_list = url_list)
 
 class NewPost(tornado.web.UIModule):
     
@@ -140,26 +142,61 @@ class Board_Info(tornado.web.UIModule):
 		 
 		return self.render_string("module_board_info.html", data=locals())
 
+class Topic_Detail_List(tornado.web.UIModule):
+	 
+	 def render(self,category_id,forum_id,topics, url=None, current_page = 1, filter_view="all",order_by="post"):
+		 
+		return self.render_string("module_topic_detail_list.html", category_id = category_id,forum_id = forum_id, topics = topics, current_page = current_page, filter_view = filter_view, order_by = order_by, url=url)
+
+class Post_Detail_List(tornado.web.UIModule):
+	 
+	 def render(self,topic,current_page_num,posts_num_per_page,permission,hide_content,hide_attach):
+		 
+		base_idx = (current_page_num - 1) * posts_num_per_page + 1
+			
+		return self.render_string("module_post_detail_list.html", topic = topic, hide_content = hide_content,hide_attach = hide_attach, base_idx = base_idx,permission = permission)
+		
+
+		
+class Forum_Jumper(tornado.web.UIModule):
+	
+	 def render(self):
+		return self.render_string("module_forum_jumper.html")
+		
+class Show_Time(tornado.web.UIModule):
+	
+	def render(self,time):
+		
+		user = self.handler.current_user
+		if user and user.get("is_auth",False):
+			tz_obj = user.get("tz_obj",self.handler.settings["tornadobb.timezone_obj"])	
+		else:
+			tz_obj = self.handler.settings["tornadobb.timezone_obj"]
+			
+		datetime_format = self.handler.settings["tornadobb.datetime_format"]
+		formatted_time = datetime.datetime.fromtimestamp(time ,tz_obj).strftime(datetime_format)
+		return self.render_string("module_show_time.html",time = formatted_time)
+
 class Pagination(tornado.web.UIModule):
 	 
-	 def render(self,pagination_obj,target="topic"):
-		#pagination_pages_num = self.handler.settings["tornadobb.pagination_pages_num"]
-		pagination_pages_num = 5
+	 def render(self,pagination_obj, target="post"):
+		
+		pagination_pages_num = self.handler.settings["tornadobb.pagination_pages_num"]
+		
 		pages_num = pagination_obj.get("pages_num")
 		
 		#quick for less than 9 cells
 		if pages_num <= pagination_pages_num + 2:
 			begin = 2
 			end = pages_num
-			#print begin
-			#print end
-			if target == "topic":
-				return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
-			elif target == "post":
+			if target == "post":
 				return self.render_string("module_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
+			elif target == "topic":
+				return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
 			else:
-				return self.render_string("module_user_topic_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
-
+				return self.render_string("module_user_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=False,show_next_space=False)
+			
+		#more than 9 cells
 		begin = pagination_obj.get("current_page_num")
 		
 		if begin % pagination_pages_num == 0:
@@ -186,42 +223,9 @@ class Pagination(tornado.web.UIModule):
 		else:
 			show_next_space = True
 		
-		if target == "topic":
-			return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=show_prev_space,show_next_space=show_next_space)
-		elif target == "post":
+		if target == "post":
 			return self.render_string("module_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=show_prev_space,show_next_space=show_next_space)
+		elif target == "topic":
+			return self.render_string("module_topic_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=show_prev_space,show_next_space=show_next_space)
 		else:
-			return self.render_string("module_user_topic_post_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=show_prev_space,show_next_space=show_next_space)
-
-class Topic_Detail_List(tornado.web.UIModule):
-	 
-	 def render(self,category_id,forum_id,topics,filter_view="all"):
-		 
-		return self.render_string("module_topic_detail_list.html", category_id = category_id,forum_id = forum_id, topics = topics, filter_view = filter_view)
-	
-class Post_Detail_List(tornado.web.UIModule):
-	 
-	 def render(self,topic,current_page_num,posts_num_per_page,permission,hide_content,hide_attach):
-		 
-		base_idx = (current_page_num - 1) * posts_num_per_page + 1
-			
-		return self.render_string("module_post_detail_list.html", topic = topic, hide_content = hide_content,hide_attach = hide_attach, base_idx = base_idx,permission = permission)
-		
-class Forum_Jumper(tornado.web.UIModule):
-	
-	 def render(self):
-		return self.render_string("module_forum_jumper.html")
-		
-class Show_Time(tornado.web.UIModule):
-	
-	def render(self,time):
-		
-		user = self.handler.current_user
-		if user and user.get("is_auth",False):
-			tz_obj = user.get("tz_obj",self.handler.settings["tornadobb.timezone_obj"])	
-		else:
-			tz_obj = self.handler.settings["tornadobb.timezone_obj"]
-			
-		datetime_format = self.handler.settings["tornadobb.datetime_format"]
-		formatted_time = datetime.datetime.fromtimestamp(time ,tz_obj).strftime(datetime_format)
-		return self.render_string("module_show_time.html",time = formatted_time)
+			return self.render_string("module_user_pagination.html", pagination_obj = pagination_obj,begin = begin,end = end,pagination_pages_num = pagination_pages_num,show_prev_space=show_prev_space,show_next_space=show_next_space)

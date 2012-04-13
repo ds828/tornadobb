@@ -34,7 +34,6 @@ import random
 
 class MainHandler(BaseHandler):
 	
-	@tornado.web.addslash
 	def get(self):
 				
 		if not self.current_user or self.current_user.get("is_auth",False):
@@ -49,130 +48,183 @@ class MainHandler(BaseHandler):
 			db_backend.do_set_user_access_log(self.current_user["_id"],self.current_user["name"],time.time(),self.request.remote_ip)
 			
 		self.render('index.html',data=locals())
-		
-class ForumHandler(BaseHandler):
+				
+class PostNewTopicHandler(BaseHandler):
 	
-	@check_url_avaliable
+	@authenticated
+	@url_parse
+	@tornado.web.removeslash
+	def get(self,category_id,forum_id, **kwargs):
+		
+		if not self.current_user.get("postable",True):
+			self.redirect(self.settings["tornadobb.root_url"])
+			return
+		
+		self.render('new_post.html',data=locals())
+		
+	@authenticated
+	@url_parse
+	@tornado.web.removeslash
+	def post(self,category_id,forum_id, **kwargs):
+		
+		"""
+		{'need_replay_for_attache': ['True'], '_xsrf': ['93e8153e619c4db2be146df3bd52c90d'], 'attache': ['http://adfadfad'], 'need_replay': ['True'], 'message': ['adfadfads'], 'subject': ['adfadf']}
+		"""
+		if not self.current_user.get("postable",True):
+			self.redirect(self.settings["tornadobb.root_url"])
+		
+		user_id = self.current_user["_id"]
+		user_name = self.current_user["name"]
+		avatar = self.current_user.get("avatar",None)
+		subject = self.get_argument("subject",None)
+		content = self.get_argument("message",None)
+		attach = []
+		if "attach_url" in self.request.arguments and "attach_name" in self.request.arguments:
+			urls = self.request.arguments["attach_url"]
+			names = self.request.arguments["attach_name"]
+			for i in xrange(0,len(urls)):
+				attach.append({"name":names[i],"url":urls[i]})
+
+		need_reply = bool(self.get_argument("need_reply1",False))
+		need_reply_for_attach = bool(self.get_argument("need_reply2",False))
+		
+		now = time.time()
+		topic = {
+				"subject":subject,
+				"create_time":now,
+				"creater_id":user_id,
+				"creater_name":user_name,
+				"last_post_time":now,
+				"last_poster_id":user_id,
+				"last_poster_name":user_name,
+				"sticky":False,
+				"closed":False,
+				"hidden":False,
+				"dist":False,
+				"dist_level":0,
+				"need_reply" : need_reply,
+				"need_reply_for_attach" : need_reply_for_attach,
+			}
+		
+		post = {
+				#"poster_id":user_id,
+				#"poster_name":user_name,
+				#"poster_role":"Member",
+				#"poster_avatar":".jpg",
+				#"poster_signature":"[b]I am a good man.[/b]",
+				#"poster_register_time":time.time(),
+				#"poster_posts_num":100,
+				#"poster_online":True,
+				"post_time":now,
+				"content":content,
+				}
+		
+		if attach:
+			post["attach"] = attach
+		
+		topic["posts"] = [post]
+		topic_id = db_backend.do_create_new_topic(category_id,forum_id,topic)
+		if topic_id:
+			self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + '/')
+		else:
+			self.write_erro(500)
+		return
+		
+
+class ReplyTopicHandler(BaseHandler):
+	
+	@authenticated
+	@url_parse
+	def post(self,category_id,forum_id,topic_id, **kwargs):
+
+		post = {
+				"poster_id":self.current_user["_id"],
+				"post_time":time.time(),
+				"content":self.get_argument("message"),
+			}
+		if db_backend.do_reply_topic(category_id,forum_id,topic_id,self.current_user["name"],post):
+			self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + '/')
+		else:
+			self.write_error(500)
+		
+class PostEditHandler(BaseHandler):
+	
+	@authenticated
+	@url_parse
 	@load_permission
-	@tornado.web.addslash
-	def get(self,category_id,forum_id,*args,**kwargs):
+	def post(self,category_id,forum_id,topic_id,**kwargs):
 		
-		#print self.request.query
 		
-		#print kwargs
-		
-		permission = kwargs.get("permission",[])
-		
-		filter_view = self.get_argument("f","all")#filter
-		if filter_view == "hide" and "hide_topic" not in permission:
+		post_id = self.get_argument("post_id")
+		poster_id = self.get_argument("poster_id")
+		message = self.get_argument("message")
+		current_id = self.current_user["_id"]
+		if poster_id == current_id or "edit_post" in kwargs.get("permission"):
+			post = {
+				"_id" : post_id,
+				"editer_id":current_id,
+				"editer_name":self.current_user["name"],
+				"edit_time":time.time(),
+				"content":message,
+				}
+			if db_backend.do_edit_post(forum_id,topic_id,post):
+				self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + "/")
+			else:
+				self.write_error(500)
+				return
+		else:
 			self.write_error(403)
 			return
-
-		jump_to_page_no = int(self.get_argument("p",1))# jump to page
-		current_page_no =  int(self.get_argument("c",1)) #current page
-		current_page_top = self.get_argument("t",None)#top item
-		current_page_bottom = self.get_argument("b",None) #bottom item
-		pages_num = self.get_argument("a",None) #total page count
-		total_items_num = self.get_argument("i",None) #total page count
-		order_by = self.get_argument("o","post")#order
-		
-		if current_page_top:
-			current_page_top = float(current_page_top)
-		
-		if current_page_bottom:
-			current_page_bottom = float(current_page_bottom)
-		
-		dist_level = self.settings["tornadobb.distillat_threshold"]
-		topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-		#topics_num_per_page = 1
-		
-		if pages_num and int(pages_num) == jump_to_page_no:
-			# go to the lastest page
-			topics = db_backend.do_jump_to_lastest_page(forum_id,topics_num_per_page,filter_view,order_by,dist_level)
-			jump_to_page_no = int(pages_num)
-		
-		elif jump_to_page_no > 1:
-				
-			offset = jump_to_page_no - current_page_no
-			if offset == 1:
-				#just go to next one page
-				topics = db_backend.do_show_next_page_topics(forum_id,current_page_bottom,topics_num_per_page,filter_view,order_by,dist_level)
-			elif offset > 1:
-				topics = db_backend.do_jump_back_to_show_topics(forum_id,current_page_bottom,topics_num_per_page,current_page_no,jump_to_page_no,filter_view,order_by,dist_level)
-			elif offset == -1:
-				topics = db_backend.do_show_prev_page_topics(forum_id,current_page_top,topics_num_per_page,filter_view,order_by,dist_level)
-			elif offset < -1:
-				topics = db_backend.do_jump_forward_to_show_topics(forum_id,current_page_top,topics_num_per_page,current_page_no,jump_to_page_no,filter_view,order_by,dist_level)
-			else:
-				topics = db_backend.do_jump_to_first_page(forum_id,topics_num_per_page,filter_view,order_by,dist_level)
-			
-		elif jump_to_page_no == 1:
-			 # go to the first page
-			topics = db_backend.do_jump_to_first_page(forum_id,topics_num_per_page,filter_view,order_by,dist_level)
-
-		if topics:
-			current_page_top = topics[0]["last_post_time"]
-			current_page_bottom = topics[-1]["last_post_time"]
-			pagination_obj = db_backend.do_create_topic_pagination(forum_id,jump_to_page_no,current_page_top,current_page_bottom,topics_num_per_page,pages_num,total_items_num,filter_view,order_by,dist_level)
-		else:
-			pagination_obj = db_backend.do_create_topic_pagination(forum_id,jump_to_page_no,0,0,topics_num_per_page,pages_num,total_items_num,filter_view,order_by,dist_level)
-
-		#forum_obj = {
-					 #"topic_filter" : filter_view, #"all" , "dist"  , "hide"
-		#			 "topics" : topics
-		#			}
-
-		self.render('forum.html',data=locals())
-
-class TopicHandler(BaseHandler):
-
-	@check_url_avaliable
+	
+class PostDeleteHandler(BaseHandler):
+	
+	@authenticated
+	@url_parse
 	@load_permission
-	@tornado.web.addslash
-	def get(self,category_id,forum_id,topic_id,*args,**kwargs):
-		
-		permission = kwargs.get("permission",[])
-		filter_view = self.get_argument("f","all")
-		jump_to_page_no = int(self.get_argument("p",1))# jump to page
-		pages_num = self.get_argument("a",None) #total page count
-		total_items_num = self.get_argument("i",None) #total item count
-				
-		posts_num_per_page = self.settings["tornadobb.posts_num_per_page"]
-		expire_time = time.time() - self.settings["tornadobb.session_expire"]
-		topic_obj  = db_backend.do_show_topic_posts(forum_id,topic_id,jump_to_page_no,posts_num_per_page,expire_time,filter_view)
+	def get(self,category_id,forum_id,topic_id,**kwargs):
 
-		if not topic_obj:
-			self.write_error(500)
+		#print self.request.arguments
+		permission = kwargs.get("permission",[])
+		post_id = self.get_argument("post_id")
+		if "delete_post" in permission:
+			post = {
+				"_id" : post_id,
+				"editer_id":self.current_user["_id"],
+				"editer_name":self.current_user["name"],
+				"edit_time":time.time(),
+				}
+			if db_backend.do_delete_post(forum_id,topic_id,post):
+				self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + "/")
+			else:
+				self.write_error(500)
+				return
+		else:
+			self.write_error(403)
 			return
 		
-		if jump_to_page_no == 1:
-			db_backend.do_add_topic_views_num(forum_id,topic_id)	
-		##print topic_obj
-		pagination_obj = db_backend.do_create_post_pagination(forum_id,topic_id,jump_to_page_no,posts_num_per_page,pages_num,total_items_num,filter_view)
-		# get current user whether alreay reply this topic boolean
-		hide_content = topic_obj.get("need_reply",False)
-
-		hide_attach = topic_obj.get("need_reply_for_attach",False)
-		#current_user = self.current_user
-		if hide_content or hide_attach:
-			#TODO: HOW can current user get replies
-			if self.current_user and "_id" in self.current_user and db_backend.do_check_already_reply(forum_id,topic_id,self.current_user["_id"]):
-				hide_content = False
-				hide_attach = False
-
-		from_query = self.get_argument("from",None)
-		#None
-		if not from_query:
-			from_query = "p=1"
+class QuoteHandler(BaseHandler):
+	
+	@authenticated
+	@url_parse
+	def post(self,category_id,forum_id,topic_id, **kwargs):
+		#print self.request.arguments
 		
-		self.render('topic.html',data=locals())
+		post = {
+				"poster_id":self.current_user["_id"],
+				"post_time":time.time(),
+				"content":self.get_argument("message"),
+			}
+		if db_backend.do_reply_topic(category_id,forum_id,topic_id,self.current_user["name"],post):
+			self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + "/")
+		else:
+			self.write_error(500)
 
 class TopicManagementHandler(BaseHandler):
 	
 	@authenticated
-	@check_url_avaliable
+	@url_parse
 	@load_permission
-	def get(self,category_id,forum_id,topic_id,*args,**kwargs):
+	def get(self,category_id,forum_id,topic_id,**kwargs):
 
 		permission = kwargs.get("permission",[])
 		command = self.get_argument("c",None)# jump to page
@@ -219,176 +271,6 @@ class TopicManagementHandler(BaseHandler):
 		else:
 			self.write_error(403)
 			return
-		
-class PostNewTopicHandler(BaseHandler):
-	
-	@authenticated
-	@check_url_avaliable
-	@tornado.web.removeslash
-	def get(self,category_id,forum_id,*args):
-		
-		if not self.current_user.get("postable",True):
-			self.redirect(self.settings["tornadobb.root_url"])
-			return
-		
-		self.render('new_post.html',data=locals())
-		
-	@authenticated
-	@check_url_avaliable
-	@tornado.web.removeslash
-	def post(self,category_id,forum_id,*args):
-		
-		"""
-		{'need_replay_for_attache': ['True'], '_xsrf': ['93e8153e619c4db2be146df3bd52c90d'], 'attache': ['http://adfadfad'], 'need_replay': ['True'], 'message': ['adfadfads'], 'subject': ['adfadf']}
-		"""
-		if not self.current_user.get("postable",True):
-			self.redirect(self.settings["tornadobb.root_url"])
-		
-		user_id = self.current_user["_id"]
-		user_name = self.current_user["name"]
-		avatar = self.current_user.get("avatar",None)
-		subject = self.get_argument("subject",None)
-		content = self.get_argument("message",None)
-		attach = []
-		if "attach_url" in self.request.arguments and "attach_name" in self.request.arguments:
-			urls = self.request.arguments["attach_url"]
-			names = self.request.arguments["attach_name"]
-			for i in xrange(0,len(urls)):
-				attach.append({"name":names[i],"url":urls[i]})
-
-		need_reply = bool(self.get_argument("need_reply1",False))
-		need_reply_for_attach = bool(self.get_argument("need_reply2",False))
-		
-		now = time.time()
-		topic = {
-				"subject":subject,
-				"create_time":now,
-				"creater_id":user_id,
-				"creater_name":user_name,
-				"last_post_time":now,
-				"last_poster_id":user_id,
-				"last_poster_name":user_name,
-				"sticky":False,
-				"closed":False,
-				"hidden":False,
-				"dist":False,
-				"dist_level":0,
-				"need_reply" : need_reply,
-				"need_reply_for_attach" : need_reply_for_attach,
-			}
-		
-		post = {
-				"poster_id":user_id,
-				#"poster_name":user_name,
-				#"poster_role":"Member",
-				#"poster_avatar":".jpg",
-				#"poster_signature":"[b]I am a good man.[/b]",
-				#"poster_register_time":time.time(),
-				#"poster_posts_num":100,
-				#"poster_online":True,
-				"post_time":now,
-				"content":content,
-				}
-		
-		if attach:
-			post["attach"] = attach
-		
-		topic["posts"] = [post]
-		topic_id = db_backend.do_create_new_topic(category_id,forum_id,topic)
-		if topic_id:
-			self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + '/')
-		else:
-			self.write_erro(500)
-		return
-		
-
-class ReplyTopicHandler(BaseHandler):
-	
-	@authenticated
-	@check_url_avaliable
-	def post(self,category_id,forum_id,topic_id):
-
-		post = {
-				"poster_id":self.current_user["_id"],
-				"post_time":time.time(),
-				"content":self.get_argument("message"),
-			}
-		if db_backend.do_reply_topic(category_id,forum_id,topic_id,self.current_user["name"],post):
-			self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + '/')
-		else:
-			self.write_error(500)
-		
-class PostEditHandler(BaseHandler):
-	
-	@authenticated
-	@check_url_avaliable
-	@load_permission
-	def post(self,category_id,forum_id,topic_id,*args,**kwargs):
-		
-		
-		post_id = self.get_argument("post_id")
-		poster_id = self.get_argument("poster_id")
-		message = self.get_argument("message")
-		current_id = self.current_user["_id"]
-		if poster_id == current_id or "edit_post" in kwargs.get("permission"):
-			post = {
-				"_id" : post_id,
-				"editer_id":current_id,
-				"editer_name":self.current_user["name"],
-				"edit_time":time.time(),
-				"content":message,
-				}
-			if db_backend.do_edit_post(forum_id,topic_id,post):
-				self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + "/")
-			else:
-				self.write_error(500)
-				return
-		else:
-			self.write_error(403)
-			return
-	
-class PostDeleteHandler(BaseHandler):
-	
-	@authenticated
-	@check_url_avaliable
-	@load_permission
-	def get(self,category_id,forum_id,topic_id,*args,**kwargs):
-
-		#print self.request.arguments
-		permission = kwargs.get("permission",[])
-		post_id = self.get_argument("post_id")
-		if "delete_post" in permission:
-			post = {
-				"_id" : post_id,
-				"editer_id":self.current_user["_id"],
-				"editer_name":self.current_user["name"],
-				"edit_time":time.time(),
-				}
-			if db_backend.do_delete_post(forum_id,topic_id,post):
-				self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + "/")
-			else:
-				self.write_error(500)
-				return
-		else:
-			self.write_error(403)
-			return
-		
-class QuoteHandler(BaseHandler):
-	
-	@authenticated
-	@check_url_avaliable
-	def post(self,category_id,forum_id,topic_id):
-		#print self.request.arguments
-		
-		post = {
-				"poster_id":self.current_user["_id"],
-				"post_time":time.time(),
-				"content":self.get_argument("message"),
-			}
-		if db_backend.do_reply_topic(category_id,forum_id,topic_id,self.current_user["name"],post):
-			self.redirect('/'.join([self.settings["tornadobb.root_url"],'topic',category_id,forum_id,topic_id]) + "/")
-		else:
-			self.write_error(500)
 
 class SearchHandler(BaseHandler):
 	
@@ -433,6 +315,7 @@ class UserLoginHandler(BaseHandler):
 		username = self.get_argument('username',None)
 		password =  self.get_argument('password',None)
 		remeber_me = self.get_argument('save_pass',False)
+		next = self.get_argument('next')
 
 		if not username or not password:
 			self.write_error(403)
@@ -482,8 +365,9 @@ class UserLoginHandler(BaseHandler):
 			expires = datetime.datetime.now(tz_obj) + datetime.timedelta(seconds=self.settings["tornadobb.session_expire"])
 			self.set_secure_cookie("is_auth", '1',expires=expires)
 			
-			self.redirect(self.get_argument("next",self.reverse_url("home_page")))
+			self.redirect(next)
 			return
+			
 		elif response == "fail":
 			errors = ["Wrong user name or password"]
 			
@@ -735,77 +619,7 @@ class UserPrivacyHandler(BaseHandler):
 		
 		self.redirect(self.request.path)
 		return
-				
-class UserTopicsHandler(BaseHandler):
-	@authenticated
-	@tornado.web.removeslash
-	def get(self):
-		
-		user_id = self.get_argument("uid",None)
-		if not user_id:
-			self.write_error(404)
-			return
-		
-		if "id" in self.request.arguments:
-			category_forum_id = self.get_argument("id",None)
-			category_id_and_forum_id = category_forum_id.split("/")
-			category_id = category_id_and_forum_id[0]
-			forum_id = category_id_and_forum_id[1]
-			jump_to_page_no = 1
-			pages_num = None
-			total_items_num = None
-			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_topics(user_id,forum_id,jump_to_page_no,topics_num_per_page)
 
-			pagination_obj = db_backend.do_create_user_topics_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
-		
-		elif "c_id" in self.request.arguments:
-			category_id = self.get_argument("c_id")
-			forum_id = self.get_argument("f_id")
-			jump_to_page_no = int(self.get_argument("p",1))# jump to page
-			pages_num = self.get_argument("a",None) #total page count
-			total_items_num = self.get_argument("i",None) #total item count
-			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_topics(user_id,forum_id,jump_to_page_no,topics_num_per_page)
-			pagination_obj = db_backend.do_create_user_topics_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
-			
-		self.render("user_topics.html",data=locals())
-		
-class UserRepliesHandler(BaseHandler):
-	@authenticated
-	@tornado.web.removeslash
-	def get(self):
-		
-		user_id = self.get_argument("uid",None)
-		if not user_id:
-			self.write_error(404)
-			return
-		
-		if "id" in self.request.arguments:
-			category_forum_id = self.get_argument("id",None)
-			category_id_and_forum_id = category_forum_id.split("/")
-			category_id = category_id_and_forum_id[0]
-			forum_id = category_id_and_forum_id[1]
-			jump_to_page_no = 1
-			pages_num = None
-			total_items_num = None
-			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_replies(user_id ,forum_id,jump_to_page_no,topics_num_per_page)
-
-			pagination_obj = db_backend.do_create_user_replies_pagination(user_id ,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
-		
-		elif "c_id" in self.request.arguments:
-			category_id = self.get_argument("c_id")
-			forum_id = self.get_argument("f_id")
-			jump_to_page_no = int(self.get_argument("p",1))# jump to page
-			pages_num = self.get_argument("a",None) #total page count
-			total_items_num = self.get_argument("i",None) #total item count
-			topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
-			topics = db_backend.do_show_user_replies(user_id ,forum_id,jump_to_page_no,topics_num_per_page)
-			pagination_obj = db_backend.do_create_user_replies_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
-			
-		self.render("user_replies.html",data=locals())
-				
 class ResendVerifyMailHandler(BaseHandler):
 		
 	@tornado.web.removeslash	
@@ -936,3 +750,179 @@ def send_verify_email(request_handler,email_address,username,password):
 	request = request_handler.request
 	http_client.fetch(request.protocol + "://" + request.host + request_handler.settings["tornadobb.root_url"] + "/sendmail", None ,method ="POST", body=body , headers = request.headers)
 
+
+class ForumHandler(BaseHandler):
+	@url_parse
+	@load_permission
+	def get(self,category_id,forum_id,page_param,**kwargs):
+				
+		filter_view = self.get_argument("f","all")#filter
+		if filter_view == "hide" and "hide_topic" not in kwargs.get("permission"):
+			self.write_error(403)
+			return
+
+		current_page_no = page_param["current_page"] #current page
+		jump_to_page_no = page_param["jump_to_page"]# jump to page	
+		pages_num = page_param["total_pages_num"] #total page count
+		total_items_num = page_param["total_topics_num"] #total items
+		
+		order_by = self.get_argument("o","post")#order
+		dist_level = self.settings["tornadobb.distillat_threshold"]
+		topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
+		
+		if pages_num == jump_to_page_no:
+			# go to the lastest page
+			topics = db_backend.do_jump_to_lastest_page(forum_id,topics_num_per_page,filter_view,order_by,dist_level)
+			jump_to_page_no = int(pages_num)
+		
+		elif jump_to_page_no > 1:
+			#jump to some page
+			current_page_top = page_param["top_topic_time"]#top item
+			current_page_bottom = page_param["bottom_topic_time"] #bottom item
+					
+			offset = jump_to_page_no - current_page_no
+			if offset == 1:
+				#just go to next one page
+				topics = db_backend.do_show_next_page_topics(forum_id,current_page_bottom,topics_num_per_page,filter_view,order_by,dist_level)
+			elif offset > 1:
+				topics = db_backend.do_jump_back_to_show_topics(forum_id,current_page_bottom,topics_num_per_page,current_page_no,jump_to_page_no,filter_view,order_by,dist_level)
+			elif offset == -1:
+				topics = db_backend.do_show_prev_page_topics(forum_id,current_page_top,topics_num_per_page,filter_view,order_by,dist_level)
+			elif offset < -1:
+				topics = db_backend.do_jump_forward_to_show_topics(forum_id,current_page_top,topics_num_per_page,current_page_no,jump_to_page_no,filter_view,order_by,dist_level)
+			else:
+				topics = db_backend.do_jump_to_first_page(forum_id,topics_num_per_page,filter_view,order_by,dist_level)
+		
+		else:
+			
+			from_page = self.get_argument("fp",1)
+			if from_page > 1:
+				pass
+			else:	
+				# go to the first page
+				topics = db_backend.do_jump_to_first_page(forum_id,topics_num_per_page,filter_view,order_by,dist_level)
+		
+		if topics:
+			current_page_top = topics[0]["last_post_time"]
+			current_page_bottom = topics[-1]["last_post_time"]
+			pagination_obj = db_backend.do_create_topic_pagination(forum_id,jump_to_page_no,current_page_top,current_page_bottom,topics_num_per_page,pages_num,total_items_num,filter_view,order_by,dist_level)
+		else:
+			pagination_obj = db_backend.do_create_topic_pagination(forum_id,jump_to_page_no,0.0,0.0,topics_num_per_page,pages_num,total_items_num,filter_view,order_by,dist_level)
+
+		pagination_obj["category_id"] = category_id
+		pagination_obj["forum_id"] = forum_id
+		
+		forum_path = self.request.path
+		
+		self.render('forum.html',data=locals())
+
+class TopicHandler(BaseHandler):
+
+	@url_parse
+	@load_permission
+	def get(self,category_id,forum_id,topic_id,page_param,**kwargs):
+		
+		permission = kwargs.get("permission")
+		filter_view = self.get_argument("f","all")
+		
+		jump_to_page_no = page_param["jump_to_page"]# jump to page	
+		pages_num = page_param["total_pages_num"] #total page count
+		total_items_num = page_param["total_topics_num"] #total items
+				
+		posts_num_per_page = self.settings["tornadobb.posts_num_per_page"]
+		expire_time = time.time() - self.settings["tornadobb.session_expire"]
+		topic_obj  = db_backend.do_show_topic_posts(forum_id,topic_id,jump_to_page_no,posts_num_per_page,expire_time,filter_view)
+
+		if not topic_obj:
+			self.write_error(500)
+			return
+		
+		if jump_to_page_no == 1:
+			db_backend.do_add_topic_views_num(forum_id,topic_id)	
+		##print topic_obj
+		pagination_obj = db_backend.do_create_post_pagination(forum_id,topic_id,jump_to_page_no,posts_num_per_page,pages_num,total_items_num,filter_view)
+		pagination_obj["category_id"] = category_id
+		pagination_obj["forum_id"] = forum_id
+		pagination_obj["topic_id"] = topic_id
+		#for modules.pagenation_post
+		pagination_obj["from_query"] = self.request.query	
+		# get current user whether alreay reply this topic boolean
+		hide_content = topic_obj.get("need_reply",False)
+
+		hide_attach = topic_obj.get("need_reply_for_attach",False)
+		#current_user = self.current_user
+		if hide_content or hide_attach:
+			#TODO: HOW can current user get replies
+			if self.current_user and "_id" in self.current_user and db_backend.do_check_already_reply(forum_id,topic_id,self.current_user["_id"]):
+				hide_content = False
+				hide_attach = False
+		
+		#for modules.Forum_Crumbs		
+		from_query = self.request.query
+		
+		self.render('topic.html',data=locals())
+
+class UserTopicsHandler(BaseHandler):
+	
+	@authenticated
+	def get(self):
+		url_parameters = self.request.path.partition(self.settings["tornadobb.root_url"])[2].split("/")
+		user_id = url_parameters[3]
+		self.render("user_topics.html",data=locals())
+
+		
+class UserRepliesHandler(BaseHandler):
+	
+	@authenticated
+	def get(self):
+		url_parameters = self.request.path.partition(self.settings["tornadobb.root_url"])[2].split("/")
+		user_id = url_parameters[3]
+		self.render("user_replies.html",data=locals())
+		
+
+
+class UserTopicsRepliesHandler(BaseHandler):
+	
+	@authenticated
+	@url_parse
+	def get(self,category_id,forum_id,user_id,target,page_param,**kwargs):
+		
+		jump_to_page_no = page_param["jump_to_page"]
+		pages_num = page_param["total_pages_num"]
+		total_items_num = page_param["total_items_num"]
+		topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
+		
+		if target == "topics":
+			topics = db_backend.do_show_user_topics(user_id,forum_id,jump_to_page_no,topics_num_per_page)
+			pagination_obj = db_backend.do_create_user_topics_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+		
+		elif target == "replies":
+			topics = db_backend.do_show_user_replies(user_id,forum_id,jump_to_page_no,topics_num_per_page)
+			pagination_obj = db_backend.do_create_user_replies_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+		
+		pagination_obj["category_id"] = category_id
+		pagination_obj["forum_id"] = forum_id
+		pagination_obj["target"] = target
+			
+		self.render("user_topics.html",data=locals())
+		
+
+class UserReplies2Handler(BaseHandler):
+	
+	@authenticated
+	@url_parse
+	def get(self,category_id,forum_id,user_id,target, page_param,**kwargs):
+		
+		jump_to_page_no = page_param["jump_to_page"]
+		pages_num = page_param["total_pages_num"]
+		total_items_num = page_param["total_items_num"]
+		topics_num_per_page = self.settings["tornadobb.topics_num_per_page"]
+		
+		topics = db_backend.do_show_user_replies(user_id,forum_id,jump_to_page_no,topics_num_per_page)
+			
+		pagination_obj = db_backend.do_create_user_replies_pagination(user_id,category_id,forum_id,jump_to_page_no,topics_num_per_page,pages_num,total_items_num)
+		pagination_obj["category_id"] = category_id
+		pagination_obj["forum_id"] = forum_id
+		pagination_obj["target"] = "replies"
+			
+		self.render("user_replies.html",data=locals())

@@ -932,10 +932,10 @@ def suite():
 	
 	#return unittest.TestSuite(map(TestMongodb, tests_user))
 	#return unittest.TestSuite(map(TestMongodb, tests_category))
-	#return unittest.TestSuite(map(TestMongodb, tests_forum))
+	return unittest.TestSuite(map(TestMongodb, tests_forum))
 	#return unittest.TestSuite(map(TestMongodb, tests_moderator))
 	#return unittest.TestSuite(map(TestMongodb, tests_member))
-	return unittest.TestSuite(map(TestMongodb, tests_evn))
+	#return unittest.TestSuite(map(TestMongodb, tests_evn))
 	#return unittest.TestSuite(map(TestMongodb, tests_topic_management))
 	#return unittest.TestSuite(map(TestMongodb, tests_post_topic))
 	

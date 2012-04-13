@@ -380,6 +380,7 @@ class AdminMemberAddWithFileHandler(AdminBaseHandler):
 		member_list = []
 		for member_line in [ line for line in content.splitlines() if not line.startswith("#") ]:
 			member_data = member_line.split(',')
+			print member_data
 			if len(member_data) == 5:
 				
 				username = member_data[0]

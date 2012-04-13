@@ -9,7 +9,7 @@
 			<div>
 				{% if is_sticky %}<span class="stickytext">Sticky:</span>{% end %}
 				{% if topic.get("closed",False) %}<span class="stickytext">({{ _("Closed") }})</span>{% end %}	
-				<a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?f={{ filter_view }}&from={{ url_escape(handler.request.query)}}" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
+				<a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?fp={{ current_page }}&f={{ filter_view }}&o={{ order_by }}&url={{ url }}" ><span class="{{ ' '.join(topic.get('high_light',handler.settings['tornadobb.topic_default_highlight'])) }}">{{ topic["subject"] }}</span></a>
 				<span class="byuser">by {{ topic["creater_name"] }}</span>
 			</div>
 		</div>
@@ -21,6 +21,6 @@
 	{% else %}
 		{% set pages_num = topic.get('replies_num',0)/items_per_page + 1 %}
 	{% end %}
-	<td class="tcr"><a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/?p={{ pages_num }}">{% module Show_Time(topic["last_post_time"]) %}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
+	<td class="tcr"><a href="{{ root_url }}/topic/{{ category_id }}/{{ forum_id }}/{{ topic['_id'] }}/{{ pages_num }}/{{pages_num }}/0">{% module Show_Time(topic["last_post_time"]) %}</a> <span class="byuser">by {{ topic["last_poster_name"] }}</span></td>
 </tr>
 {% end %}

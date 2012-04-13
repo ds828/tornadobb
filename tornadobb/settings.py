@@ -368,10 +368,11 @@ tornadobb_handlers = [
 			(TORNADOBB_ROOT_URL + "/sendmail$", SendEmailHandler),
 			(TORNADOBB_ROOT_URL + "/tz$", TimezoneHandler),
 			url(TORNADOBB_ROOT_URL + "/search/*$", SearchHandler,name="search_page"),
-			url(TORNADOBB_ROOT_URL + "/?$", MainHandler,name="home_page"),
+			url(TORNADOBB_ROOT_URL + "$", MainHandler,name="home_page"),
 			(TORNADOBB_ROOT_URL + "/forum/[a-z0-9]+/[a-z0-9]+/new/*$", PostNewTopicHandler),#post new topic
-		    (TORNADOBB_ROOT_URL + "/forum/[a-z0-9]+/[a-z0-9]+/?$", ForumHandler),
-		    (TORNADOBB_ROOT_URL + "/topic/[a-z0-9]+/[a-z0-9]+/[a-z0-9]+/?$", TopicHandler),
+			#forum/category_id/forum_id/c[current page]/p[jump to page]/a[total pages]/i[total items]/t[top_time]/b[button time]
+		    (TORNADOBB_ROOT_URL + "/forum/[a-z0-9]+/[a-z0-9]+/(\d+/\d+/\d+/\d+/\d+\.\d+/\d+\.\d+)?/?", ForumHandler),
+		    (TORNADOBB_ROOT_URL + "/topic/[a-z0-9]+/[a-z0-9]+/[a-z0-9]+/(\d+/\d+/\d+)?$", TopicHandler),
 		    (TORNADOBB_ROOT_URL + "/topic/[a-z0-9]+/[a-z0-9]+/[a-z0-9]+/cmd$", TopicManagementHandler),
 		    (TORNADOBB_ROOT_URL + "/topic/[a-z0-9]+/[a-z0-9]+/[a-z0-9]+/reply$", ReplyTopicHandler),#reply a topic
 		    (TORNADOBB_ROOT_URL + "/topic/[a-z0-9]+/[a-z0-9]+/[a-z0-9]+/edit$", PostEditHandler),#edit a topic
@@ -387,8 +388,11 @@ tornadobb_handlers = [
 		    (TORNADOBB_ROOT_URL + "/profile/avatar/*$", UserAvatarHandler),
 		    (TORNADOBB_ROOT_URL + "/profile/personality/*$", UserSignatureHandler),
 		    (TORNADOBB_ROOT_URL + "/profile/display/*$", UserDisplayHandler),
-			(TORNADOBB_ROOT_URL + "/profile/topics/*$", UserTopicsHandler),
-			(TORNADOBB_ROOT_URL + "/profile/replies/*$", UserRepliesHandler),
+			(TORNADOBB_ROOT_URL + "/profile/topics/[a-z0-9]+$", UserTopicsHandler),
+			#user_di/category_di/forum_id/current_page/total_pages_num/total_items_num
+			(TORNADOBB_ROOT_URL + "/profile/topics/[a-z0-9]+/[a-z0-9]+/[a-z0-9]+/\d+(/\d+/\d+)?$", UserTopicsRepliesHandler),
+			(TORNADOBB_ROOT_URL + "/profile/replies/[a-z0-9]+$", UserRepliesHandler),
+			(TORNADOBB_ROOT_URL + "/profile/replies/[a-z0-9]+/[a-z0-9]+/[a-z0-9]+/\d+(/\d+/\d+)?$", UserTopicsRepliesHandler),
 			(TORNADOBB_ROOT_URL + "/profile/pwd/*$", UserPasswordHandler),
 			(TORNADOBB_ROOT_URL + "/profile/email/*$", UserEmailHandler),
 			(TORNADOBB_ROOT_URL + "/profile/privacy/*$", UserPrivacyHandler),

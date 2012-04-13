@@ -60,7 +60,7 @@
 					<div class="infldset">
 						<p>{{_("Registered")}}: {% module Show_Time(user["registered_time"]) %}</p>
 						<p>{{_("Last visit")}}: {% module Show_Time(user["last_access"]) %}</p>
-						<p class="actions">{{_("Posts")}}: {{ user.get("topics_num",0) + user.get("replies_num",0) }} - <a href="{{ root_url }}/profile/topics?uid={{ user['_id'] }}">{{_("Show all topics")}}</a> - <a href="{{ root_url }}/profile/replies?uid={{ user['_id'] }}">{{_("Show all replies")}}</a></p>
+						<p class="actions">{{_("Posts")}}: {{ user.get("topics_num",0) + user.get("replies_num",0) }} - <a href="{{ root_url }}/profile/topics/{{ user['_id'] }}">{{_("Show all topics")}}</a> - <a href="{{ root_url }}/profile/replies/{{ user['_id'] }}">{{_("Show all replies")}}</a></p>
 					</div>
 				</fieldset>
 			</div>

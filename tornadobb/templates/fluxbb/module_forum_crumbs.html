@@ -1,7 +1,8 @@
 <ul class="crumbs">
 <li><a href="{{ handler.settings['tornadobb.root_url'] }}">{{ _("Index") }}</a></li>
 {% set count = len(url_list)%}
-{% for i in xrange(count) %}
-<li><span>»&#160;</span><a href="{{ url_list[i] }}"> {{ _(title_list[i]) }}</a></li>
+{% for i in xrange(count-1) %}
+<li><span>»&#160;</span><a href="{{ url_list[i] }}">{{ _(title_list[i]) }}</a></li>
 {% end %}
+<li><span>»&#160;</span>{{ _(title_list[-1]) }}</li>
 </ul>
