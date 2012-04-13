@@ -3,7 +3,7 @@
 #
 #       settings.py
 #       
-#       Copyright 2011 Di SONG <di@di-debian>
+#       Copyright 2011 Di SONG <songdi19@gmail.com>
 #       
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -408,6 +408,7 @@ tornadobb_handlers = [
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/close$", AdminMemberOpenCloseHandler),
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/postable$", AdminMemberShutHandler),
 			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/add$", AdminMemberAddHandler),
+			(TORNADOBB_ROOT_URL + TORNADOBB_ADMIN_URL + "/member/add_with_file$", AdminMemberAddWithFileHandler),
 			(TORNADOBB_ROOT_URL + "/rules/*$", ForumRulesHandler),
 			(TORNADOBB_ROOT_URL + "/language/*$", ChangeLanguageHandler),
 			]

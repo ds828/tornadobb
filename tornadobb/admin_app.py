@@ -3,7 +3,7 @@
 #
 #       user_app.py
 #       
-#       Copyright 2012 Di SONG <di@di-debian>
+#       Copyright 2012 Di SONG <songdi19@gmail.com>
 #       
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -368,8 +368,51 @@ class AdminMemberAddHandler(AdminBaseHandler):
 class AdminMemberAddWithFileHandler(AdminBaseHandler):
 	
 	@authenticated
+	def get(self):
+		
+		self.render('admin_member_add_with_file.html',data=locals())
+	
+	@authenticated
 	def post(self):
 		
-		file1 = self.request.files['Filedata'][0]
-		print file1['body']
+		content = self.request.files['Filedata'][0]['body']
+		register_time = time.time()
+		member_list = []
+		for member_line in [ line for line in content.splitlines() if not line.startswith("#") ]:
+			member_data = member_line.split(',')
+			if len(member_data) == 5:
+				
+				username = member_data[0]
+				if db_backend.do_check_user_name(username):
+					continue
+					
+				password = member_data[1]
+				email = member_data[2]
+				
+				display_email = member_data[3]
+				if display_email.lower() == "true":
+					display_email = True
+				else:
+					display_email = False
+				
+				active = member_data[4]
+				if active.lower() == "true":
+					active = True
+				else:
+					active = False
+				
+				user = {
+						"name":username,
+						"password":password,
+						"email":email,
+						"registered_time":register_time,
+						"display_email":display_email,
+						"verify":active,
+				}
+				member_list.append(user)
 		
+		if member_list:
+			if not db_backend.do_user_register(member_list):
+				errors = ["Fail to add members"]
+		
+		self.render('admin_member_add_with_file.html',data=locals())

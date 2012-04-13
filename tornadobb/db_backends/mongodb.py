@@ -3,7 +3,7 @@
 #
 #       mongodb.py
 #       
-#       Copyright 2012 Di SONG <di@di-debian>
+#       Copyright 2012 Di SONG <songdi19@gmail.com>
 #       
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -114,7 +114,8 @@ class mongodb(backend_base):
 			If used, return True, or False
 		"""
 		self._database["user"].ensure_index([("name",DESCENDING)])
-		if user_name and not self._database["user"].find_one({"name":user_name},fields=["_id"]):
+		print self._database["user"].find_one({"name":user_name},fields=["_id"])
+		if user_name and self._database["user"].find_one({"name":user_name},fields=["_id"]):
 			return True
 		else:
 			return False
@@ -122,7 +123,7 @@ class mongodb(backend_base):
 	def do_check_user_email(self,email):
 		
 		self._database["user"].ensure_index([("email",DESCENDING)])
-		if email and not self._database["user"].find_one({"email":email},fields=["_id"]):
+		if email and self._database["user"].find_one({"email":email},fields=["_id"]):
 			return True
 		else:
 			return False
@@ -206,6 +207,16 @@ class mongodb(backend_base):
 					"registered_time":time.time(),
 					"display_email":display_email,
 					}
+			OR
+			add user_list for admin 
+			user_list [{
+					"name" : username,
+					"password": password,
+					"email" : email,
+					"registered_time":time.time(),
+					"display_email":display_email,
+					"verify":True|False
+					}]	
 		"""
 		try:
 			user_id = self._database["user"].insert(user)
