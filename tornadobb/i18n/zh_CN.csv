@@ -13,6 +13,7 @@
 "add one video","加入视频"
 "add one attachment","加入附件"
 "Add Member","新加用户"
+"Add Members With One File","使用文件新加用户"
 "avaliable","有效的"
 "Attachment","附件"
 "Agree the forum rule","同意论坛规则"
@@ -78,6 +79,8 @@
 "for message in messages",""
 "File","文件"
 "Fail to upload avatar image","不能上传头像文件"
+"Fail to add members","新加用户失败"
+"File for Memebers you want to add"，"选择用户信息文件"
 "For the forum to display times correctly you must select your local time zone","选择一个时区来显示正确的时间"
 #G
 "Guests online","访客在线"
