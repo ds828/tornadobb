@@ -1,0 +1,45 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ _("Add Members With One File") }} - {{ tornadobb_settings["tornadobb.forum_title"] }}{% end%}
+{% block menu_member %}isactive{% end %}
+{% block right_content %}
+<h2 class="block2"><span>{{_("Add Members With One File")}}</span></h2>
+<div class="box">
+	<form id="register" method="post" action="" enctype="multipart/form-data">
+		{% raw xsrf_form_html() %}
+		<div class="inform">
+			<fieldset>
+				<legend>{{_("File for Memebers you want to add")}}</legend>
+				<div class="infldset">
+					<label class="required"><strong>{{_("File")}} <span>({{_("Required")}})</span></strong><br /><input type="file" name="Filedata" id="Filedata" /><br /></label>
+				</div>
+			</fieldset>
+		</div>
+		
+		<p class="buttons"><input type="submit" value="{{_('Register')}}" /></p>
+	</form>
+</div>
+
+{% end %}
+{% block scripts %}
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.min.js"></script>    
+<script type="text/javascript" src="{{ root_url }}/static/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#register").validate({
+		rules: {
+			file: {
+				required: true
+			}
+		},
+		messages: {
+		
+			file: {
+				required: "{{ _('Please select a file') }}"
+				
+			}
+		}
+	});
+});
+</script>
+{% end %}
