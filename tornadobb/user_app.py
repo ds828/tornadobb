@@ -409,9 +409,9 @@ class UserRegisterHandler(BaseHandler):
 		username = self.get_argument('username')
 		email = self.get_argument('email1')
 		#check username and email
-		if not db_backend.do_check_user_name(username):
+		if db_backend.do_check_user_name(username):
 			errors = ["This username: %s has already been used" % username]
-		elif not db_backend.do_check_user_email(email):
+		elif db_backend.do_check_user_email(email):
 			errors = ["This email: %s has already been used" % email]
 		else:
 			
