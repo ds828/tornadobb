@@ -162,7 +162,7 @@ class mongodb(backend_base):
 			
 			user = self._database["user"].find_and_modify({"name":user_name,"password":password},{"$set":{"last_access":current_time,"xsrf":xsrf_value}},fields=fields)
 			if user:
-				if user.get("closed",False):
+				if not user.get("closed",False):
 					if not user.get("verify",False):
 						return "not_verify",None
 					else:
