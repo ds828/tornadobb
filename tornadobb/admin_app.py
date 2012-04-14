@@ -333,7 +333,7 @@ class AdminMemberAddHandler(AdminBaseHandler):
 		username = self.get_argument('username')
 		email = self.get_argument('email',None)
 		#check username and email
-		if not db_backend.do_check_user_name(username):
+		if db_backend.do_check_user_name(username):
 			errors = ["This username: %s has already been used" % username]
 		else:
 			display_email = bool(self.get_argument('display_email',False))
