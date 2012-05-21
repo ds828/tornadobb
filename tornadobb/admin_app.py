@@ -63,7 +63,6 @@ class AdminCategoryHandler(AdminBaseHandler):
 class AdminCategoryEditHandler(AdminBaseHandler):
 
 	@authenticated
-	@tornado.web.addslash
 	def post(self):
 		#print self.request.arguments
 		
