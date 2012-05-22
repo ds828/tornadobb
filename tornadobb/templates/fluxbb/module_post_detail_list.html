@@ -28,7 +28,7 @@
 				<div class="postright">
 				
 					<div class="postmsg">
-					<p>{{ topic["subject"] }}</p>
+					{% if i==0 %}<p>{{ topic["subject"] }}</p>{% end %}
 					{% if hide_content %}
 						<p>{{ _("to see the content, user must reply first") }}.</p>
 					{% else %}
