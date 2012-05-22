@@ -42,9 +42,6 @@ FORUM_TITLE = "TornadoBB Forum"
 # Forum sub title
 FORUM_SUB_TITLE = "A Simple & Fast Forum based on Tornodo written by Python and MongoDB"
 
-#Forum keywords
-FORUM_KEYWORDS = u""
-
 #html page template
 FORUM_TEMPLATE = "fluxbb"
 
@@ -76,6 +73,14 @@ TORNADOBB_SESSION_EXPIRE = 30 #mins
 TORNADOBB_TIME_ZONE="Australia/Sydney"
 
 #TORNADOBB_TIME_ZONE="Asia/Shanghai"
+
+##########################################################
+#
+#	Forum keywords
+#
+###########################################################
+
+FORUM_KEYWORDS = ",".join([w.strip() for w in open("tornadobb/keywords.txt")])
 
 ###########################################################
 #
@@ -368,7 +373,7 @@ tornadobb_handlers = [
 			(TORNADOBB_ROOT_URL + "/sendmail$", SendEmailHandler),
 			(TORNADOBB_ROOT_URL + "/tz$", TimezoneHandler),
 			url(TORNADOBB_ROOT_URL + "/search/*$", SearchHandler,name="search_page"),
-			url(TORNADOBB_ROOT_URL + "$", MainHandler,name="home_page"),
+			url(TORNADOBB_ROOT_URL + "/?$", MainHandler,name="home_page"),
 			(TORNADOBB_ROOT_URL + "/forum/[a-z0-9]+/[a-z0-9]+/new/*$", PostNewTopicHandler),#post new topic
 			#forum/category_id/forum_id/c[current page]/p[jump to page]/a[total pages]/i[total items]/t[top_time]/b[button time]
 		    (TORNADOBB_ROOT_URL + "/forum/[a-z0-9]+/[a-z0-9]+/(\d+/\d+/\d+/\d+/\d+\.\d+/\d+\.\d+)?/?", ForumHandler),
