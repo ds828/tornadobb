@@ -26,8 +26,9 @@
 					</dl>
 				</div>
 				<div class="postright">
-					<h3>{{ topic["subject"] }}</h3>
+				
 					<div class="postmsg">
+					<p>{{ topic["subject"] }}</p>
 					{% if hide_content %}
 						<p>{{ _("to see the content, user must reply first") }}.</p>
 					{% else %}
