@@ -1064,7 +1064,12 @@ class mongodb(backend_base):
 			collection_name = forum_id + "_hide"
 		
 		topic = self._database[collection_name].find_one({"_id":topic_id},fields=fields)
+		
+		if not topic:
+			return None
+		
 		posts = topic.get("posts",[])
+			
 		user_list = list(set([post["poster_id"] for post in posts]))
 
 		fields = [

@@ -102,7 +102,7 @@ DATABASE_SETTINGS = {
 #	SMTP settings
 #
 ###########################################################
-SMTP_SETTINGS = {
+"""SMTP_SETTINGS = {
 
 					"server":"smtp.gmail.com",
 					"use_authentication": True,
@@ -112,6 +112,18 @@ SMTP_SETTINGS = {
 					"username":"tornadobb1@gmail.com",
 					"password":"4nE7dbMk",
 					"email_address":"tornadobb1@gmail.com",
+				}
+"""				
+SMTP_SETTINGS = {
+
+					"server":"smtp.gmail.com",
+					"use_authentication": True,
+					"tls_port": 587,
+					"ssl_port": 465,
+					"port":None,
+					"username":"auxpage@gmail.com",
+					"password":"pZ8bo0vC1",
+					"email_address":"auxpage@gmail.com",
 				}
 
 ###########################################################

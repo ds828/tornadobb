@@ -315,7 +315,7 @@ class UserLoginHandler(BaseHandler):
 		username = self.get_argument('username',None)
 		password =  self.get_argument('password',None)
 		remeber_me = self.get_argument('save_pass',False)
-		next = self.get_argument('next')
+		next = self.get_argument('next',self.reverse_url("home_page"))
 
 		if not username or not password:
 			self.write_error(403)
@@ -657,6 +657,7 @@ class UserActiveHandler(BaseHandler):
 		password = self.get_argument("p",None)
 		if username and password and db_backend.do_active_user_account(username,password):
 			messages = ["Your account is actived now,please login"]
+			next = self.reverse_url("home_page")
 			self.render("login.html",data=locals())
 		else:
 			self.write_error(500)
