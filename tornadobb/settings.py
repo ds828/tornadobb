@@ -74,14 +74,6 @@ TORNADOBB_TIME_ZONE="Australia/Sydney"
 
 #TORNADOBB_TIME_ZONE="Asia/Shanghai"
 
-##########################################################
-#
-#	Forum keywords
-#
-###########################################################
-
-FORUM_KEYWORDS = ",".join([w.strip() for w in open("tornadobb/keywords.txt")])
-
 ###########################################################
 #
 # setup database
@@ -138,6 +130,14 @@ version="0.1"
 TORNADOBB_ROOT_PATH = os.path.dirname(__file__)
 import sys
 sys.path.append(TORNADOBB_ROOT_PATH)
+
+##########################################################
+#
+#	Forum keywords
+#
+###########################################################
+
+FORUM_KEYWORDS = ",".join([w.strip() for w in open(os.path.join(TORNADOBB_ROOT_PATH,"keywords.txt"))])
 
 ##########################################################
 #
