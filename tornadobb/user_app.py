@@ -809,7 +809,11 @@ class ForumHandler(BaseHandler):
 			pagination_obj = db_backend.do_create_topic_pagination(forum_id,jump_to_page_no,current_page_top,current_page_bottom,topics_num_per_page,pages_num,total_items_num,filter_view,order_by,dist_level)
 		else:
 			pagination_obj = db_backend.do_create_topic_pagination(forum_id,jump_to_page_no,0.0,0.0,topics_num_per_page,pages_num,total_items_num,filter_view,order_by,dist_level)
-
+		
+		if not pagination_obj:
+			self.write_error(500)
+			return
+		
 		pagination_obj["category_id"] = category_id
 		pagination_obj["forum_id"] = forum_id
 		
@@ -842,6 +846,9 @@ class TopicHandler(BaseHandler):
 			db_backend.do_add_topic_views_num(forum_id,topic_id)	
 		##print topic_obj
 		pagination_obj = db_backend.do_create_post_pagination(forum_id,topic_id,jump_to_page_no,posts_num_per_page,pages_num,total_items_num,filter_view)
+		if not pagination_obj:
+			self.write_error(500)
+			return
 		pagination_obj["category_id"] = category_id
 		pagination_obj["forum_id"] = forum_id
 		pagination_obj["topic_id"] = topic_id

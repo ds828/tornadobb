@@ -127,10 +127,74 @@ class MyImgTag(ImgTag):
 
         return u'<a href="%s" target="_blank"><img src="%s" onload="scale_image(this)"></img></a>' % (img_url,img_url)
 
+class MyLinkTag(LinkTag):
+	
+    def __init__(self, name, **kwargs):
+        super(MyLinkTag, self).__init__( name, inline=True)
+        
+    def render_open(self, parser, node_index):
+
+        self.domain = u''
+        tag_data = parser.tag_data
+        nest_level = tag_data[u'link_nest_level'] = tag_data.setdefault(u'link_nest_level', 0) + 1
+
+        if nest_level > 1:
+            return u""
+
+        if self.params:
+            url = self.params.strip()
+        else:
+            url = self.get_contents_text(parser).strip()
+            url = PostMarkup.standard_unreplace(url)
+
+        self.domain = u""
+
+        if u':' not in url:
+            url = u'http://' + url
+
+        scheme, uri = url.split(u':', 1)
+
+        if scheme not in [u'http', u'https']:
+            return u''
+
+        try:
+            domain_match = self._re_domain.search(uri.lower())
+            if domain_match is None:
+                return u''
+            domain = domain_match.group(1)
+        except IndexError:
+            return u''
+
+        domain = domain.lower()
+        if domain.startswith(u'www.'):
+            domain = domain[4:]
+
+        def percent_encode(s):            
+            safe_chars = self._safe_chars
+            def replace(c):
+                if c not in safe_chars:
+                    return u"%%%02X" % ord(c)
+                else:
+                    return c
+            return u"".join([replace(c) for c in s])
+
+        #self.url = percent_encode(url.encode(u'utf-8', u'replace'))
+        self.url = percent_encode(url)
+        self.domain = domain
+
+        if not self.url:
+            return u""
+
+        if self.domain:
+            return u'<a href="%s" target="_blank">' % PostMarkup.standard_replace_no_break(self.url)
+        else:
+            return u""
+	
 _my_postmarkup = create(use_pygments=pygments_available, annotate_links=False)
 #cover default behaive of quote tag
 _my_postmarkup.add_tag(MyVideoTag,u"video")
 _my_postmarkup.add_tag(MyQuoteTag,u"quote")
 _my_postmarkup.add_tag(EmoticonTag,u"emo")
 _my_postmarkup.add_tag(MyImgTag,u"img")
+_my_postmarkup.add_tag(MyLinkTag,u"url")
 render_bbcode = _my_postmarkup.render_to_html
